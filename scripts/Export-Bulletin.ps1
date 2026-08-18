@@ -97,9 +97,20 @@ table { font-size: 12px !important; }
   page-break-inside: avoid !important;
 }
 
-/* A heading stranded at the foot of a page is the classic print defect. */
+/* A heading stranded at the foot of a page is the classic print defect. break-after alone
+   is not enough: a .section-head holds an eyebrow, an h2 and a standfirst, and the page can
+   break BETWEEN them - leaving the eyebrow alone at the foot of a page with its own heading
+   overleaf. It has to move as one block. */
 h1, h2, h3, .section-head, .partrule { break-after: avoid !important; page-break-after: avoid !important; }
+.section-head { break-inside: avoid !important; page-break-inside: avoid !important; }
 .partrule { break-before: page !important; page-break-before: always !important; }
+
+/* The hero fact grids are auto-fit at minmax(150px, 1fr). On screen that gives three columns
+   for six fields - two tidy rows. The narrower print column fits four, so six fields leave
+   two orphan slots, and because the container paints --hair behind a 1px gap those orphans
+   render as a solid grey panel that reads as a mistake. Both grids carry exactly six fields,
+   so pinning three columns restores the intended two rows. */
+.covermeta, .facts { grid-template-columns: repeat(3, 1fr) !important; }
 
 /* URLs are long; let them wrap rather than overflow the text column. */
 a { word-break: break-word; }

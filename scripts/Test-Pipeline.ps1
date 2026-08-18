@@ -227,6 +227,30 @@ Remove-Item (Join-Path $f 'handoff\*') -Force
 $r = Invoke-Target $VM_VIS @{ Path = $f }
 Assert 'absent handoff is skipped, not failed' ($r.Code -eq 0 -and $r.Out -match 'SKIP') "exit $($r.Code)"
 
+# An actor with no CVEs is the ordinary case, not an edge case. PowerShell wraps $null into a
+# one-element array, so an absent optional field read as @(Get-Val ...) reports Count 1 - which
+# made the CVE cross-field rule fire on a file carrying no cves key at all.
+$f = New-Fixture 'no-cves'
+$j = Read-Text (Join-Path $f 'handoff\analysis.json') | ConvertFrom-Json
+$j.PSObject.Properties.Remove('cves')
+$j.PSObject.Properties.Remove('vuln_relationship')
+$j.subject_type = 'actor'
+Write-Text (Join-Path $f 'handoff\analysis.json') ($j | ConvertTo-Json -Depth 12)
+$r = Invoke-Target $VM_VIS @{ Path = $f }
+$ok = ($r.Code -eq 1) -and ($r.Out -notmatch 'cves present but')   # mapping.json still has via_cve
+Assert 'an actor with no cves does not trip the CVE cross-field rule' $ok $(
+    if ($r.Out -match 'cves present but') { 'absent field read as present' } else { 'absent field reads as empty' })
+
+$f = New-Fixture 'no-cves-clean'
+Remove-Item (Join-Path $f 'handoff\mapping.json') -Force
+$j = Read-Text (Join-Path $f 'handoff\analysis.json') | ConvertFrom-Json
+$j.PSObject.Properties.Remove('cves')
+$j.PSObject.Properties.Remove('vuln_relationship')
+$j.subject_type = 'actor'
+Write-Text (Join-Path $f 'handoff\analysis.json') ($j | ConvertTo-Json -Depth 12)
+$r = Invoke-Target $VM_VIS @{ Path = $f }
+Assert 'a CVE-free actor analysis validates cleanly' ($r.Code -eq 0) "exit $($r.Code)"
+
 # ================================================================ 4. merge and bulletin
 Set-Group '4. Merge and bulletin refusals'
 

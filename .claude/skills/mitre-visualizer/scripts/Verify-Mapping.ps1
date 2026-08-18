@@ -74,6 +74,18 @@ begin {
         return $null
     }
 
+    # Reads an array field as a REAL array. PowerShell wraps $null into a one-element array -
+    # @($null).Count is 1, not 0 - so an absent optional field otherwise reads as present with
+    # one entry. That fired the CVE cross-field rule on the first subject that legitimately
+    # carried no CVEs, reporting "cves present" for a file with no cves key at all. Every
+    # array field must be read through this helper, never by array-wrapping Get-Val directly.
+    function Get-Arr {
+        param($Obj, [string]$Name)
+        $v = Get-Val $Obj $Name
+        if ($null -eq $v) { return @() }
+        return @($v)
+    }
+
     # A subject folder holds its artefacts in subfolders - handoff/ for the JSON, reports/
     # for the rendered halves, bulletin/ for the merged output. Falls back to the subject
     # root so a folder an analyst assembled by hand still validates.
@@ -134,7 +146,7 @@ process {
                 $obj = Get-Val $analysis 'objective'
                 $cf  = Get-Val $analysis 'confidence'
                 $rel = Get-Val $analysis 'vuln_relationship'
-                $cves = @(Get-Val $analysis 'cves')
+                $cves = (Get-Arr $analysis 'cves')
 
                 $bad = @()
                 if ($st  -and $SUBJECT_TYPES -notcontains $st)  { $bad += "subject_type '$st'" }
@@ -155,16 +167,16 @@ process {
                 $slugVal = Get-Val $analysis 'slug'
                 $results += Test-Check 'analysis.json slug matches folder' ($slugVal -eq $slug) $(if ($slugVal -ne $slug) { "'$slugVal' vs folder '$slug'" })
 
-                $src = @(Get-Val $analysis 'sources')
+                $src = (Get-Arr $analysis 'sources')
                 $results += Test-Check 'analysis.json has at least one source' ($src.Count -gt 0) "$($src.Count)"
 
-                $bg = @(Get-Val $analysis 'background')
+                $bg = (Get-Arr $analysis 'background')
                 $bgOk = ($bg.Count -gt 0) -and -not ($bg | Where-Object { [string]::IsNullOrWhiteSpace($_) })
                 $results += Test-Check 'analysis.json background is present and non-empty' $bgOk $(if ($bgOk) { "$($bg.Count) paragraph(s)" })
 
                 # chronology: dated evidence, oldest first. The mapping step derives
                 # techniques from .detail, so an entry without it breaks the next stage.
-                $chron = @(Get-Val $analysis 'chronology')
+                $chron = (Get-Arr $analysis 'chronology')
                 $chronBad = @(); $prev = $null; $outOfOrder = $false; $badSrc = @()
                 foreach ($c in $chron) {
                     $d = Get-Val $c 'date'
@@ -174,7 +186,7 @@ process {
                     # zero-padded ISO dates sort chronologically as plain strings
                     if ($null -ne $prev -and $d -lt $prev) { $outOfOrder = $true }
                     $prev = $d
-                    foreach ($si in @(Get-Val $c 'sources')) {
+                    foreach ($si in (Get-Arr $c 'sources')) {
                         if ($si -isnot [int] -or $si -lt 0 -or $si -ge $src.Count) { $badSrc += "$si (in '$d')" }
                     }
                 }
@@ -183,7 +195,7 @@ process {
                 $results += Test-Check 'analysis.json chronology source indices resolve' ($badSrc.Count -eq 0) $(if ($badSrc.Count) { "out of range: " + (($badSrc | Select-Object -Unique) -join ', ') })
 
                 $riskBad = @()
-                $riskRows = @(Get-Val $analysis 'risk')
+                $riskRows = (Get-Arr $analysis 'risk')
                 foreach ($r in $riskRows) {
                     if (-not (Test-Prop $r 'sector') -or -not (Test-Prop $r 'level')) { $riskBad += 'entry missing sector/level'; continue }
                     if ($RISK_LEVELS -notcontains $r.level) { $riskBad += "level '$($r.level)'" }
@@ -216,13 +228,13 @@ process {
                 # true pipeline binding begin{} runs once, so assigning here would replace the
                 # table with this subject's array and every later subject would die on
                 # $TACTICS.ContainsKey(). ForEach-Object hides it by re-running the script.
-                $tacticList = @(Get-Val $mapping 'tactics')
+                $tacticList = (Get-Arr $mapping 'tactics')
 
                 $badT = @(); $techCount = 0; $badIds = @(); $noUsage = 0; $noName = @(); $emptyTac = 0
                 foreach ($t in $tacticList) {
                     $tn = Get-Val $t 'tactic'
                     if ($allowed -notcontains $tn) { $badT += $tn }
-                    $techs = @(Get-Val $t 'techniques')
+                    $techs = (Get-Arr $t 'techniques')
                     if ($techs.Count -eq 0) { $emptyTac++ }
                     foreach ($tech in $techs) {
                         $techCount++
@@ -255,10 +267,10 @@ process {
             }
             $results += Test-Check 'the two files agree on subject/slug/matrix' ($mismatch.Count -eq 0) $(if ($mismatch.Count) { $mismatch -join '; ' })
 
-            $declared = @(Get-Val $analysis 'cves')
+            $declared = (Get-Arr $analysis 'cves')
             $used = @()
-            foreach ($t in @(Get-Val $mapping 'tactics')) {
-                foreach ($tech in @(Get-Val $t 'techniques')) {
+            foreach ($t in (Get-Arr $mapping 'tactics')) {
+                foreach ($tech in (Get-Arr $t 'techniques')) {
                     $vc = Get-Val $tech 'via_cve'
                     if ($vc) { $used += $vc }
                 }

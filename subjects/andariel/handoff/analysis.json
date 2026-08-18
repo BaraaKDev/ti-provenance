@@ -1,0 +1,135 @@
+{
+  "schema": "analysis/1.0",
+  "subject": "Andariel",
+  "slug": "andariel",
+  "subject_type": "actor",
+  "matrix": "enterprise",
+  "attack_id": "G0138",
+  "aliases": ["Onyx Sleet", "Silent Chollima", "Stonefly", "APT45", "DarkSeoul", "PLUTONIUM"],
+  "objective": "espionage",
+  "objective_note": "Collection against military and nuclear programmes, funded by ransomware run against the same victims",
+  "confidence": "published",
+  "facts": {
+    "attribution": "North Korea, RGB 3rd Bureau",
+    "active_since": "2009",
+    "targets": "Defence, aerospace, nuclear, engineering",
+    "funding": "Ransomware against healthcare"
+  },
+  "background": [
+    "Andariel is a North Korean state-sponsored group attributed to the Reconnaissance General Bureau's 3rd Bureau, based in Pyongyang and Sinuiju, and assessed to be a subset of the Lazarus Group. Vendors track the same actor as Onyx Sleet, Silent Chollima, Stonefly, APT45, DarkSeoul and PLUTONIUM. MITRE dates the group to at least 2009; Microsoft dates its own first observation to 2014. The gap reflects when each organisation began tracking rather than a disagreement about the group.",
+    "The defining characteristic is that the espionage pays for itself. The group runs ransomware operations against healthcare entities and uses the proceeds to fund intelligence collection, and the authoring agencies of the July 2024 joint advisory record cases where ransomware and espionage were run against the same entity - in some instances on the same day. Most state-sponsored collection is a cost centre; this one is not, which is why a victim can be hit by two operations that look like completely different actors.",
+    "What they are collecting is stated unusually plainly. The advisory lists the requirements: tanks and self-propelled howitzers, littoral combat ships, submarines, torpedoes and autonomous underwater vehicles, fighter aircraft and UAVs, missiles and missile defence, satellites and nano-satellite technology, phased-array radar, uranium processing and enrichment, nuclear waste storage, nuclear power plants, shipbuilding and marine engineering, robotics, additive manufacturing and machining. The material sought is contract specifications, bills of materials, design drawings and engineering documents.",
+    "Tradecraft has shifted. Historically the group led with spear-phishing; Microsoft records a move to exploiting n-day vulnerabilities in public-facing web servers as the primary route in from around 2023, using both public and custom exploits, followed by web shells. Post-access tooling is a large custom RAT family - TigerRAT, SmallTiger, Dora RAT, ValidAlpha, LightHand, DurianBeacon, NukeSped, Atharvan and Goat RAT - packed with Themida and VMProtect, alongside commodity tooling including the Sliver C2 framework, Ngrok, masscan, 3Proxy, PuTTY and Mimikatz, and abuse of legitimate remote monitoring and management software."
+  ],
+  "chronology": [
+    {
+      "date": "2009",
+      "event": "Earliest tracked activity against South Korean targets",
+      "detail": "MITRE dates the group to at least 2009, operating against South Korean government agencies, military organisations and domestic companies, and against financial institutions including ATMs, banks and cryptocurrency exchanges. Early operations used watering-hole attacks carrying zero-day exploits, spear-phishing attachments, drive-by compromise and ActiveX exploitation, and hid payload code inside PNG and BMP images using steganography.",
+      "key": true,
+      "sources": [0]
+    },
+    {
+      "date": "2020",
+      "event": "TigerRAT enters the toolset",
+      "detail": "The custom TigerRAT backdoor came into use, providing keylogging and screen recording against compromised hosts - capabilities aimed at watching an operator work rather than at moving files in bulk.",
+      "sources": [2]
+    },
+    {
+      "date": "2021-05",
+      "event": "Maui ransomware deployed against healthcare",
+      "detail": "Maui ransomware was used against US healthcare and public health organisations, encrypting servers responsible for diagnostics, electronic health records and imaging. The proceeds funded intelligence collection, making the healthcare victims a revenue source rather than a collection target.",
+      "key": true,
+      "sources": [3]
+    },
+    {
+      "date": "2021-12",
+      "event": "Log4Shell exploitation of public-facing web servers",
+      "detail": "The group began widespread exploitation of internet-facing web servers through known vulnerabilities, with CVE-2021-44228 in Apache Log4j named as the example, deploying web shells to hold the foothold and reach applications and data behind it.",
+      "key": true,
+      "sources": [1, 2]
+    },
+    {
+      "date": "2023",
+      "event": "N-day exploitation replaces phishing as the primary way in",
+      "detail": "Microsoft records the group mostly exploiting n-day vulnerabilities from around this point, using publicly available and custom exploits rather than leading with spear-phishing. Named targets include Confluence, PaperCut, TeamCity and Apache ActiveMQ. The group is separately recorded researching vulnerabilities in the NIST National Vulnerability Database, which is reconnaissance rather than evidence of exploiting every CVE it read.",
+      "key": true,
+      "sources": [1, 2]
+    },
+    {
+      "date": "2023-12",
+      "event": "1.2 TB taken from South Korean defence contractors",
+      "detail": "Microsoft records the theft of 1.2 terabytes of data from South Korean defence contractors, the largest single collection volume attributed to the group in reviewed reporting.",
+      "key": true,
+      "sources": [2]
+    },
+    {
+      "date": "2024-02",
+      "event": "SmallTiger backdoor identified",
+      "detail": "A C++ backdoor tracked as SmallTiger was identified, carrying layered obfuscation, and was subsequently used against South Korean defence organisations. It sits alongside TigerRAT rather than replacing it.",
+      "sources": [2]
+    },
+    {
+      "date": "2024-05",
+      "event": "Dora RAT deployed against South Korean organisations",
+      "detail": "Dora RAT, written in Go, was deployed against South Korean educational institutions, construction companies and manufacturing organisations - a widening of targeting beyond the defence and nuclear core.",
+      "sources": [2]
+    },
+    {
+      "date": "2024-07-25",
+      "event": "Eight-agency joint advisory published",
+      "detail": "The FBI, CNMF, CISA, DC3, NSA, the Republic of Korea's National Intelligence Service and National Police Agency, and the UK's NCSC published AA24-207A. It sets out the collection requirements in detail and records the group launching ransomware and conducting espionage against the same entity, in some cases on the same day.",
+      "key": true,
+      "sources": [1]
+    }
+  ],
+  "risk": [
+    {
+      "sector": "Defence and aerospace",
+      "level": "critical",
+      "why": "The stated collection requirement. The advisory names tanks, submarines, torpedoes, autonomous underwater vehicles, fighter aircraft, UAVs, missiles and satellites individually."
+    },
+    {
+      "sector": "Nuclear",
+      "level": "critical",
+      "why": "Named as a collection priority in its own right: uranium processing and enrichment, waste and storage, power plants, and government nuclear research institutes."
+    },
+    {
+      "sector": "Engineering and manufacturing",
+      "level": "high",
+      "why": "Shipbuilding, marine engineering, robotics, additive manufacturing and machining are all named requirements, and 2024 activity reached South Korean manufacturers directly."
+    },
+    {
+      "sector": "Healthcare",
+      "level": "high",
+      "why": "Exposed as a ransomware revenue source rather than a collection target - a different threat from the same actor, and the reason espionage against other sectors is funded at all."
+    },
+    {
+      "sector": "Energy",
+      "level": "high",
+      "why": "Named by Microsoft among the industries of interest to North Korean intelligence that this group targets."
+    },
+    {
+      "sector": "Education and research",
+      "level": "moderate",
+      "why": "South Korean educational institutions were hit in 2024, and research institutes sit adjacent to the nuclear and engineering requirements."
+    },
+    {
+      "sector": "Financial services",
+      "level": "moderate",
+      "why": "Historically targeted - ATMs, banks and cryptocurrency exchanges - but this sits in the group's earlier profile rather than the current collection mandate."
+    },
+    {
+      "sector": "Retail and hospitality",
+      "level": "minimal",
+      "why": "No indication of interest. Holds neither the technical information the collection requirements name nor the ransomware payout profile of healthcare."
+    }
+  ],
+  "sources": [
+    "https://attack.mitre.org/groups/G0138/",
+    "https://www.cisa.gov/news-events/cybersecurity-advisories/aa24-207a",
+    "https://www.microsoft.com/en-us/security/blog/2024/07/25/onyx-sleet-uses-array-of-malware-to-gather-intelligence-for-north-korea/",
+    "https://www.cisa.gov/news-events/cybersecurity-advisories/aa22-187a"
+  ],
+  "report": "analysis.html"
+}

@@ -95,13 +95,19 @@
     font-weight: 700; letter-spacing: 0; color: var(--accent-ink);
   }
 
+  /* Fixed four-column track, with the final entry - the alias list - spanning the
+     full width. auto-fit produced four columns at print width for five entries, and
+     because the container paints --hair behind a 1px gap the three empty tracks on
+     row two rendered as a solid grey slab. A fixed count plus an explicit span means
+     every track is occupied. Keep the alias entry last. */
   .meta {
     margin: 38px 0 0; display: grid; gap: 1px;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     background: var(--hair); border: 1px solid var(--hair);
     border-radius: 10px; overflow: hidden;
   }
   .meta > div { background: var(--surface); padding: 14px 16px; margin: 0; }
+  .meta > div:last-child { grid-column: 1 / -1; }
   .meta dt {
     font-size: 10.5px; font-weight: 600; letter-spacing: .13em; text-transform: uppercase;
     color: var(--muted); margin: 0 0 5px;

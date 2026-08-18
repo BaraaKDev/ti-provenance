@@ -1,0 +1,1805 @@
+<title>Akira - Threat Bulletin</title>
+<style>
+/* ============================================================================
+   BULLETIN - Akira
+   Merged by scripts/Merge-Bulletin.ps1. Do not hand-edit the CSS: regenerate.
+   Part 1 CSS is verbatim from analysis.html.
+   Part 2 CSS is rewritten to sit under .flowpart, because the two halves share
+   class names ('high' and 'low' mean different things in each).
+   ============================================================================ */
+
+/* ---------- part 1: analysis (unscoped) ---------- */
+
+  /* ---- Tokens: shared across TI-Reporting - see CLAUDE.md ---- */
+  :root {
+    color-scheme: light;
+
+    --ground: #f6f4f2;
+    --surface: #ffffff;
+    --surface-2: #efece7;
+    --ink: #1b1e24;
+    --muted: #5c6470;
+    --hair: #ddd8d1;
+    --hair-strong: #c8c2b8;
+
+    /* ACCENT - extortion objective: ember red, same values the flow report uses. */
+    --ember: #cf4a1f;
+    --ember-ink: #a8380f;
+    --ember-wash: rgba(207, 74, 31, 0.10);
+    --steel: #346b8f;
+    --steel-wash: rgba(52, 107, 143, 0.10);
+    --spine: #b9b2a8;
+
+    /* SECTOR RISK - shares the CVSS ramp, separate tokens, different form. */
+    --risk-critical: #a4161a;  --risk-critical-wash: rgba(164, 22, 26, 0.10);
+    --risk-high:     #b3541e;  --risk-high-wash:     rgba(179, 84, 30, 0.10);
+    --risk-moderate: #8a6a00;  --risk-moderate-wash: rgba(138, 106, 0, 0.10);
+    --risk-low:      #4a6b2a;  --risk-low-wash:      rgba(74, 107, 42, 0.10);
+    --risk-minimal:  #5c6470;  --risk-minimal-wash:  rgba(92, 100, 112, 0.10);
+
+    --shadow: 0 1px 2px rgba(20,22,26,.06), 0 8px 24px rgba(20,22,26,.05);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.65; -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 940px; margin: 0 auto; padding: 0 24px; }
+
+  /* ================= 1. COVER ================= */
+  .cover {
+    position: relative; overflow: hidden;
+    border-bottom: 1px solid var(--hair);
+    background:
+      radial-gradient(120% 90% at 88% -5%, var(--ember-wash), transparent 62%),
+      var(--surface);
+  }
+  .cover .wrap { position: relative; z-index: 2; padding-top: 84px; padding-bottom: 76px; }
+
+  .covermotif {
+    position: absolute; top: -40px; right: -60px; width: 460px; height: 460px;
+    color: var(--ember); pointer-events: none; z-index: 1;
+  }
+  .covermotif .arcs   { opacity: .16; }
+  .covermotif .rail   { opacity: .30; }
+  .covermotif .dots   { opacity: .22; }
+
+  .tlp {
+    display: inline-block; font-family: ui-monospace, Consolas, monospace;
+    font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
+    padding: 4px 10px; border-radius: 4px; margin-bottom: 26px;
+    background: var(--surface-2); border: 1px solid var(--hair-strong); color: var(--muted);
+  }
+  .tlp.clear { color: var(--muted); }
+  .tlp.green { color: var(--risk-low);      border-color: color-mix(in srgb, var(--risk-low) 40%, transparent);      background: var(--risk-low-wash); }
+  .tlp.amber { color: var(--risk-high);     border-color: color-mix(in srgb, var(--risk-high) 40%, transparent);     background: var(--risk-high-wash); }
+  .tlp.red   { color: var(--risk-critical); border-color: color-mix(in srgb, var(--risk-critical) 40%, transparent); background: var(--risk-critical-wash); }
+
+  .eyebrow {
+    font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+    font-size: 12px; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--muted); margin: 0 0 18px; display: flex; align-items: center; gap: 12px;
+  }
+  .eyebrow::after { content: ""; flex: 1; height: 1px; background: var(--hair-strong); }
+  .idtag { color: var(--ember-ink); font-weight: 600; }
+
+  .cover h1 {
+    font-size: clamp(44px, 8vw, 78px); line-height: .96; letter-spacing: -.025em;
+    font-weight: 800; margin: 0 0 10px; text-wrap: balance; max-width: 16ch;
+  }
+  .cover h1 .accent { color: var(--ember); }
+  .cover .standfirst {
+    font-size: clamp(17px, 2.4vw, 21px); color: var(--muted);
+    max-width: 60ch; margin: 20px 0 0;
+  }
+  .covermeta {
+    margin-top: 42px; display: grid; gap: 1px;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    background: var(--hair); border: 1px solid var(--hair); border-radius: 12px; overflow: hidden;
+  }
+  .covermeta div { background: var(--surface); padding: 15px 18px; }
+  .covermeta .k { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0 0 5px; }
+  .covermeta .v { font-size: 15px; font-weight: 600; margin: 0; }
+
+  /* ================= Sections ================= */
+  section { padding: 62px 0; }
+  section.alt { background: var(--surface); border-top: 1px solid var(--hair); border-bottom: 1px solid var(--hair); }
+  .section-head { margin-bottom: 38px; }
+  .section-head .eyebrow { margin-bottom: 10px; }
+  .section-head h2 {
+    font-size: clamp(27px, 4vw, 35px); letter-spacing: -.015em;
+    font-weight: 800; margin: 0; text-wrap: balance;
+  }
+  .section-head p { color: var(--muted); max-width: 64ch; margin: 12px 0 0; font-size: 16px; }
+
+  .prose { max-width: 68ch; }
+  .prose p { margin: 0 0 18px; font-size: 16.5px; }
+  .prose p:last-child { margin-bottom: 0; }
+  .prose strong { font-weight: 700; }
+  .prose h3 {
+    font-size: 20px; font-weight: 700; letter-spacing: -.01em;
+    margin: 34px 0 12px; text-wrap: balance;
+  }
+
+  .src {
+    font-family: ui-monospace, Consolas, monospace; font-size: 11px; font-weight: 700;
+    color: var(--steel); background: var(--steel-wash);
+    border: 1px solid color-mix(in srgb, var(--steel) 24%, transparent);
+    padding: 0 5px; border-radius: 4px; vertical-align: 1px; margin-left: 3px;
+    text-decoration: none; white-space: nowrap;
+  }
+
+  /* ================= 2. CHRONOLOGY ================= */
+  .chrono { position: relative; padding-left: 116px; }
+  .chrono::before {
+    content: ""; position: absolute; left: 92px; top: 10px; bottom: 10px;
+    width: 3px; border-radius: 3px;
+    background: linear-gradient(to bottom, var(--spine) 0%, var(--spine) 45%, var(--ember) 100%);
+  }
+  .entry { position: relative; margin-bottom: 30px; }
+  .entry:last-child { margin-bottom: 0; }
+  .entry .when {
+    position: absolute; left: -116px; top: 1px; width: 76px; text-align: right;
+    font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; font-weight: 700;
+    color: var(--ember-ink); letter-spacing: .02em;
+  }
+  .entry::after {
+    content: ""; position: absolute; left: -27px; top: 7px;
+    width: 11px; height: 11px; border-radius: 50%;
+    background: var(--surface); border: 3px solid var(--spine); z-index: 2;
+  }
+  .entry.key::after { border-color: var(--ember); background: var(--ember); }
+  .entry h3 { margin: 0 0 8px; font-size: 18.5px; font-weight: 700; letter-spacing: -.01em; }
+  .entry p { margin: 0 0 12px; font-size: 16px; max-width: 62ch; }
+  .entry p:last-child { margin-bottom: 0; }
+
+  /* ================= 4. CONCLUSION ================= */
+  .callout {
+    margin-top: 28px; padding: 20px 22px;
+    background: var(--surface); border: 1px solid var(--ember);
+    border-left: 4px solid var(--ember); border-radius: 12px; font-size: 16.5px;
+  }
+  section.alt .callout { background: var(--ground); }
+  .callout strong { color: var(--ember-ink); }
+  .callout p { margin: 0 0 14px; }
+  .callout p:last-child { margin: 0; }
+
+  .takeaways { display: grid; gap: 12px; margin-top: 26px; }
+  .takeaway {
+    display: grid; grid-template-columns: 30px 1fr; gap: 0 14px; align-items: start;
+    background: var(--surface); border: 1px solid var(--hair);
+    border-radius: 12px; padding: 16px 18px; box-shadow: var(--shadow);
+  }
+  section.alt .takeaway { background: var(--ground); }
+  .takeaway .n {
+    display: flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--ember-wash); color: var(--ember-ink);
+    border: 1px solid color-mix(in srgb, var(--ember) 28%, transparent);
+    font-family: ui-monospace, Consolas, monospace; font-size: 12px; font-weight: 700;
+  }
+  .takeaway p { margin: 0; font-size: 15.5px; }
+
+  /* ================= 5. RISK & IMPACT ================= */
+  .sectors {
+    border: 1px solid var(--hair); border-radius: 14px; overflow: hidden;
+    background: var(--surface); box-shadow: var(--shadow);
+  }
+  section.alt .sectors { background: var(--ground); }
+  .sector {
+    display: grid; grid-template-columns: minmax(150px, 1.1fr) 104px 92px 2fr;
+    gap: 16px; align-items: center;
+    padding: 15px 20px; border-bottom: 1px solid var(--hair);
+  }
+  .sector:last-child { border-bottom: none; }
+  .sector .name { font-weight: 700; font-size: 15.5px; }
+  .sector .why { font-size: 14px; color: var(--muted); }
+
+  .meter { display: flex; gap: 3px; }
+  .meter i {
+    display: block; height: 9px; flex: 1; border-radius: 2px;
+    background: var(--hair-strong); opacity: .5;
+  }
+  .level {
+    font-family: ui-monospace, Consolas, monospace; font-size: 10.5px; font-weight: 700;
+    letter-spacing: .1em; text-transform: uppercase; text-align: center;
+    padding: 3px 8px; border-radius: 100px; white-space: nowrap;
+  }
+
+  .sector.critical .meter i:nth-child(-n+5) { background: var(--risk-critical); opacity: 1; }
+  .sector.high     .meter i:nth-child(-n+4) { background: var(--risk-high);     opacity: 1; }
+  .sector.moderate .meter i:nth-child(-n+3) { background: var(--risk-moderate); opacity: 1; }
+  .sector.low      .meter i:nth-child(-n+2) { background: var(--risk-low);      opacity: 1; }
+  .sector.minimal  .meter i:nth-child(-n+1) { background: var(--risk-minimal);  opacity: 1; }
+
+  .sector.critical .level { color: #fff; background: var(--risk-critical); }
+  .sector.high     .level { color: var(--risk-high);     background: var(--risk-high-wash);     border: 1px solid color-mix(in srgb, var(--risk-high) 32%, transparent); }
+  .sector.moderate .level { color: var(--risk-moderate); background: var(--risk-moderate-wash); border: 1px solid color-mix(in srgb, var(--risk-moderate) 32%, transparent); }
+  .sector.low      .level { color: var(--risk-low);      background: var(--risk-low-wash);      border: 1px solid color-mix(in srgb, var(--risk-low) 32%, transparent); }
+  .sector.minimal  .level { color: var(--risk-minimal);  background: var(--risk-minimal-wash);  border: 1px solid var(--hair-strong); }
+
+  .risklegend {
+    display: flex; flex-wrap: wrap; gap: 18px; margin-top: 20px;
+    padding: 14px 18px; background: var(--surface-2);
+    border: 1px solid var(--hair); border-radius: 12px;
+    font-size: 13px; color: var(--muted);
+  }
+  .risklegend .item { display: flex; align-items: center; gap: 8px; }
+  .risklegend .sw { width: 22px; height: 8px; border-radius: 2px; }
+
+  /* ================= Footer ================= */
+  footer { border-top: 1px solid var(--hair); padding: 40px 0 64px; color: var(--muted); font-size: 14px; }
+  footer h3 { font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin: 0 0 14px; }
+  footer a { color: var(--ember-ink); }
+  .sources { counter-reset: s; display: grid; gap: 8px; margin: 0 0 26px; padding: 0; list-style: none; }
+  /* Counter absolutely positioned, not a grid column: an <li> holding a text node AND an
+     <a> produces three grid items, so the anchor wrapped into the 30px counter column and
+     the URL rendered about four characters wide. */
+  .sources li {
+    counter-increment: s; position: relative; padding-left: 40px;
+    font-size: 13.5px; overflow-wrap: anywhere;
+  }
+  .sources li::before {
+    content: counter(s); position: absolute; left: 0; top: 2px;
+    font-family: ui-monospace, Consolas, monospace; font-size: 11px;
+    font-weight: 700; color: var(--steel); background: var(--steel-wash);
+    border: 1px solid color-mix(in srgb, var(--steel) 24%, transparent);
+    border-radius: 4px; text-align: center; width: 30px; height: 20px; line-height: 18px;
+  }
+  .note {
+    margin-top: 12px; padding: 14px 16px; background: var(--surface-2);
+    border: 1px dashed var(--hair-strong); border-radius: 10px; color: var(--muted);
+    font-size: 13.5px;
+  }
+  code { font-family: ui-monospace, Consolas, monospace; font-size: .9em; background: var(--surface-2); padding: 1px 5px; border-radius: 3px; }
+
+
+/* ---------- part 2: attack flow (scoped under .flowpart) ---------- */
+.flowpart {
+    color-scheme: light;
+
+    --ground: #f6f4f2;
+    --surface: #ffffff;
+    --surface-2: #efece7;
+    --ink: #1b1e24;
+    --muted: #5c6470;
+    --hair: #ddd8d1;
+    --hair-strong: #c8c2b8;
+
+    
+    --ember: #cf4a1f;
+    --ember-ink: #a8380f;
+    --ember-wash: rgba(207, 74, 31, 0.10);
+    --steel: #346b8f;
+    --steel-wash: rgba(52, 107, 143, 0.10);
+    --spine: #b9b2a8;
+
+    
+    --sev-crit: #a4161a;  --sev-crit-wash: rgba(164, 22, 26, 0.10);
+    --sev-high: #b3541e;  --sev-high-wash: rgba(179, 84, 30, 0.10);
+    --sev-med:  #8a6a00;  --sev-med-wash:  rgba(138, 106, 0, 0.10);
+    --sev-low:  #4a6b2a;  --sev-low-wash:  rgba(74, 107, 42, 0.10);
+
+    --shadow: 0 1px 2px rgba(20,22,26,.06), 0 8px 24px rgba(20,22,26,.05);
+  }
+.flowpart * { box-sizing: border-box; }
+.flowpart {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.55; -webkit-font-smoothing: antialiased;
+  }
+.flowpart .wrap { max-width: 940px; margin: 0 auto; padding: 0 24px; }
+.flowpart header {
+    border-bottom: 1px solid var(--hair);
+    background: radial-gradient(120% 80% at 85% -10%, var(--ember-wash), transparent 60%), var(--surface);
+  }
+.flowpart .hero { padding: 64px 0 52px; }
+.flowpart .eyebrow {
+    font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+    font-size: 12px; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--muted); margin: 0 0 18px; display: flex; align-items: center; gap: 12px;
+  }
+.flowpart .eyebrow::after { content: ""; flex: 1; height: 1px; background: var(--hair-strong); }
+.flowpart .idtag { color: var(--ember-ink); font-weight: 600; }
+.flowpart h1 {
+    font-size: clamp(40px, 7vw, 68px); line-height: .98; letter-spacing: -.02em;
+    font-weight: 800; margin: 0 0 8px; text-wrap: balance;
+  }
+.flowpart h1 .destruct { color: var(--ember); }
+.flowpart .lede { font-size: clamp(17px, 2.4vw, 20px); color: var(--muted); max-width: 62ch; margin: 18px 0 0; }
+.flowpart .idrow { margin-top: 22px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.flowpart .idrow .label {
+    font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--muted); margin-right: 4px;
+  }
+.flowpart .chip,
+.flowpart .cve {
+    font-family: ui-monospace, Consolas, monospace; font-size: 12.5px;
+    padding: 4px 10px; border: 1px solid var(--hair-strong); border-radius: 100px;
+    color: var(--ink); background: var(--surface-2); white-space: nowrap;
+  }
+.flowpart .cve { font-weight: 600; }
+.flowpart .idrow.vulns .cve {
+    background: var(--ember-wash); color: var(--ember-ink);
+    border-color: color-mix(in srgb, var(--ember) 30%, transparent);
+  }
+.flowpart .facts {
+    margin-top: 36px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1px; background: var(--hair); border: 1px solid var(--hair); border-radius: 12px; overflow: hidden;
+  }
+.flowpart .fact { background: var(--surface); padding: 16px 18px; }
+.flowpart .fact .k { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0 0 6px; }
+.flowpart .fact .v { font-size: 15px; font-weight: 600; margin: 0; font-variant-numeric: tabular-nums; }
+.flowpart .fact .v.bad { color: var(--ember-ink); }
+.flowpart section { padding: 60px 0; }
+.flowpart .section-head { margin-bottom: 40px; }
+.flowpart .section-head .eyebrow { margin-bottom: 10px; }
+.flowpart .section-head h2 { font-size: clamp(26px, 4vw, 34px); letter-spacing: -.01em; font-weight: 800; margin: 0; text-wrap: balance; }
+.flowpart .section-head p { color: var(--muted); max-width: 64ch; margin: 12px 0 0; font-size: 15.5px; }
+.flowpart .sev {
+    font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; font-weight: 700;
+    letter-spacing: .04em; padding: 2px 8px; border-radius: 5px; white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+.flowpart .sev.crit { color: var(--sev-crit); background: var(--sev-crit-wash); border: 1px solid color-mix(in srgb, var(--sev-crit) 26%, transparent); }
+.flowpart .sev.high { color: var(--sev-high); background: var(--sev-high-wash); border: 1px solid color-mix(in srgb, var(--sev-high) 26%, transparent); }
+.flowpart .sev.med { color: var(--sev-med);  background: var(--sev-med-wash);  border: 1px solid color-mix(in srgb, var(--sev-med) 26%, transparent); }
+.flowpart .sev.low { color: var(--sev-low);  background: var(--sev-low-wash);  border: 1px solid color-mix(in srgb, var(--sev-low) 26%, transparent); }
+.flowpart .exp {
+    font-family: ui-monospace, Consolas, monospace; font-size: 10.5px; font-weight: 700;
+    letter-spacing: .09em; text-transform: uppercase; padding: 3px 9px;
+    border-radius: 100px; white-space: nowrap;
+  }
+.flowpart .exp.kev { background: var(--sev-crit); color: #fff; border: 1px solid var(--sev-crit); }
+.flowpart .exp.poc { background: transparent; color: var(--sev-high); border: 1px solid color-mix(in srgb, var(--sev-high) 40%, transparent); }
+.flowpart .exp.none { background: transparent; color: var(--muted); border: 1px solid var(--hair-strong); }
+.flowpart .cwe {
+    font-family: ui-monospace, Consolas, monospace; font-size: 11.5px;
+    color: var(--steel); background: var(--steel-wash); padding: 2px 7px; border-radius: 5px; white-space: nowrap;
+  }
+.flowpart .table-wrap { overflow-x: auto; }
+.flowpart table { border-collapse: collapse; width: 100%; font-size: 14px; }
+.flowpart thead th {
+    text-align: left; font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--muted); font-weight: 700; padding: 0 14px 10px 0;
+    border-bottom: 1px solid var(--hair-strong); white-space: nowrap;
+  }
+.flowpart tbody td { padding: 12px 14px 12px 0; border-bottom: 1px solid var(--hair); vertical-align: middle; }
+.flowpart tbody tr:last-child td { border-bottom: none; }
+.flowpart td.mono { font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+.flowpart .callout {
+    margin-top: 26px; padding: 18px 20px;
+    background: var(--surface); border: 1px solid var(--ember);
+    border-left: 4px solid var(--ember); border-radius: 12px; font-size: 15px;
+  }
+.flowpart .callout strong { color: var(--ember-ink); }
+.flowpart .callout p { margin: 0 0 12px; }
+.flowpart .callout p:last-child { margin: 0; }
+.flowpart .flow { position: relative; padding-left: 34px; }
+.flowpart .flow::before {
+    content: ""; position: absolute; left: 11px; top: 6px; bottom: 40px; width: 3px; border-radius: 3px;
+    background: linear-gradient(to bottom, var(--spine) 0%, var(--spine) 40%, var(--ember) 100%);
+  }
+.flowpart .phase { position: relative; margin-bottom: 14px; }
+.flowpart .node {
+    position: absolute; left: -34px; top: 22px; width: 25px; height: 25px; border-radius: 50%;
+    background: var(--surface); border: 3px solid var(--spine);
+    display: flex; align-items: center; justify-content: center;
+    font-family: ui-monospace, Consolas, monospace; font-size: 11px; font-weight: 700;
+    color: var(--muted); z-index: 2;
+  }
+.flowpart .phase.impact .node { border-color: var(--ember); background: var(--ember); color: #fff; }
+.flowpart .card { background: var(--surface); border: 1px solid var(--hair); border-radius: 14px; padding: 20px 22px; box-shadow: var(--shadow); }
+.flowpart .phase.impact .card {
+    border-color: var(--ember);
+    background: linear-gradient(0deg, var(--ember-wash), var(--ember-wash)), var(--surface);
+  }
+.flowpart .card-top { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-bottom: 6px; }
+.flowpart .ticon {
+    width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--steel-wash); color: var(--steel);
+    border: 1px solid color-mix(in srgb, var(--steel) 26%, transparent);
+  }
+.flowpart .ticon svg { width: 19px; height: 19px; display: block; }
+.flowpart .phase.impact .ticon {
+    background: var(--ember-wash); color: var(--ember);
+    border-color: color-mix(in srgb, var(--ember) 34%, transparent);
+  }
+.flowpart .tactic { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--steel); font-weight: 700; }
+.flowpart .phase.heat .ticon {
+    background: color-mix(in srgb, var(--ember-wash) 70%, var(--steel-wash));
+    color: color-mix(in srgb, var(--ember) 62%, var(--steel));
+    border-color: color-mix(in srgb, var(--ember) 24%, transparent);
+  }
+.flowpart .phase.heat .tactic { color: color-mix(in srgb, var(--ember-ink) 72%, var(--steel)); }
+.flowpart .phase.impact .tactic { color: var(--ember-ink); }
+.flowpart .card h3 { font-size: 19px; margin: 2px 0 10px; font-weight: 700; letter-spacing: -.01em; width: 100%; }
+.flowpart .card p { margin: 0 0 14px; color: var(--muted); font-size: 14.5px; }
+.flowpart .card p:last-child { margin-bottom: 0; }
+.flowpart .ttps { display: flex; flex-direction: column; gap: 8px; }
+.flowpart .ttp { display: flex; gap: 12px; align-items: baseline; font-size: 14px; }
+.flowpart .tid {
+    font-family: ui-monospace, Consolas, monospace; font-size: 12px; font-weight: 600;
+    color: var(--steel); background: var(--steel-wash); padding: 2px 7px; border-radius: 5px;
+    white-space: nowrap; flex-shrink: 0; min-width: 78px; text-align: center;
+  }
+.flowpart .ttp .desc { color: var(--ink); }
+.flowpart .viacve {
+    font-family: ui-monospace, Consolas, monospace; font-size: 11px; font-weight: 600;
+    color: var(--ember-ink); background: var(--ember-wash);
+    border: 1px solid color-mix(in srgb, var(--ember) 26%, transparent);
+    padding: 1px 6px; border-radius: 4px; white-space: nowrap;
+  }
+.flowpart .tool {
+    font-family: ui-monospace, Consolas, monospace; font-size: .92em;
+    color: var(--ember-ink); background: var(--ember-wash); padding: 1px 5px; border-radius: 4px;
+  }
+.flowpart .transition {
+    padding: 6px 0 6px 6px; font-size: 12.5px; color: var(--muted); font-style: italic;
+    display: flex; align-items: center; gap: 8px;
+  }
+.flowpart .transition svg { flex-shrink: 0; color: var(--spine); }
+.flowpart .transition.handoff {
+    font-style: normal; font-weight: 600; color: var(--ember-ink);
+    background: var(--ember-wash); border: 1px dashed color-mix(in srgb, var(--ember) 40%, transparent);
+    border-radius: 10px; padding: 12px 16px; margin: 6px 0 14px; font-size: 13.5px;
+  }
+.flowpart .transition.handoff svg { color: var(--ember); }
+.flowpart .arsenal { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
+.flowpart .weapon {
+    background: var(--surface); border: 1px solid var(--hair); border-left: 3px solid var(--steel);
+    border-radius: 10px; padding: 16px 18px;
+  }
+.flowpart .weapon.destruct { border-left-color: var(--ember); }
+.flowpart .weapon .wname {
+    font-family: ui-monospace, Consolas, monospace; font-weight: 700; font-size: 15px; margin: 0 0 2px;
+    display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
+  }
+.flowpart .weapon .sid { font-size: 11px; color: var(--muted); font-weight: 500; }
+.flowpart .weapon .role2 { font-size: 13px; color: var(--muted); margin: 6px 0 0; }
+.flowpart .weapon .kind {
+    display: inline-block; font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+    font-weight: 700; margin-top: 10px; color: var(--steel);
+  }
+.flowpart .weapon.destruct .kind { color: var(--ember); }
+.flowpart .fixgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px; }
+.flowpart .fix {
+    background: var(--surface); border: 1px solid var(--hair);
+    border-left: 3px solid var(--steel); border-radius: 10px; padding: 16px 18px;
+  }
+.flowpart .fix.urgent { border-left-color: var(--ember); }
+.flowpart .fix h3 { margin: 0 0 6px; font-size: 14.5px; font-weight: 700; }
+.flowpart .fix p { margin: 0; font-size: 13.5px; color: var(--muted); }
+.flowpart .fix .tagline {
+    display: inline-block; font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+    font-weight: 700; margin-top: 10px; color: var(--steel);
+  }
+.flowpart .fix.urgent .tagline { color: var(--ember); }
+.flowpart code {
+    font-family: ui-monospace, Consolas, monospace; font-size: .9em;
+    background: var(--surface-2); padding: 1px 5px; border-radius: 3px;
+  }
+.flowpart .legend {
+    display: flex; flex-wrap: wrap; gap: 20px; margin-top: 28px; padding: 16px 20px;
+    background: var(--surface-2); border: 1px solid var(--hair); border-radius: 12px;
+    font-size: 13px; color: var(--muted);
+  }
+.flowpart .legend .item { display: flex; align-items: center; gap: 9px; }
+.flowpart .legend .keys { display: flex; gap: 5px; }
+.flowpart .legend .ticon { width: 26px; height: 26px; border-radius: 7px; }
+.flowpart .legend .ticon svg { width: 14px; height: 14px; }
+.flowpart .legend .ticon.heat {
+    background: color-mix(in srgb, var(--ember-wash) 70%, var(--steel-wash));
+    color: color-mix(in srgb, var(--ember) 62%, var(--steel));
+    border-color: color-mix(in srgb, var(--ember) 24%, transparent);
+  }
+.flowpart .legend .ticon.impact {
+    background: var(--ember-wash); color: var(--ember);
+    border-color: color-mix(in srgb, var(--ember) 34%, transparent);
+  }
+.flowpart .legend .spinekey {
+    width: 26px; height: 8px; border-radius: 4px; flex-shrink: 0;
+    background: linear-gradient(90deg, var(--spine), var(--ember));
+  }
+.flowpart footer { border-top: 1px solid var(--hair); padding: 34px 0 56px; color: var(--muted); font-size: 13.5px; }
+.flowpart footer a { color: var(--ember-ink); }
+.flowpart footer .note {
+    margin-top: 10px; padding: 14px 16px; background: var(--surface-2);
+    border: 1px dashed var(--hair-strong); border-radius: 10px; color: var(--muted);
+  }
+.flowpart code.path { font-family: ui-monospace, Consolas, monospace; font-size: .92em; color: var(--ink); }
+
+
+
+/* ---------- bulletin chrome (step 4 only) ---------- */
+.partrule { border-top: 1px solid var(--hair); background: var(--ground); }
+.partrule .wrap { padding: 46px 0 8px; }
+.partrule .pnum {
+  display: inline-block; font-size: .68rem; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--ember); border: 1px solid var(--ember); border-radius: 2px;
+  padding: 3px 8px; margin-bottom: 12px;
+}
+.partrule h2 { font-size: 1.5rem; margin: 0; color: var(--ink); }
+.partrule p  { color: var(--muted); margin: 6px 0 0; max-width: 62ch; }
+
+.bsummary, .bdefence { border-top: 1px solid var(--hair); background: var(--surface); }
+.bsummary .wrap, .bdefence .wrap { padding: 40px 0; }
+.bslede { color: var(--ink); max-width: 68ch; }
+.bskey { margin: 18px 0 0; padding: 0; list-style: none; }
+.bskey li {
+  border-left: 2px solid var(--ember); padding: 4px 0 4px 14px;
+  margin-bottom: 10px; color: var(--ink); max-width: 68ch;
+}
+.bsteps { margin: 18px 0 0; padding-left: 20px; color: var(--ink); max-width: 68ch; }
+.bsteps li { margin-bottom: 10px; }
+.bwhat { display: block; font-weight: 600; }
+.bwhy  { display: block; color: var(--muted); font-size: .9rem; }
+
+/* The flow report carries its own hero. Inside a bulletin the cover already introduced the
+   subject, so the hero is demoted rather than repeated at cover scale. */
+.flowpart > header { padding-top: 0; }
+.flowpart header h1 { font-size: 1.9rem; }
+.flowpart header .lede { font-size: 1rem; }
+</style>
+
+<!-- ===================== 1. COVER ===================== -->
+<header class="cover">
+  <svg class="covermotif" viewBox="0 0 400 400" fill="none" aria-hidden="true">
+    <g class="arcs" stroke="currentColor" stroke-width="1.1">
+      <circle cx="286" cy="132" r="46"/>
+      <circle cx="286" cy="132" r="86"/>
+      <circle cx="286" cy="132" r="126"/>
+      <circle cx="286" cy="132" r="166"/>
+    </g>
+    <g class="rail" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+      <path d="M286 46 V318"/>
+    </g>
+    <g class="dots" fill="currentColor">
+      <circle cx="286" cy="86"  r="7"/>
+      <circle cx="286" cy="150" r="7"/>
+      <circle cx="286" cy="214" r="7"/>
+      <circle cx="286" cy="278" r="7"/>
+      <circle cx="196" cy="188" r="4"/>
+      <circle cx="352" cy="242" r="4"/>
+      <circle cx="230" cy="300" r="4"/>
+    </g>
+  </svg>
+
+  <div class="wrap">
+    <span class="tlp clear">TLP:CLEAR</span>
+
+    <p class="eyebrow">Campaign Analysis <span class="idtag">G1024</span></p>
+    <h1>Akira<span class="accent">.</span></h1>
+    <p class="standfirst">
+      A ransomware operation that has taken a quarter of a billion dollars without needing a
+      single zero-day — every documented way in is a remote-access appliance protected by a
+      password alone.
+    </p>
+
+    <div class="covermeta">
+      <div><p class="k">Subject type</p><p class="v">Campaign &middot; actor + CVEs</p></div>
+      <div><p class="k">Attribution</p><p class="v">eCrime, financially motivated</p></div>
+      <div><p class="k">First observed</p><p class="v">March 2023</p></div>
+      <div><p class="k">Assessed risk</p><p class="v">Critical</p></div>
+      <div><p class="k">Report date</p><p class="v">16 August 2026</p></div>
+      <div><p class="k">Analyst</p><p class="v">Threat Intelligence</p></div>
+    </div>
+  </div>
+</header>
+
+<!-- BULLETIN:SUMMARY -->
+  <section class="bsummary">
+    <div class="wrap">
+      <p class="eyebrow">Executive summary</p>
+      <p class="bslede">
+        Akira is a ransomware-as-a-service operation that has extorted roughly a quarter of a
+        billion dollars from more than 250 organisations since March 2023 without ever needing a
+        zero-day. It gets in through remote-access appliances — two Cisco flaws, one SonicWall
+        flaw, all patched long before it used them at scale — or, most often, by simply logging in
+        to a VPN account that has only a password. It steals data first, deletes the backups, then
+        encrypts at hypervisor level, and since October 2023 it has sometimes skipped the
+        encryption entirely and extorted on the stolen data alone.
+      </p>
+      <ul class="bskey">
+        <li>
+          <strong>Your exposure is set by your remote-access authentication, not your industry.</strong>
+          Manufacturing is the most-targeted sector and healthcare, education, professional services
+          and construction all sit inside the observed victim profile — but the selection is
+          opportunistic. A mid-sized manufacturer with enforced phishing-resistant MFA is a harder
+          target than a large enterprise carrying one legacy appliance with single-factor logon.
+        </li>
+        <li>
+          <strong>Only four of the thirteen intrusion phases are addressed by patching.</strong>
+          The flow's handoff line marks where the vulnerabilities stop contributing. Everything
+          below it — credential theft, killed EDR, backup deletion, encryption — follows from any
+          foothold at all, including a phished password.
+        </li>
+        <li>
+          <strong>A successful MFA event is not evidence the account is safe.</strong> In the
+          SonicWall campaign operators enrolled their own TOTP token through an enrolment portal
+          exposed on port 4433, so the second factor was satisfied legitimately. Audit existing MFA
+          registrations for devices nobody recognises; enforcement alone did not stop this.
+        </li>
+        <li>
+          <strong>Backups are attacked with credentials taken earlier in the same intrusion.</strong>
+          Veeam credentials are harvested during credential access and used to delete backups before
+          any encryptor runs. Offline or immutable copies held outside domain trust are what break
+          that sequence — ordinary backups do not survive it.
+        </li>
+        <li>
+          <strong>Detection built on the encryptor will age out.</strong> Four payloads —
+          C++ Akira, Rust Megazord, Akira_v2, and a Nutanix AHV build — have run down one unchanged
+          path. The path is the durable detection surface; the file is not. And where the operation
+          runs extortion-only, no encryptor appears at all.
+        </li>
+      </ul>
+    </div>
+  </section><!-- /BULLETIN:SUMMARY -->
+
+
+
+<main>
+
+  <!-- ===================== 2. OVERVIEW ===================== -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Overview</p>
+        <h2>Three years of the same way in</h2>
+      </div>
+
+      <div class="prose">
+        <p>
+          Akira is a ransomware-as-a-service operation first observed in <strong>March 2023</strong>,
+          tracked by MITRE as G1024<a class="src" href="#s1">1</a> and by vendors as GOLD SAHARA,
+          PUNK SPIDER, Howling Scorpius and Storm-1567. It runs a double-extortion model:
+          affiliates steal data before encrypting it, then name victims on a Tor leak site styled
+          after 1980s green-screen terminals, from which the operation takes its
+          name<a class="src" href="#s4">4</a>. Reporting links its tooling and infrastructure to the
+          defunct Conti operation, though that connection is consistently described as an
+          <em>assessed association</em> rather than an established one<a class="src" href="#s7">7</a>.
+        </p>
+        <p>
+          The defining characteristic is that Akira <strong>rarely needs a novel exploit</strong>.
+          The recurring entry point across three years of reporting is a remote-access VPN protected
+          by a password alone, reached either with credentials acquired beforehand or through a known
+          flaw in the appliance itself<a class="src" href="#s3">3</a>. Every CVE attributed to the
+          group sits in an internet-facing edge device — Cisco ASA and FTD, SonicWall SonicOS — and
+          none is a zero-day. For a defender this inverts the usual priority: the control that most
+          reliably stops an Akira intrusion is multi-factor authentication on remote access, not a
+          faster patch cycle.
+        </p>
+        <p>
+          The tradecraft after entry is consistent enough across engagements to read as a documented
+          playbook. Credentials are harvested with Mimikatz, LaZagne, LSASS memory dumps via
+          <code>comsvcs.dll</code>, <code>ntdsutil</code> against NTDS.dit, Veeam credential-dumping
+          scripts and Kerberoasting. Persistence comes from newly created domain accounts — one
+          recurring name is <code>itadm</code> — services registered with <code>nssm.exe</code>, and
+          registry changes that hide those accounts from the logon screen<a class="src" href="#s3">3</a>.
+          Defensive controls are removed rather than evaded: the vulnerable Zemana antimalware driver
+          is loaded to terminate protection from kernel mode, Windows Defender is disabled through
+          PowerShell, and vendor uninstall tools are turned against the products they belong
+          to<a class="src" href="#s4">4</a>. Data leaves through rclone, WinSCP, WinRAR, FileZilla and
+          MEGA — 483 GB in one recorded engagement — and backups are deleted or stopped before any
+          encryptor runs<a class="src" href="#s3">3</a>.
+        </p>
+      </div>
+
+      <h3 style="font-size:20px;font-weight:700;margin:38px 0 22px;">Activity, oldest first</h3>
+
+      <div class="chrono">
+        <div class="entry key">
+          <div class="when">2023-03</div>
+          <h3>Akira emerges as a distinct ransomware operation</h3>
+          <p>
+            Operations begin against small and mid-sized businesses. Affiliates gain entry by logging
+            in to VPN accounts that lack multi-factor authentication, using credentials acquired
+            beforehand, then steal data before deploying a C++ encryptor built on ChaCha20 and
+            KCipher2 with RSA key wrapping. Victims are published on a Tor leak
+            site.<a class="src" href="#s1">1</a><a class="src" href="#s3">3</a><a class="src" href="#s4">4</a>
+          </p>
+        </div>
+
+        <div class="entry">
+          <div class="when">2023-08</div>
+          <h3>Megazord Rust encryptor introduced</h3>
+          <p>
+            Some intrusions begin deploying Megazord, a Rust-based encryptor that appends
+            <code>.powerranges</code> to encrypted files and requires a password supplied at runtime
+            before it will execute. Its ransom note points at the same negotiation site as Akira,
+            tying both payloads to one operation. Talos incident responders record the move to Rust
+            as a deliberate rewrite away from the original C++ and Crypto++ codebase rather than a
+            new family.<a class="src" href="#s4">4</a><a class="src" href="#s6">6</a><a class="src" href="#s7">7</a>
+          </p>
+        </div>
+
+        <div class="entry key">
+          <div class="when">2023-09</div>
+          <h3>Cisco ASA remote-access VPN exploited</h3>
+          <p>
+            Affiliates exploit <strong>CVE-2023-20269</strong> in Cisco ASA and FTD to brute-force
+            valid credentials against the remote-access VPN and establish clientless SSL VPN sessions
+            through default connection profiles. <strong>CVE-2020-3259</strong>, an
+            information-disclosure flaw in the same appliances that leaks memory contents to
+            unauthenticated crafted GET requests, is named alongside it as a route to harvesting the
+            credentials that make the first step work. Cisco ASA SSL VPN and AnyConnect endpoints
+            without MFA remain the most common way
+            in.<a class="src" href="#s3">3</a><a class="src" href="#s4">4</a><a class="src" href="#s8">8</a><a class="src" href="#s9">9</a>
+          </p>
+        </div>
+
+        <div class="entry key">
+          <div class="when">2023-10</div>
+          <h3>Shift to extortion-only operations</h3>
+          <p>
+            Intrusions are observed in which data is archived with WinRAR and moved out using rclone,
+            WinSCP and MEGA cloud storage — 483 GB in one engagement — and the victim is then extorted
+            <strong>without any encryptor being deployed at all</strong>. Dwell time across
+            engagements ranges from under a day to 25 days.<a class="src" href="#s3">3</a>
+          </p>
+        </div>
+
+        <div class="entry key">
+          <div class="when">2024-04</div>
+          <h3>Joint international advisory published</h3>
+          <p>
+            The FBI, CISA, Europol EC3 and NCSC-NL publish AA24-109A. It documents
+            <strong>Akira_v2</strong>, a Rust rewrite of the Linux and ESXi encryptor that accepts
+            runtime arguments to target VMware ESXi virtual machine disk files, restrict execution to
+            virtual machines only, stop running VMs before encrypting, set the encryption percentage
+            and control CPU threading.<a class="src" href="#s2">2</a><a class="src" href="#s4">4</a>
+          </p>
+        </div>
+
+        <div class="entry">
+          <div class="when">2024-11</div>
+          <h3>Assessed among the five most active ransomware operations</h3>
+          <p>
+            Unit 42 assesses the group as consistently ranking in the top five most active ransomware
+            operations. Affiliates are recorded creating new domain accounts for persistence, dumping
+            LSASS through <code>comsvcs.dll</code>, Kerberoasting, abusing the Zemana antimalware
+            driver to terminate endpoint protection, and building their own virtual machines on
+            compromised hosts to run outside host-level monitoring.<a class="src" href="#s4">4</a>
+          </p>
+        </div>
+
+        <div class="entry key">
+          <div class="when">2025-08</div>
+          <h3>SonicWall SSL VPN campaign begins</h3>
+          <p>
+            A surge of intrusions begins against SonicWall SSL VPN appliances, linked to
+            <strong>CVE-2024-40766</strong>. Rapid7 records a consistent chain: access through the
+            SSLVPN component, escalation to an elevated or service account, theft of files from
+            network shares and file servers, deletion or stopping of backups, then encryption at the
+            hypervisor level.<a class="src" href="#s5">5</a><a class="src" href="#s10">10</a>
+          </p>
+        </div>
+
+        <div class="entry key">
+          <div class="when">2025-09</div>
+          <h3>MFA enrolment abused through the Virtual Office Portal</h3>
+          <p>
+            Where a username and password had already been exposed, operators enrol
+            <strong>their own MFA/TOTP token</strong> through SonicWall's publicly reachable Virtual
+            Office Portal on port 4433, converting a stolen password into a fully enrolled VPN
+            identity that satisfies the MFA challenge legitimately. Over-provisioned SSLVPN Default
+            Users Group membership is recorded as a recurring contributing
+            misconfiguration.<a class="src" href="#s5">5</a>
+          </p>
+        </div>
+
+        <div class="entry key">
+          <div class="when">2025-11</div>
+          <h3>Advisory reissued with a critical-infrastructure warning</h3>
+          <p>
+            The joint advisory is updated on 13 November 2025 with additional co-signers including
+            DC3, HHS and European agencies, warning of an <strong>imminent threat to critical
+            infrastructure</strong>. Operators are recorded establishing command and control through
+            tunnelling utilities such as Ngrok to initiate encrypted sessions. The advisory records
+            more than <strong>250 affected organisations</strong> and approximately
+            <strong>USD 244.17 million</strong> in ransomware proceeds as of late September
+            2025.<a class="src" href="#s2">2</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- History section deliberately omitted: the group's origin is fully covered by the
+       first chronology entry, and the only pre-history available - a possible Conti
+       lineage - is an assessed association rather than documented fact. A History
+       section here would restate the Overview rather than add to it. -->
+
+  <!-- ===================== 4. CONCLUSION ===================== -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Conclusion</p>
+        <h2>The payload keeps changing; the way in does not</h2>
+      </div>
+
+      <div class="prose">
+        <p>
+          Across three years Akira has rewritten its encryptor twice, added platforms from Windows to
+          Linux, VMware ESXi and Nutanix AHV, and at times abandoned encryption entirely in favour of
+          pure data extortion. What has not changed once is the entry point. Every documented
+          intrusion begins at a remote-access service reachable from the internet and protected by a
+          single factor — whether that factor is stolen, brute-forced through a Cisco flaw, or
+          bypassed by enrolling a fresh token through a SonicWall portal the operator could reach
+          without authenticating. An organisation that models Akira as a malware problem will keep
+          buying the wrong control.
+        </p>
+      </div>
+
+      <div class="takeaways">
+        <div class="takeaway"><span class="n">1</span><p>
+          <strong>MFA on remote access stops more Akira intrusions than patching does.</strong> Every
+          CVE attributed to the group sits in an edge appliance and none was a zero-day; the recurring
+          entry point is a VPN account protected by a password alone.
+        </p></div>
+        <div class="takeaway"><span class="n">2</span><p>
+          <strong>Enrolled MFA is not enforced MFA.</strong> In the SonicWall campaign operators
+          enrolled their own TOTP token through a publicly reachable portal, so the challenge was
+          satisfied legitimately. A successful MFA event in the logs is not evidence the account is
+          controlled by its owner.
+        </p></div>
+        <div class="takeaway"><span class="n">3</span><p>
+          <strong>Encryption is now optional.</strong> Since October 2023 the group has run
+          extortion-only intrusions in which nothing is encrypted. A recovery plan built entirely
+          around restoring from backup answers only half of what this actor does.
+        </p></div>
+        <div class="takeaway"><span class="n">4</span><p>
+          <strong>Backups are a target before they are a remedy.</strong> The observed chain deletes
+          or stops backups as a deliberate step before encryptors run, and does so at hypervisor level
+          where a single action reaches every guest at once.
+        </p></div>
+        <div class="takeaway"><span class="n">5</span><p>
+          <strong>Detection anchored to the encryptor will age badly.</strong> C++ Akira, Rust
+          Megazord, Akira_v2 and the Nutanix AHV build are four payloads on one unchanged intrusion
+          path. Detection built on the path outlives detection built on the file.
+        </p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 5. RISK & IMPACT ===================== -->
+  <section class="alt">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Risk &amp; Impact</p>
+        <h2>Who this actor actually hits</h2>
+        <p>
+          Akira is opportunistic rather than strategic: it selects on exposure and ability to pay, not
+          on sector. The levels below therefore track where victims have actually been observed, not
+          which sectors sound most consequential.
+        </p>
+      </div>
+
+      <div class="sectors">
+        <div class="sector critical">
+          <div class="name">Manufacturing</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Critical</div>
+          <div class="why">Named as a primary target set by MITRE, CISA, Unit 42 and Sophos alike — the most consistently cited sector across three years of reporting.</div>
+        </div>
+        <div class="sector high">
+          <div class="name">Professional services and consulting</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">High</div>
+          <div class="why">Sits squarely in the observed SMB victim profile; named by both Unit 42 and Sophos among the recurring targets.</div>
+        </div>
+        <div class="sector high">
+          <div class="name">Education</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">High</div>
+          <div class="why">Named in Sophos victimology, and the sector's reliance on flat remote-access VPN estates matches the observed entry vector closely.</div>
+        </div>
+        <div class="sector high">
+          <div class="name">Healthcare</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">High</div>
+          <div class="why">The US Department of Health and Human Services co-signed the November 2025 advisory update, which is a direct signal of observed targeting.</div>
+        </div>
+        <div class="sector high">
+          <div class="name">Construction and engineering</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">High</div>
+          <div class="why">Listed by Unit 42 among the small and mid-sized business sectors the group concentrates on.</div>
+        </div>
+        <div class="sector moderate">
+          <div class="name">Government</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Moderate</div>
+          <div class="why">Appears in Sophos victimology, but the victim profile skews strongly toward private-sector SMBs rather than public bodies.</div>
+        </div>
+        <div class="sector moderate">
+          <div class="name">Financial services</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Moderate</div>
+          <div class="why">Plausible given the opportunistic targeting model, but no reviewed reporting places Akira in the sector specifically.</div>
+        </div>
+        <div class="sector moderate">
+          <div class="name">Energy and utilities</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Moderate</div>
+          <div class="why">The November 2025 update frames a critical-infrastructure threat in general terms; reporting does not place Akira intrusions in energy specifically.</div>
+        </div>
+        <div class="sector low">
+          <div class="name">Aerospace and defence</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Low</div>
+          <div class="why">Outside the documented pattern. The operation is financially motivated and selects organisations that pay quickly, not those with the strongest access controls.</div>
+        </div>
+      </div>
+
+      <div class="risklegend">
+        <div class="item"><span class="sw" style="background:var(--risk-critical)"></span> Critical — actively targeted</div>
+        <div class="item"><span class="sw" style="background:var(--risk-high)"></span> High — fits the victim profile</div>
+        <div class="item"><span class="sw" style="background:var(--risk-moderate)"></span> Moderate — plausible, not observed</div>
+        <div class="item"><span class="sw" style="background:var(--risk-low)"></span> Low — outside the pattern</div>
+        <div class="item"><span class="sw" style="background:var(--risk-minimal)"></span> Minimal — no indication</div>
+      </div>
+
+      <div class="callout">
+        <p>
+          <strong>Bottom line.</strong> Exposure to Akira is decided by the authentication on your
+          remote-access estate, not by your industry. A mid-sized manufacturer with enforced,
+          phishing-resistant MFA on every VPN account is a harder target than a large enterprise
+          carrying one legacy appliance with single-factor logon — and the group has consistently
+          gone for whichever it finds first.
+        </p>
+        <p>
+          For <em>how</em> a compromise actually unfolds — the techniques, the tooling and the
+          order they run in — see the companion attack-flow report,
+          <code>akira-G1024-attack-flow.html</code>.
+        </p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <h3>Part 1 sources</h3>
+    <ol class="sources">
+      <li id="s1">MITRE ATT&amp;CK — Groups: Akira (G1024) — <a href="https://attack.mitre.org/groups/G1024/">https://attack.mitre.org/groups/G1024/</a></li>
+      <li id="s2">CISA — #StopRansomware: Akira Ransomware (AA24-109A), updated 13 November 2025 — <a href="https://www.cisa.gov/news-events/cybersecurity-advisories/aa24-109a">https://www.cisa.gov/news-events/cybersecurity-advisories/aa24-109a</a></li>
+      <li id="s3">Sophos X-Ops — Akira, again: the ransomware that keeps on taking — <a href="https://www.sophos.com/en-us/blog/akira-again-the-ransomware-that-keeps-on-taking/">https://www.sophos.com/en-us/blog/akira-again-the-ransomware-that-keeps-on-taking/</a></li>
+      <li id="s4">Palo Alto Unit 42 — Threat Assessment: Howling Scorpius (Akira Ransomware) — <a href="https://unit42.paloaltonetworks.com/threat-assessment-howling-scorpius-akira-ransomware/">https://unit42.paloaltonetworks.com/threat-assessment-howling-scorpius-akira-ransomware/</a></li>
+      <li id="s5">Rapid7 — Akira Ransomware Group Utilizing SonicWall Devices for Initial Access — <a href="https://www.rapid7.com/blog/post/dr-akira-ransomware-group-utilizing-sonicwall-devices-for-initial-access/">https://www.rapid7.com/blog/post/dr-akira-ransomware-group-utilizing-sonicwall-devices-for-initial-access/</a></li>
+      <li id="s6">Cisco Talos — Talos IR trends: BEC attacks surge, while weaknesses in MFA persist (Q1 2024) — <a href="https://blog.talosintelligence.com/talos-ir-quarterly-trends-q1-2024/">https://blog.talosintelligence.com/talos-ir-quarterly-trends-q1-2024/</a></li>
+      <li id="s7">Trend Micro — Ransomware Spotlight: Akira — <a href="https://www.trendmicro.com/vinfo/us/security/news/ransomware-spotlight/ransomware-spotlight-akira">https://www.trendmicro.com/vinfo/us/security/news/ransomware-spotlight/ransomware-spotlight-akira</a></li>
+      <li id="s8">NVD — CVE-2020-3259 (Cisco ASA/FTD information disclosure, CVSS 7.5, CWE-200, in CISA KEV) — <a href="https://nvd.nist.gov/vuln/detail/CVE-2020-3259">https://nvd.nist.gov/vuln/detail/CVE-2020-3259</a></li>
+      <li id="s9">NVD — CVE-2023-20269 (Cisco ASA/FTD VPN AAA separation, CVSS 9.1, CWE-863/CWE-288) — <a href="https://nvd.nist.gov/vuln/detail/CVE-2023-20269">https://nvd.nist.gov/vuln/detail/CVE-2023-20269</a></li>
+      <li id="s10">NVD — CVE-2024-40766 (SonicWall SonicOS improper access control, CVSS 9.8, CWE-284, in CISA KEV) — <a href="https://nvd.nist.gov/vuln/detail/CVE-2024-40766">https://nvd.nist.gov/vuln/detail/CVE-2024-40766</a></li>
+    </ol>
+
+    <p class="note">
+      <strong>Confidence and sourcing.</strong> The chronology, tooling and victimology are drawn
+      from vendor and government reporting and are stated as reported. The Conti lineage is an
+      assessed association carried by multiple vendors, not an established fact, and is marked as
+      such in the text. Sector risk levels are <em>analyst assessments</em>, not measured values;
+      they deliberately share a colour ramp with CVSS severity but are rendered as meters rather
+      than scores so the two are not confused. One sourcing limitation is worth stating plainly:
+      the CISA advisory pages block automated retrieval, so the figures attributed to AA24-109A —
+      the victim count, the proceeds total and the November 2025 Ngrok detail — were taken from
+      summaries of that advisory rather than read from the advisory text directly. They should be
+      confirmed against the primary before being quoted externally.
+    </p>
+    <p class="note">
+      <strong>Pipeline.</strong> Step 1 of TI-Reporting. The companion ATT&amp;CK flow report
+      is built from the JSON handoff in <code>subjects/akira/handoff/</code>, of which this analysis
+      produces <code>analysis.json</code>.
+    </p>
+  </div>
+</footer>
+
+<section class="partrule">
+  <div class="wrap">
+    <span class="pnum">Part 2</span>
+    <h2>ATT&amp;CK attack flow</h2>
+    <p>How a compromise unfolds, tactic by tactic and in order. Part 1 established who is at
+       risk and why; this part is how they get hit.</p>
+  </div>
+</section>
+
+<div class="flowpart">
+<header>
+  <div class="wrap hero">
+    <p class="eyebrow">Campaign Flow <span class="idtag">G1024 · 3 CVEs</span></p>
+    <h1>Akira<span class="destruct">.</span></h1>
+    <p class="lede">
+      An extortion crew walking through <strong>remote-access appliances</strong> — two Cisco
+      flaws and one SonicWall flaw, none of them a zero-day. The vulnerabilities buy the front
+      door and a durable identity; every credential dump, killed EDR agent and hypervisor-level
+      encryptor below that is Akira tradecraft that would follow from any other foothold.
+    </p>
+
+    <div class="idrow">
+      <span class="label">Also tracked as</span>
+      <span class="chip">GOLD SAHARA</span>
+      <span class="chip">PUNK SPIDER</span>
+      <span class="chip">Howling Scorpius</span>
+      <span class="chip">Storm-1567</span>
+    </div>
+
+    <div class="idrow vulns">
+      <span class="label">Exploits</span>
+      <span class="cve">CVE-2020-3259</span>
+      <span class="cve">CVE-2023-20269</span>
+      <span class="cve">CVE-2024-40766</span>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><p class="k">Attribution</p><p class="v">eCrime &middot; RaaS</p></div>
+      <div class="fact"><p class="k">Active since</p><p class="v">March 2023</p></div>
+      <div class="fact"><p class="k">Objective</p><p class="v bad">Extortion</p></div>
+      <div class="fact"><p class="k">Entry vector</p><p class="v bad">Remote-access VPN</p></div>
+      <div class="fact"><p class="k">Highest CVSS</p><p class="v bad">9.8</p></div>
+      <div class="fact"><p class="k">CISA KEV</p><p class="v bad">2 of 3</p></div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ==========================================================
+       SECTION 1 of 4 - VULNERABILITIES
+       ========================================================== -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Vulnerabilities</p>
+        <h2>Three doorways, two vendors, no zero-days</h2>
+        <p>
+          These are alternative entry points, not a chain. Each is independently sufficient, each
+          sits in an internet-facing remote-access appliance, and all three had patches available
+          before Akira used them at scale.
+        </p>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>CVE</th><th>CVSS</th><th>Exploitation</th><th>CWE</th><th>What it gives the actor</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="cve">CVE-2024-40766</span></td>
+              <td><span class="sev crit">9.8</span></td>
+              <td><span class="exp kev">KEV</span></td>
+              <td><span class="cwe">CWE-284</span></td>
+              <td>Unauthenticated reach into the SonicOS SSLVPN component across Gen5, Gen6 and Gen7 firewalls. The entry point for the campaign that began in August 2025.</td>
+            </tr>
+            <tr>
+              <td><span class="cve">CVE-2023-20269</span></td>
+              <td><span class="sev crit">9.1</span></td>
+              <td><span class="exp poc">In the wild</span></td>
+              <td><span class="cwe">CWE-863</span> <span class="cwe">CWE-288</span></td>
+              <td>Brute-forcing of valid VPN credentials without authenticating first, and clientless SSL VPN sessions through default connection profiles on Cisco ASA and FTD.</td>
+            </tr>
+            <tr>
+              <td><span class="cve">CVE-2020-3259</span></td>
+              <td><span class="sev high">7.5</span></td>
+              <td><span class="exp kev">KEV</span></td>
+              <td><span class="cwe">CWE-200</span></td>
+              <td>Appliance memory read back to unauthenticated crafted GET requests on the same Cisco ASA and FTD web services interface, surfacing the credentials the logon needs.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout">
+        <p>
+          <strong>What patching buys you.</strong> It closes three specific doorways — and in the
+          Cisco pair's case it also stops the credential leak that feeds the doorway next to it.
+          Both Cisco flaws are in the CISA KEV catalogue with remediation deadlines that have long
+          passed, so an unpatched appliance here is an overdue action, not an open risk decision.
+        </p>
+        <p>
+          <strong>What it does not.</strong> It does not close the route Akira uses most often,
+          which involves no exploitation at all: logging in to a VPN account that has only a
+          password. Nor does it touch anything below the handoff line in the flow — this actor's
+          tradecraft after entry does not depend on these vulnerabilities, so a patched
+          estate is protected against <em>this doorway</em> rather than against this actor.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================
+       SECTION 2 of 4 - THE INTRUSION
+       ========================================================== -->
+  <section style="background:var(--surface); border-top:1px solid var(--hair); border-bottom:1px solid var(--hair);">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">The Intrusion</p>
+        <h2>Four phases of doorway, nine of tradecraft</h2>
+        <p>
+          One path, entry to extortion. Phases 05 through 10 are an escalation loop rather than a
+          straight line — discover, escalate, steal credentials, move, land somewhere new, repeat —
+          and a vertical flow flattens that into a single pass. Read them as a cycle that runs
+          again on each new host.
+        </p>
+      </div>
+
+      <div class="flow">
+
+        <!-- ===== VULNERABILITY-ENABLED PHASES: carry .viacve ===== -->
+        <div class="phase">
+          <div class="node">01</div>
+          <div class="card">
+            <div class="card-top">
+              <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5l7.5 3.2v6c0 4.4-3.1 8.1-7.5 9.6-4.4-1.5-7.5-5.2-7.5-9.6v-6L12 2.5z"/><path d="M13.2 7.8l-2.9 4.7h3.4l-2.9 4.2"/></svg></span>
+              <span class="tactic">Initial Access</span>
+            </div>
+            <h3>Walk in through the remote-access edge</h3>
+            <div class="ttps">
+              <div class="ttp">
+                <span class="tid">T1078</span>
+                <span class="desc">
+                  Valid Accounts — logs in to VPN accounts carrying no second factor, using credentials acquired before the intrusion begins. This is the most common route across three years of reporting and involves no exploitation at all.
+                </span>
+              </div>
+              <div class="ttp">
+                <span class="tid">T1190</span>
+                <span class="desc">
+                  Exploit Public-Facing Application — sends crafted GET requests to the Cisco ASA and FTD web services interface to read back memory contents, harvesting the credentials that make the logon above work.
+                  <span class="viacve">via CVE-2020-3259</span>
+                </span>
+              </div>
+              <div class="ttp">
+                <span class="tid">T1190</span>
+                <span class="desc">
+                  Exploit Public-Facing Application — abuses the AAA separation flaw on the same appliances to establish clientless SSL VPN sessions through default connection profiles.
+                  <span class="viacve">via CVE-2023-20269</span>
+                </span>
+              </div>
+              <div class="ttp">
+                <span class="tid">T1190</span>
+                <span class="desc">
+                  Exploit Public-Facing Application — reaches the SonicOS SSLVPN component on Gen5, Gen6 and Gen7 firewalls through improper access control.
+                  <span class="viacve">via CVE-2024-40766</span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="transition">
+          <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1v12M3 9l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          A VPN session is a network position, not a command channel — the first thing needed is code running on a host.
+        </div>
+
+        <div class="phase">
+          <div class="node">02</div>
+          <div class="card">
+            <div class="card-top">
+              <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.8" y="4.2" width="18.4" height="15.6" rx="2.2"/><path d="M7 9.5l3 2.9-3 2.9M13 15.3h4.2"/></svg></span>
+              <span class="tactic">Execution</span>
+            </div>
+            <h3>Run code with the tools already on the host</h3>
+            <div class="ttps">
+              <div class="ttp">
+                <span class="tid">T1047</span>
+                <span class="desc">Windows Management Instrumentation — executes commands on remote hosts over WMI, including via <span class="tool">wmiexec</span>.</span>
+              </div>
+              <div class="ttp">
+                <span class="tid">T1059.001</span>
+                <span class="desc">Command and Scripting Interpreter: PowerShell — drives Defender configuration changes and domain enumeration through <span class="tool">Get-ADComputer</span>.</span>
+              </div>
+              <div class="ttp">
+                <span class="tid">T1569.002</span>
+                <span class="desc">System Services: Service Execution — runs payloads on remote systems as a service using <span class="tool">PsExec</span>.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="transition">
+          <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1v12M3 9l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Hands-on-keyboard work needs an interactive channel that survives the VPN session dropping.
+        </div>
+
+        <div class="phase">
+          <div class="node">03</div>
+          <div class="card">
+            <div class="card-top">
+              <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2.2"/><path d="M7.9 7.9a5.8 5.8 0 0 0 0 8.2M16.1 16.1a5.8 5.8 0 0 0 0-8.2"/><path d="M5 5a9.9 9.9 0 0 0 0 14M19 19a9.9 9.9 0 0 0 0-14"/></svg></span>
+              <span class="tactic">Command and Control</span>
+            </div>
+            <h3>Hide the channel inside legitimate software</h3>
+            <div class="ttps">
+              <div class="ttp">
+                <span class="tid">T1219.002</span>
+                <span class="desc">Remote Access Tools: Remote Desktop Software — installs <span class="tool">AnyDesk</span> and <span class="tool">DWAgent</span>, so the operator channel is signed remote-support software rather than custom malware and rarely trips an endpoint rule.</span>
+              </div>
+              <div class="ttp">
+                <span class="tid">T1572</span>
+                <span class="desc">Protocol Tunneling — establishes encrypted sessions through tunnelling utilities such as <span class="tool">Ngrok</span>, recorded in the November 2025 advisory update.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="transition">
+          <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1v12M3 9l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          A channel dies with the account that opened it, so the next move is an identity of their own.
+        </div>
+
+        <div class="phase">
+          <div class="node">04</div>
+          <div class="card">
+            <div class="card-top">
+              <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4.6" r="2.3"/><path d="M12 6.9v14.2M5 12v1.2a7 7 0 0 0 14 0V12"/><path d="M3.2 12h4.2M16.6 12h4.2"/></svg></span>
+              <span class="tactic">Persistence</span>
+            </div>
+            <h3>Become a legitimate user of the estate</h3>
+            <div class="ttps">
+              <div class="ttp">
+                <span class="tid">T1098.005</span>
+                <span class="desc">
+                  Account Manipulation: Device Registration — where a password had already leaked, enrols an operator-controlled MFA/TOTP token through the publicly reachable Virtual Office Portal on <span class="tool">port 4433</span>. The stolen password becomes a fully enrolled identity, and the logs record a <em>successful</em> second factor.
+                  <span class="viacve">via CVE-2024-40766</span>
+                </span>
+              </div>
+              <div class="ttp">
+                <span class="tid">T1136.002</span>
+                <span class="desc">Create Account: Domain Account — creates domain accounts that outlive the credentials used to get in. One name recurs across engagements: <span class="tool">itadm</span>.</span>
+              </div>
+              <div class="ttp">
+                <span class="tid">T1543.003</span>
+                <span class="desc">Create or Modify System Process: Windows Service — registers tooling as an auto-starting service with <span class="tool">nssm.exe</span>.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== THE HANDOFF - exactly one per report ===== -->
+        <div class="transition handoff">
+          <svg width="15" height="15" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1v12M3 9l4 4 4-4" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          The vulnerabilities' contribution ends here — they delivered a network position and, in the SonicWall case, an enrolled identity that satisfies MFA. Everything below is Akira's own tradecraft and would follow from any other foothold, including a phished password.
+        </div>
+
+        <!-- ===== ACTOR TRADECRAFT: no .viacve chips below this point ===== -->
+        <div class="phase heat">
+          <div class="node">05</div>
+          <div class="card">
+            <div class="card-top">
+              <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.2 12S5.8 5.8 12 5.8 21.8 12 21.8 12 18.2 18.2 12 18.2 2.2 12 2.2 12z"/><circle cx="12" cy="12" r="2.6"/><path d="M4.1 20.2L19.9 3.8"/></svg></span>
+              <span class="tactic">Stealth</span>
+            </div>
+            <h3>Put the new identity and the work out of sight</h3>
+            <div class="ttps">
+              <div class="ttp">
+                <span class="tid">T1564.002</span>
+                <span class="desc">Hide Artifacts: Hidden Users — edits the registry so the accounts just created do not appear on the Windows logon screen.</span>
+              </div>
+              <div class="ttp">
+                <span class="tid">T1564.006</span>
+                <span class="desc">Hide Artifacts: Run Virtual Instance — builds its own virtual machines on compromised hosts and works from inside them, where host-level endpoint monitoring cannot see the activity.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="transition">
+          <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1v12M3 9l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Hiding only defeats a watching analyst; the sensors themselves still have to go before the noisy work starts.
+        </div>
+
+        <div class="phase heat">
+          <div class="node">06</div>
+          <div class="card">
+            <div class="card-top">
+              <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8.6a6 6 0 1 0-12 0c0 6.4-2.4 8.2-2.4 8.2h16.8S18 15 18 8.6z"/><path d="M13.7 20.4a2 2 0 0 1-3.4 0"/><path d="M3.6 3.6l16.8 16.8"/></svg></span>
+              <span class="tactic">Defense Impairment</span>
+            </div>
+            <h3>Break the endpoint protection rather than evade it</h3>
+            <div class="ttps">
+              <div class="ttp">
+                <span class="tid">T1685</span>
+                <span class="desc">Disable or Modify Tools — loads the vulnerable <span class="tool">Zemana antimalware driver</span> to terminate endpoint protection from kernel mode, disables Defender through PowerShell, and runs vendors' own uninstall utilities against their products. The controls are removed, not dodged.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="transition">
+          <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1v12M3 9l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          With nothing watching, the account can be traded up for one that reaches file servers and backups.
+        </div>
+
+        <div class="phase heat">
+          <div class="node">07</div>
+          <div class="card">
+            <div class="card-top">
+              <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.8 20.6H7.9V15.5H13V10.4H18.1V5.3H21.2"/></svg></span>
+              <span class="tactic">Privilege Escalation</span>
+            </div>
+            <h3>Trade up to an account that reaches everything</h3>
+            <div class="ttps">
+              <div class="ttp">
+                <span class="tid">T1078</span>
+                <span class="desc">Valid Accounts — moves from the initial VPN identity to an elevated or service account before touching file servers and backups. Reporting records the escalation as observed but not the mechanism, so this is mapped to the account use itself rather than to a named escalation technique.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="transition">
+          <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1v12M3 9l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Elevated rights are what make the credential stores readable — dumping LSASS and NTDS.dit needs SYSTEM first.
+        </div>
+
+        <div class="phase heat">
+          <div class="node">08</div>
+          <div class="card">
+            <div class="card-top">
+              <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.8" cy="12" r="4.3"/><path d="M12.1 12h9.1M17.6 12v3.9M20.4 12v2.8"/></svg></span>
+              <span class="tactic">Credential Access</span>
+            </div>
+            <h3>Take the whole directory, not one password at a time</h3>
+            <div class="ttps">
+              <div class="ttp">
+                <span class="tid">T1003.001</span>
+                <span class="desc">OS Credential Dumping: LSASS Memory — dumps LSASS with <span class="tool">Mimikatz</span>, and separately by calling <span class="tool">comsvcs.dll</span> through <span class="tool">rundll32</span> to avoid bringing a known tool to the host.</span>
+              </div>
+              <div class="ttp">
+                <span class="tid">T1003.003</span>
+                <span class="desc">OS Credential Dumping: NTDS — extracts the domain database with <span class="tool">ntdsutil</span>, taking every domain credential at once rather than harvesting host by host.</span>
+              </div>
+              <div class="ttp">
+                <span class="tid">T1110</span>
+                <span class="desc">Brute Force — brute-forces the Cisco remote-access VPN to identify valid credentials, which <span class="tool">CVE-2023-20269</span> permits without authenticating first. Note this one runs against the perimeter before access, not inside the estate. Reporting does not distinguish guessing from spraying, so it stays at the parent technique.</span>
+              </div>
+              <div class="ttp">
+                <span class="tid">T1555</span>
+                <span class="desc">Credentials from Password Stores — harvests stored credentials with <span class="tool">LaZagne</span>, and runs scripts specifically to pull credentials out of the Veeam backup infrastructure — the same systems it deletes later.</span>
+              </div>
+              <div class="ttp">
+                <span class="tid">T1558.003</span>
+                <span class="desc">Steal or Forge Kerberos Tickets: Kerberoasting — requests service tickets and cracks them offline to recover service-account passwords.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="transition">
+          <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1v12M3 9l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Domain credentials are what make domain-wide queries return anything, so enumeration comes after the dump rather than before it.
+        </div>
+
+        <div class="phase heat">
+          <div class="node">09</div>
+          <div class="card">
+            <div class="card-top">
+              <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.6"/><circle cx="12" cy="12" r="1.1"/><path d="M12 12l6.4-5.3"/></svg></span>
+              <span class="tactic">Discovery</span>
+            </div>
+            <h3>Map the estate with the credentials just taken</h3>
+            <div class="ttps">
+              <div class="ttp">
+                <span class="tid">T1018</span>
+                <span class="desc">Remote System Discovery — identifies reachable hosts with ping sweeps and <span class="tool">Get-ADComputer</span> before choosing lateral movement targets.</span>
+              </div>
+              <div class="ttp">
+                <span class="tid">T1046</span>
+                <span class="desc">Network Service Discovery — sweeps the internal network with <span class="tool">Advanced IP Scanner</span> and <span class="tool">NetScan</span>.</span>
+              </div>
+              <div class="ttp">
+                <span class="tid">T1087.002</span>
+                <span class="desc">Account Discovery: Domain Account — enumerates accounts and directory structure with <span class="tool">AdFind</span>, <span class="tool">Get-ADComputer</span> and net commands.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="transition">
+          <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1v12M3 9l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          The map names the file servers and hypervisors worth reaching; the credentials open them.
+        </div>
+
+        <div class="phase heat">
+          <div class="node">10</div>
+          <div class="card">
+            <div class="card-top">
+              <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="1.8" y="7.8" width="7.4" height="8.4" rx="1.6"/><rect x="14.8" y="7.8" width="7.4" height="8.4" rx="1.6"/><path d="M9.6 12h4.8M12.4 9.6l2.4 2.4-2.4 2.4"/></svg></span>
+              <span class="tactic">Lateral Movement</span>
+            </div>
+            <h3>Reach the servers that hold the leverage</h3>
+            <div class="ttps">
+              <div class="ttp">
+                <span class="tid">T1021.001</span>
+                <span class="desc">Remote Services: Remote Desktop Protocol — pivots between hosts over RDP using the credentials recovered from LSASS and NTDS.dit.</span>
+              </div>
+              <div class="ttp">
+                <span class="tid">T1021.002</span>
+                <span class="desc">Remote Services: SMB/Windows Admin Shares — reaches administrative shares over SMB to move tooling and get onto file servers.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="transition">
+          <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1v12M3 9l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          From here the loop stops repeating and the operation turns to what it came for: the data itself.
+        </div>
+
+        <div class="phase heat">
+          <div class="node">11</div>
+          <div class="card">
+            <div class="card-top">
+              <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8l9.2 4.6-9.2 4.6-9.2-4.6L12 2.8z"/><path d="M2.8 12L12 16.6 21.2 12"/><path d="M2.8 16.6L12 21.2l9.2-4.6"/></svg></span>
+              <span class="tactic">Collection</span>
+            </div>
+            <h3>Gather and stage what the extortion will rest on</h3>
+            <div class="ttps">
+              <div class="ttp">
+                <span class="tid">T1005</span>
+                <span class="desc">Data from Local System — collects files directly from compromised hosts.</span>
+              </div>
+              <div class="ttp">
+                <span class="tid">T1039</span>
+                <span class="desc">Data from Network Shared Drive — takes files from network shares and file servers, which is where the data that carries the leverage actually lives.</span>
+              </div>
+              <div class="ttp">
+                <span class="tid">T1560.001</span>
+                <span class="desc">Archive Collected Data: Archive via Utility — compresses the haul with <span class="tool">WinRAR</span> before moving it — 483 GB in one recorded engagement.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="transition">
+          <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1v12M3 9l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          The data has to be off the network before encryption starts, or the threat to leak it is empty.
+        </div>
+
+        <div class="phase heat">
+          <div class="node">12</div>
+          <div class="card">
+            <div class="card-top">
+              <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4.2 14.8v4a2.2 2.2 0 0 0 2.2 2.2h11.2a2.2 2.2 0 0 0 2.2-2.2v-4"/><path d="M12 2.9v12.2M7.9 7l4.1-4.1L16.1 7"/></svg></span>
+              <span class="tactic">Exfiltration</span>
+            </div>
+            <h3>Move it out over channels that look like business traffic</h3>
+            <div class="ttps">
+              <div class="ttp">
+                <span class="tid">T1048</span>
+                <span class="desc">Exfiltration Over Alternative Protocol — transfers over SFTP and FTP using <span class="tool">WinSCP</span> and <span class="tool">FileZilla</span>.</span>
+              </div>
+              <div class="ttp">
+                <span class="tid">T1567.002</span>
+                <span class="desc">Exfiltration Over Web Service: Exfiltration to Cloud Storage — pushes the staged archives to <span class="tool">MEGA</span> using <span class="tool">rclone</span>.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="transition">
+          <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1v12M3 9l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          With a copy of the data already gone, the encryption is leverage rather than the objective — and since October 2023 it is sometimes skipped entirely.
+        </div>
+
+        <div class="phase impact">
+          <div class="node">13</div>
+          <div class="card">
+            <div class="card-top">
+              <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5.6" rx="7.8" ry="2.9"/><path d="M19.8 5.6v12.8c0 1.6-3.5 2.9-7.8 2.9s-7.8-1.3-7.8-2.9V5.6"/><path d="M8.7 10.9l6.6 6.6M15.3 10.9l-6.6 6.6"/></svg></span>
+              <span class="tactic">Impact</span>
+            </div>
+            <h3>Remove the way back, then charge for it</h3>
+            <div class="ttps">
+              <div class="ttp">
+                <span class="tid">T1489</span>
+                <span class="desc">Service Stop — <span class="tool">Akira_v2</span> takes a runtime argument to stop running virtual machines before encrypting them, so no guest holds a disk file open when it is rewritten.</span>
+              </div>
+              <div class="ttp">
+                <span class="tid">T1490</span>
+                <span class="desc">Inhibit System Recovery — deletes or stops backups as a deliberate step before any encryptor runs, having already taken the Veeam credentials earlier in the intrusion.</span>
+              </div>
+              <div class="ttp">
+                <span class="tid">T1486</span>
+                <span class="desc">Data Encrypted for Impact — encrypts at hypervisor level, so one action reaches every guest at once. Four payloads on this one path: C++ <span class="tool">Akira</span> using ChaCha20 and KCipher2, Rust <span class="tool">Megazord</span> appending <span class="tool">.powerranges</span>, Rust <span class="tool">Akira_v2</span> for Linux and ESXi, and a Nutanix AHV build.</span>
+              </div>
+              <div class="ttp">
+                <span class="tid">T1657</span>
+                <span class="desc">Financial Theft — extorts payment by pairing stolen data with a Tor leak site. Some intrusions skip encryption altogether and extort on the data alone, which makes the leak site rather than the encryptor the real source of leverage.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="legend">
+        <div class="item">
+          <span class="keys" aria-hidden="true">
+            <span class="ticon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="7.6"/><circle cx="12" cy="12" r="2.4"/></svg></span>
+            <span class="ticon heat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="7.6"/><circle cx="12" cy="12" r="2.4"/></svg></span>
+            <span class="ticon impact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="7.6"/><circle cx="12" cy="12" r="2.4"/></svg></span>
+          </span>
+          Tactic icon and label warm as the intrusion advances
+        </div>
+        <div class="item"><span class="spinekey" aria-hidden="true"></span> The spine tracks the same progression</div>
+        <div class="item"><span class="tid" style="min-width:0">T####</span> ATT&amp;CK technique ID</div>
+        <div class="item"><span class="viacve">via CVE</span> Enabled by the vulnerability — absent below the handoff</div>
+        <div class="item"><span class="tool">tool.exe</span> Observed tooling / IOC</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================
+       SECTION 3 of 4 - THE ARSENAL
+       ========================================================== -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">The Arsenal</p>
+        <h2>Three encryptors and a toolkit of other people's software</h2>
+        <p>
+          Almost everything below the encryptors is legitimate administrative or support software.
+          That is the detection problem in one line: the malicious half of this arsenal only appears
+          at the very end, by which point the data has already left.
+        </p>
+      </div>
+      <div class="arsenal">
+        <div class="weapon destruct">
+          <p class="wname">Akira <span class="sid">S1129</span></p>
+          <p class="role2">Original C++ encryptor using ChaCha20 and KCipher2 with RSA key wrapping</p>
+          <span class="kind">Ransomware</span>
+        </div>
+        <div class="weapon destruct">
+          <p class="wname">Megazord <span class="sid">S1191</span></p>
+          <p class="role2">Rust encryptor appending .powerranges, requires a password supplied at runtime</p>
+          <span class="kind">Ransomware</span>
+        </div>
+        <div class="weapon destruct">
+          <p class="wname">Akira_v2 <span class="sid">S1194</span></p>
+          <p class="role2">Rust Linux and ESXi encryptor with runtime control over VM targeting and encryption percentage</p>
+          <span class="kind">Ransomware</span>
+        </div>
+        <div class="weapon destruct">
+          <p class="wname">Zemana driver <span class="sid">&mdash;</span></p>
+          <p class="role2">Vulnerable antimalware driver loaded to terminate endpoint protection from kernel mode</p>
+          <span class="kind">Defense impairment</span>
+        </div>
+        <div class="weapon">
+          <p class="wname">Mimikatz <span class="sid">S0002</span></p>
+          <p class="role2">Credential dumping from LSASS memory</p>
+          <span class="kind">Cred access</span>
+        </div>
+        <div class="weapon">
+          <p class="wname">LaZagne <span class="sid">&mdash;</span></p>
+          <p class="role2">Harvests credentials from local password stores</p>
+          <span class="kind">Cred access</span>
+        </div>
+        <div class="weapon">
+          <p class="wname">ntdsutil <span class="sid">&mdash;</span></p>
+          <p class="role2">Built-in utility used to extract the NTDS.dit domain credential database</p>
+          <span class="kind">Cred access</span>
+        </div>
+        <div class="weapon">
+          <p class="wname">AdFind <span class="sid">&mdash;</span></p>
+          <p class="role2">Active Directory enumeration</p>
+          <span class="kind">Discovery</span>
+        </div>
+        <div class="weapon">
+          <p class="wname">Advanced IP Scanner <span class="sid">&mdash;</span></p>
+          <p class="role2">Internal sweep for reachable hosts and services</p>
+          <span class="kind">Discovery</span>
+        </div>
+        <div class="weapon">
+          <p class="wname">NetScan <span class="sid">&mdash;</span></p>
+          <p class="role2">Network service discovery alongside Advanced IP Scanner</p>
+          <span class="kind">Discovery</span>
+        </div>
+        <div class="weapon">
+          <p class="wname">PsExec <span class="sid">&mdash;</span></p>
+          <p class="role2">Remote service execution for lateral movement</p>
+          <span class="kind">Lateral movement</span>
+        </div>
+        <div class="weapon">
+          <p class="wname">AnyDesk <span class="sid">&mdash;</span></p>
+          <p class="role2">Legitimate remote-desktop software used as the operator channel</p>
+          <span class="kind">Remote access</span>
+        </div>
+        <div class="weapon">
+          <p class="wname">DWAgent <span class="sid">&mdash;</span></p>
+          <p class="role2">Second remote-support agent used for interactive control</p>
+          <span class="kind">Remote access</span>
+        </div>
+        <div class="weapon">
+          <p class="wname">Ngrok <span class="sid">&mdash;</span></p>
+          <p class="role2">Tunnelling utility establishing encrypted C2 sessions</p>
+          <span class="kind">Tunnelling</span>
+        </div>
+        <div class="weapon">
+          <p class="wname">rclone <span class="sid">S1040</span></p>
+          <p class="role2">Bulk exfiltration to MEGA cloud storage</p>
+          <span class="kind">Exfiltration</span>
+        </div>
+        <div class="weapon">
+          <p class="wname">WinSCP <span class="sid">&mdash;</span></p>
+          <p class="role2">Exfiltration over SFTP</p>
+          <span class="kind">Exfiltration</span>
+        </div>
+        <div class="weapon">
+          <p class="wname">FileZilla <span class="sid">&mdash;</span></p>
+          <p class="role2">Exfiltration over FTP</p>
+          <span class="kind">Exfiltration</span>
+        </div>
+        <div class="weapon">
+          <p class="wname">WinRAR <span class="sid">&mdash;</span></p>
+          <p class="role2">Archives collected data before transfer</p>
+          <span class="kind">Collection</span>
+        </div>
+        <div class="weapon">
+          <p class="wname">nssm.exe <span class="sid">&mdash;</span></p>
+          <p class="role2">Registers tooling as a persistent Windows service</p>
+          <span class="kind">Persistence</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================
+       SECTION 4 of 4 - REMEDIATION
+       ========================================================== -->
+  <section style="background:var(--surface); border-top:1px solid var(--hair); border-bottom:1px solid var(--hair);">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Remediation</p>
+        <h2>Close the doorways, then assume one was already open</h2>
+        <p>
+          Patching addresses phases 01 to 04. It does nothing about phases 05 to 13, and nothing
+          about the entry route that needs no vulnerability at all.
+        </p>
+      </div>
+
+      <div class="fixgrid">
+        <div class="fix urgent">
+          <h3>Patch the three appliances</h3>
+          <p>
+            SonicOS to a build later than the affected Gen5, Gen6 and Gen7 releases listed below,
+            per SonicWall advisory <code>SNWLID-2024-0015</code>. Cisco ASA and FTD per the vendor
+            advisories for both CVEs. Two of the three are in the CISA KEV catalogue with deadlines
+            that have already passed.
+          </p>
+          <span class="tagline">Patch</span>
+        </div>
+        <div class="fix urgent">
+          <h3>Enforce MFA, and audit what is already enrolled</h3>
+          <p>
+            This is the control that addresses the entry route patching cannot reach. Enforcement
+            alone is not enough here: operators enrolled their own tokens through an exposed
+            enrolment portal, so audit existing MFA registrations for devices nobody recognises and
+            restrict enrolment to trusted networks.
+          </p>
+          <span class="tagline">Mitigation</span>
+        </div>
+        <div class="fix urgent">
+          <h3>Rotate every credential the appliances held</h3>
+          <p>
+            <code>CVE-2020-3259</code> discloses memory contents rather than granting execution, and
+            <code>CVE-2023-20269</code> allows offline discovery of valid credentials. Patching stops
+            future leakage but does nothing about what already left. Rotate local appliance accounts,
+            VPN accounts and any service account whose credentials transited them.
+          </p>
+          <span class="tagline">Rotate credentials</span>
+        </div>
+        <div class="fix">
+          <h3>Reduce the SSLVPN blast radius</h3>
+          <p>
+            Remove over-provisioned membership of the SSLVPN Default Users Group, and take the
+            Virtual Office Portal off the public internet — its reachability on port 4433 is what
+            made operator-controlled MFA enrolment possible.
+          </p>
+          <span class="tagline">Mitigation</span>
+        </div>
+        <div class="fix urgent">
+          <h3>Hunt for what is already inside</h3>
+          <p>
+            Search for domain accounts created outside change control, especially <code>itadm</code>;
+            registry keys hiding accounts from the logon screen; <code>nssm.exe</code> service
+            registrations; <code>AnyDesk</code>, <code>DWAgent</code> and <code>Ngrok</code> on
+            servers that have no support contract reason to run them; unexpected virtual machines on
+            hypervisors; and outbound <code>rclone</code> traffic to MEGA. Patching closes the door;
+            it does not remove anyone already through it.
+          </p>
+          <span class="tagline">Hunt</span>
+        </div>
+        <div class="fix">
+          <h3>Make backups survive an operator with domain rights</h3>
+          <p>
+            The chain takes Veeam credentials during Credential Access and uses them to delete
+            backups before encrypting. Offline or immutable copies, held under credentials that
+            domain compromise does not yield, are what break that sequence.
+          </p>
+          <span class="tagline">Mitigation</span>
+        </div>
+      </div>
+
+      <div class="table-wrap" style="margin-top:22px">
+        <table>
+          <thead>
+            <tr><th>CVE</th><th>CVSS</th><th>Affected</th><th>Fixed in</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="cve">CVE-2024-40766</span></td>
+              <td><span class="sev crit">9.8</span></td>
+              <td class="mono">Gen5 &le; 5.9.2.14-12o · Gen6 &le; 6.5.4.14-109n · Gen7 &le; 7.0.1-5035</td>
+              <td class="mono">Per SNWLID-2024-0015</td>
+            </tr>
+            <tr>
+              <td><span class="cve">CVE-2023-20269</span></td>
+              <td><span class="sev crit">9.1</span></td>
+              <td class="mono">Cisco ASA / FTD remote-access VPN</td>
+              <td class="mono">Per Cisco advisory</td>
+            </tr>
+            <tr>
+              <td><span class="cve">CVE-2020-3259</span></td>
+              <td><span class="sev high">7.5</span></td>
+              <td class="mono">Cisco ASA / FTD web services interface</td>
+              <td class="mono">Per Cisco advisory</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>
+      Part 2 sources:
+      <a href="https://attack.mitre.org/groups/G1024/">MITRE ATT&amp;CK G1024</a>;
+      <a href="https://www.cisa.gov/news-events/cybersecurity-advisories/aa24-109a">CISA AA24-109A</a> (updated 13 November 2025);
+      <a href="https://www.sophos.com/en-us/blog/akira-again-the-ransomware-that-keeps-on-taking/">Sophos X-Ops</a>;
+      <a href="https://unit42.paloaltonetworks.com/threat-assessment-howling-scorpius-akira-ransomware/">Palo Alto Unit 42</a>;
+      <a href="https://www.rapid7.com/blog/post/dr-akira-ransomware-group-utilizing-sonicwall-devices-for-initial-access/">Rapid7</a>;
+      <a href="https://blog.talosintelligence.com/talos-ir-quarterly-trends-q1-2024/">Cisco Talos</a>;
+      <a href="https://www.trendmicro.com/vinfo/us/security/news/ransomware-spotlight/ransomware-spotlight-akira">Trend Micro</a>;
+      NVD for
+      <a href="https://nvd.nist.gov/vuln/detail/CVE-2020-3259">CVE-2020-3259</a>,
+      <a href="https://nvd.nist.gov/vuln/detail/CVE-2023-20269">CVE-2023-20269</a> and
+      <a href="https://nvd.nist.gov/vuln/detail/CVE-2024-40766">CVE-2024-40766</a>.
+    </p>
+    <p class="note">
+      <strong>Attribution confidence.</strong> Akira is <em>confirmed</em> by multiple independent
+      primaries to have exploited all three vulnerabilities — Sophos and Unit 42 for the Cisco pair,
+      Rapid7 for SonicWall — so the actor-to-CVE link is reported rather than inferred. The group's
+      possible descent from Conti is a different matter: that is an assessed association carried by
+      several vendors, not an established fact, and nothing on this page depends on it. Other actors
+      also exploit these same CVEs, so patching priority should be driven by the vulnerability
+      rather than by whether Akira is the actor you expect.
+    </p>
+    <p class="note">
+      <strong>Scope note.</strong> The ATT&amp;CK mapping behind this flow is <em>derived</em> from
+      published reporting of Akira behaviour, not copied from a vendor's published mapping; every
+      technique ID was verified against attack.mitre.org before use. Two tactics carry no
+      techniques — <strong>Reconnaissance</strong> and <strong>Resource Development</strong> —
+      because reporting says credentials were "acquired beforehand" without saying how. That absence
+      reflects a gap in the published reporting, not evidence that Akira lacks the capability.
+      Exact fixed build numbers could not be retrieved from the vendor advisories at build time, so
+      the Fixed-in column points at the advisory rather than asserting a version; confirm the target
+      build against the vendor before scheduling the change. Built from the JSON handoff in
+      <code class="path">subjects/akira/handoff/</code>.
+    </p>
+  </div>
+</footer>
+</div>
+
+<!-- BULLETIN:DEFENCE -->
+
+  <!-- Intentionally empty. This is a campaign subject, so Part 2 carries its own
+       Remediation section (patch, MFA enforcement, credential rotation, SSLVPN blast
+       radius, hunt, and backup survivability). Duplicating it here would create two
+       versions of the same guidance that drift apart. -->
+<!-- /BULLETIN:DEFENCE -->

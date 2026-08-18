@@ -1,0 +1,516 @@
+<!--
+  ============================================================================
+  TI ANALYSIS TEMPLATE - copy this file, replace every {{PLACEHOLDER}}.
+
+  Step 1 of the TI-Reporting pipeline. Produces subjects/<slug>/reports/analysis.html,
+  which CLAUDE.md later merges with the companion ATT&CK flow report into a
+  bulletin. Tokens, type scale and accent logic match that report on purpose -
+  the two documents sit side by side and must not look like two products.
+  The shared palette is recorded in CLAUDE.md.
+
+  ---------------------------------------------------------------------------
+  FIVE SECTIONS, ALWAYS IN THIS ORDER:
+
+      1. Cover        title, subject, TLP marking, motif
+      2. Overview     who they are, then activity CHRONOLOGICALLY
+      3. History      OPTIONAL - origin story. Delete if the subject is new
+                      or nothing is documented. Do not pad it.
+      4. Conclusion   the tl;dr
+      5. Risk & Impact  sector risk visual + how future victims get hit
+
+  ---------------------------------------------------------------------------
+  ACCENT: retune to the subject's OBJECTIVE. Destruction/extortion = ember red.
+  Espionage/collection = covert violet. The two documents in one bulletin must
+  share an accent or the merge looks like an accident. Full table in SKILL.md.
+
+  RISK COLOURS are a SEPARATE token family from CVSS severity. They share the
+  ramp deliberately - red means danger in both - but they measure different
+  things, so they get different tokens AND a different form: CVSS uses an
+  outlined numeric badge, sector risk uses a segmented meter.
+  ============================================================================
+-->
+<title>{{SUBJECT}} — Threat Analysis</title>
+
+<style>
+  /* ---- Tokens: shared across TI-Reporting - see CLAUDE.md ---- */
+  :root {
+    color-scheme: light;
+
+    --ground: #f6f4f2;
+    --surface: #ffffff;
+    --surface-2: #efece7;
+    --ink: #1b1e24;
+    --muted: #5c6470;
+    --hair: #ddd8d1;
+    --hair-strong: #c8c2b8;
+
+    /* ACCENT - retune per objective, same values the flow report uses. */
+    --ember: #cf4a1f;
+    --ember-ink: #a8380f;
+    --ember-wash: rgba(207, 74, 31, 0.10);
+    --steel: #346b8f;
+    --steel-wash: rgba(52, 107, 143, 0.10);
+    --spine: #b9b2a8;
+
+    /* SECTOR RISK - shares the CVSS ramp, separate tokens, different form. */
+    --risk-critical: #a4161a;  --risk-critical-wash: rgba(164, 22, 26, 0.10);
+    --risk-high:     #b3541e;  --risk-high-wash:     rgba(179, 84, 30, 0.10);
+    --risk-moderate: #8a6a00;  --risk-moderate-wash: rgba(138, 106, 0, 0.10);
+    --risk-low:      #4a6b2a;  --risk-low-wash:      rgba(74, 107, 42, 0.10);
+    --risk-minimal:  #5c6470;  --risk-minimal-wash:  rgba(92, 100, 112, 0.10);
+
+    --shadow: 0 1px 2px rgba(20,22,26,.06), 0 8px 24px rgba(20,22,26,.05);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.65; -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 940px; margin: 0 auto; padding: 0 24px; }
+
+  /* ================= 1. COVER ================= */
+  .cover {
+    position: relative; overflow: hidden;
+    border-bottom: 1px solid var(--hair);
+    background:
+      radial-gradient(120% 90% at 88% -5%, var(--ember-wash), transparent 62%),
+      var(--surface);
+  }
+  .cover .wrap { position: relative; z-index: 2; padding-top: 84px; padding-bottom: 76px; }
+
+  /* Abstract motif: a rail with nodes, echoing the flow spine, plus blast
+     arcs. Decorative but family-resembling - the bulletin's two halves share
+     a visual language. Inherits the accent via currentColor. */
+  .covermotif {
+    position: absolute; top: -40px; right: -60px; width: 460px; height: 460px;
+    color: var(--ember); pointer-events: none; z-index: 1;
+  }
+  .covermotif .arcs   { opacity: .16; }
+  .covermotif .rail   { opacity: .30; }
+  .covermotif .dots   { opacity: .22; }
+
+  .tlp {
+    display: inline-block; font-family: ui-monospace, Consolas, monospace;
+    font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
+    padding: 4px 10px; border-radius: 4px; margin-bottom: 26px;
+    background: var(--surface-2); border: 1px solid var(--hair-strong); color: var(--muted);
+  }
+  .tlp.clear { color: var(--muted); }
+  .tlp.green { color: var(--risk-low);      border-color: color-mix(in srgb, var(--risk-low) 40%, transparent);      background: var(--risk-low-wash); }
+  .tlp.amber { color: var(--risk-high);     border-color: color-mix(in srgb, var(--risk-high) 40%, transparent);     background: var(--risk-high-wash); }
+  .tlp.red   { color: var(--risk-critical); border-color: color-mix(in srgb, var(--risk-critical) 40%, transparent); background: var(--risk-critical-wash); }
+
+  .eyebrow {
+    font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+    font-size: 12px; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--muted); margin: 0 0 18px; display: flex; align-items: center; gap: 12px;
+  }
+  .eyebrow::after { content: ""; flex: 1; height: 1px; background: var(--hair-strong); }
+  .idtag { color: var(--ember-ink); font-weight: 600; }
+
+  .cover h1 {
+    font-size: clamp(44px, 8vw, 78px); line-height: .96; letter-spacing: -.025em;
+    font-weight: 800; margin: 0 0 10px; text-wrap: balance; max-width: 16ch;
+  }
+  .cover h1 .accent { color: var(--ember); }
+  .cover .standfirst {
+    font-size: clamp(17px, 2.4vw, 21px); color: var(--muted);
+    max-width: 60ch; margin: 20px 0 0;
+  }
+  .covermeta {
+    margin-top: 42px; display: grid; gap: 1px;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    background: var(--hair); border: 1px solid var(--hair); border-radius: 12px; overflow: hidden;
+  }
+  .covermeta div { background: var(--surface); padding: 15px 18px; }
+  .covermeta .k { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0 0 5px; }
+  .covermeta .v { font-size: 15px; font-weight: 600; margin: 0; }
+
+  /* ================= Sections ================= */
+  section { padding: 62px 0; }
+  section.alt { background: var(--surface); border-top: 1px solid var(--hair); border-bottom: 1px solid var(--hair); }
+  .section-head { margin-bottom: 38px; }
+  .section-head .eyebrow { margin-bottom: 10px; }
+  .section-head h2 {
+    font-size: clamp(27px, 4vw, 35px); letter-spacing: -.015em;
+    font-weight: 800; margin: 0; text-wrap: balance;
+  }
+  .section-head p { color: var(--muted); max-width: 64ch; margin: 12px 0 0; font-size: 16px; }
+
+  .prose { max-width: 68ch; }
+  .prose p { margin: 0 0 18px; font-size: 16.5px; }
+  .prose p:last-child { margin-bottom: 0; }
+  .prose strong { font-weight: 700; }
+  .prose h3 {
+    font-size: 20px; font-weight: 700; letter-spacing: -.01em;
+    margin: 34px 0 12px; text-wrap: balance;
+  }
+
+  /* Inline source marker. Every factual claim that is not common knowledge
+     should carry one, and every marker must resolve in the Sources list. */
+  .src {
+    font-family: ui-monospace, Consolas, monospace; font-size: 11px; font-weight: 700;
+    color: var(--steel); background: var(--steel-wash);
+    border: 1px solid color-mix(in srgb, var(--steel) 24%, transparent);
+    padding: 0 5px; border-radius: 4px; vertical-align: 1px; margin-left: 3px;
+    text-decoration: none; white-space: nowrap;
+  }
+
+  /* ================= 2/3. CHRONOLOGY =================
+     Used by both Overview and History. Vertical rail with dated entries -
+     deliberately echoes the attack-flow spine so the bulletin reads as one
+     document. Entries MUST run oldest to newest. */
+  .chrono { position: relative; padding-left: 116px; }
+  .chrono::before {
+    content: ""; position: absolute; left: 92px; top: 10px; bottom: 10px;
+    width: 3px; border-radius: 3px;
+    background: linear-gradient(to bottom, var(--spine) 0%, var(--spine) 45%, var(--ember) 100%);
+  }
+  .entry { position: relative; margin-bottom: 30px; }
+  .entry:last-child { margin-bottom: 0; }
+  .entry .when {
+    position: absolute; left: -116px; top: 1px; width: 76px; text-align: right;
+    font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; font-weight: 700;
+    color: var(--ember-ink); letter-spacing: .02em;
+  }
+  .entry::after {
+    content: ""; position: absolute; left: -27px; top: 7px;
+    width: 11px; height: 11px; border-radius: 50%;
+    background: var(--surface); border: 3px solid var(--spine); z-index: 2;
+  }
+  .entry.key::after { border-color: var(--ember); background: var(--ember); }
+  .entry h3 { margin: 0 0 8px; font-size: 18.5px; font-weight: 700; letter-spacing: -.01em; }
+  .entry p { margin: 0 0 12px; font-size: 16px; max-width: 62ch; }
+  .entry p:last-child { margin-bottom: 0; }
+
+  /* ================= 4. CONCLUSION ================= */
+  .callout {
+    margin-top: 28px; padding: 20px 22px;
+    background: var(--surface); border: 1px solid var(--ember);
+    border-left: 4px solid var(--ember); border-radius: 12px; font-size: 16.5px;
+  }
+  section.alt .callout { background: var(--ground); }
+  .callout strong { color: var(--ember-ink); }
+  .callout p { margin: 0 0 14px; }
+  .callout p:last-child { margin: 0; }
+
+  .takeaways { display: grid; gap: 12px; margin-top: 26px; }
+  .takeaway {
+    display: grid; grid-template-columns: 30px 1fr; gap: 0 14px; align-items: start;
+    background: var(--surface); border: 1px solid var(--hair);
+    border-radius: 12px; padding: 16px 18px; box-shadow: var(--shadow);
+  }
+  section.alt .takeaway { background: var(--ground); }
+  .takeaway .n {
+    display: flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--ember-wash); color: var(--ember-ink);
+    border: 1px solid color-mix(in srgb, var(--ember) 28%, transparent);
+    font-family: ui-monospace, Consolas, monospace; font-size: 12px; font-weight: 700;
+  }
+  .takeaway p { margin: 0; font-size: 15.5px; }
+
+  /* ================= 5. RISK & IMPACT =================
+     The sector meter. Five levels, sharing the CVSS ramp but tokenised
+     separately and rendered as a meter rather than a numeric badge, so a
+     reader never mistakes an analyst's sector judgment for a scored CVSS. */
+  .sectors {
+    border: 1px solid var(--hair); border-radius: 14px; overflow: hidden;
+    background: var(--surface); box-shadow: var(--shadow);
+  }
+  section.alt .sectors { background: var(--ground); }
+  .sector {
+    display: grid; grid-template-columns: minmax(150px, 1.1fr) 104px 92px 2fr;
+    gap: 16px; align-items: center;
+    padding: 15px 20px; border-bottom: 1px solid var(--hair);
+  }
+  .sector:last-child { border-bottom: none; }
+  .sector .name { font-weight: 700; font-size: 15.5px; }
+  .sector .why { font-size: 14px; color: var(--muted); }
+
+  .meter { display: flex; gap: 3px; }
+  .meter i {
+    display: block; height: 9px; flex: 1; border-radius: 2px;
+    background: var(--hair-strong); opacity: .5;
+  }
+  .level {
+    font-family: ui-monospace, Consolas, monospace; font-size: 10.5px; font-weight: 700;
+    letter-spacing: .1em; text-transform: uppercase; text-align: center;
+    padding: 3px 8px; border-radius: 100px; white-space: nowrap;
+  }
+
+  .sector.critical .meter i:nth-child(-n+5) { background: var(--risk-critical); opacity: 1; }
+  .sector.high     .meter i:nth-child(-n+4) { background: var(--risk-high);     opacity: 1; }
+  .sector.moderate .meter i:nth-child(-n+3) { background: var(--risk-moderate); opacity: 1; }
+  .sector.low      .meter i:nth-child(-n+2) { background: var(--risk-low);      opacity: 1; }
+  .sector.minimal  .meter i:nth-child(-n+1) { background: var(--risk-minimal);  opacity: 1; }
+
+  .sector.critical .level { color: #fff; background: var(--risk-critical); }
+  .sector.high     .level { color: var(--risk-high);     background: var(--risk-high-wash);     border: 1px solid color-mix(in srgb, var(--risk-high) 32%, transparent); }
+  .sector.moderate .level { color: var(--risk-moderate); background: var(--risk-moderate-wash); border: 1px solid color-mix(in srgb, var(--risk-moderate) 32%, transparent); }
+  .sector.low      .level { color: var(--risk-low);      background: var(--risk-low-wash);      border: 1px solid color-mix(in srgb, var(--risk-low) 32%, transparent); }
+  .sector.minimal  .level { color: var(--risk-minimal);  background: var(--risk-minimal-wash);  border: 1px solid var(--hair-strong); }
+
+  .risklegend {
+    display: flex; flex-wrap: wrap; gap: 18px; margin-top: 20px;
+    padding: 14px 18px; background: var(--surface-2);
+    border: 1px solid var(--hair); border-radius: 12px;
+    font-size: 13px; color: var(--muted);
+  }
+  .risklegend .item { display: flex; align-items: center; gap: 8px; }
+  .risklegend .sw { width: 22px; height: 8px; border-radius: 2px; }
+
+  /* ================= Footer ================= */
+  footer { border-top: 1px solid var(--hair); padding: 40px 0 64px; color: var(--muted); font-size: 14px; }
+  footer h3 { font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin: 0 0 14px; }
+  footer a { color: var(--ember-ink); }
+  .sources { counter-reset: s; display: grid; gap: 8px; margin: 0 0 26px; padding: 0; list-style: none; }
+  /* The counter is absolutely positioned rather than a grid column. A grid here breaks:
+     an <li> holding a text node AND an <a> produces THREE grid items (::before, an
+     anonymous text item, the anchor), so the anchor wraps into the 30px counter column
+     and the URL renders about four characters wide. Absolute positioning lets any number
+     of inline children flow normally. */
+  .sources li {
+    counter-increment: s; position: relative; padding-left: 40px;
+    font-size: 13.5px; overflow-wrap: anywhere;
+  }
+  .sources li::before {
+    content: counter(s); position: absolute; left: 0; top: 2px;
+    font-family: ui-monospace, Consolas, monospace; font-size: 11px;
+    font-weight: 700; color: var(--steel); background: var(--steel-wash);
+    border: 1px solid color-mix(in srgb, var(--steel) 24%, transparent);
+    border-radius: 4px; text-align: center; width: 30px; height: 20px; line-height: 18px;
+  }
+  .note {
+    margin-top: 12px; padding: 14px 16px; background: var(--surface-2);
+    border: 1px dashed var(--hair-strong); border-radius: 10px; color: var(--muted);
+    font-size: 13.5px;
+  }
+  code { font-family: ui-monospace, Consolas, monospace; font-size: .9em; background: var(--surface-2); padding: 1px 5px; border-radius: 3px; }
+</style>
+
+<!-- ===================== 1. COVER ===================== -->
+<header class="cover">
+  <svg class="covermotif" viewBox="0 0 400 400" fill="none" aria-hidden="true">
+    <g class="arcs" stroke="currentColor" stroke-width="1.1">
+      <circle cx="286" cy="132" r="46"/>
+      <circle cx="286" cy="132" r="86"/>
+      <circle cx="286" cy="132" r="126"/>
+      <circle cx="286" cy="132" r="166"/>
+    </g>
+    <g class="rail" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+      <path d="M286 46 V318"/>
+    </g>
+    <g class="dots" fill="currentColor">
+      <circle cx="286" cy="86"  r="7"/>
+      <circle cx="286" cy="150" r="7"/>
+      <circle cx="286" cy="214" r="7"/>
+      <circle cx="286" cy="278" r="7"/>
+      <circle cx="196" cy="188" r="4"/>
+      <circle cx="352" cy="242" r="4"/>
+      <circle cx="230" cy="300" r="4"/>
+    </g>
+  </svg>
+
+  <div class="wrap">
+    <!-- TLP marking: clear | green | amber | red. Set both class and text. -->
+    <span class="tlp clear">TLP:CLEAR</span>
+
+    <p class="eyebrow">{{REPORT_KIND}} <span class="idtag">{{SUBJECT_ID}}</span></p>
+    <h1>{{SUBJECT}}<span class="accent">.</span></h1>
+    <p class="standfirst">{{ONE_SENTENCE_THESIS}}</p>
+
+    <div class="covermeta">
+      <div><p class="k">Subject type</p><p class="v">{{ACTOR_OR_VULNERABILITY}}</p></div>
+      <div><p class="k">Attribution</p><p class="v">{{ATTRIBUTION}}</p></div>
+      <div><p class="k">First observed</p><p class="v">{{FIRST_OBSERVED}}</p></div>
+      <div><p class="k">Assessed risk</p><p class="v">{{OVERALL_RISK}}</p></div>
+      <div><p class="k">Report date</p><p class="v">{{REPORT_DATE}}</p></div>
+      <div><p class="k">Analyst</p><p class="v">{{ANALYST}}</p></div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ===================== 2. OVERVIEW =====================
+       Open with WHO/WHAT - one or two paragraphs of background so a reader
+       who has never heard of the subject is oriented. Then report activity
+       CHRONOLOGICALLY, oldest first, in the .chrono rail.
+
+       For a VULNERABILITY subject, the same structure holds: background on
+       the flaw, then a chronological account of threat actors abusing it in
+       real campaigns. -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Overview</p>
+        <h2>{{OVERVIEW_HEADLINE}}</h2>
+      </div>
+
+      <div class="prose">
+        <p>{{WHO_OR_WHAT_PARAGRAPH_1}}</p>
+        <p>{{WHO_OR_WHAT_PARAGRAPH_2}}</p>
+      </div>
+
+      <h3 style="font-size:20px;font-weight:700;margin:38px 0 22px;">{{ACTIVITY_SUBHEAD}}</h3>
+
+      <div class="chrono">
+        <!-- Repeat per dated event. OLDEST FIRST. Add class "key" to the
+             entry for turning points - it fills the rail node in accent. -->
+        <div class="entry">
+          <div class="when">{{DATE}}</div>
+          <h3>{{WHAT_HAPPENED}}</h3>
+          <p>{{DETAIL}}<a class="src" href="#s1">1</a></p>
+        </div>
+
+        <div class="entry key">
+          <div class="when">{{DATE}}</div>
+          <h3>{{WHAT_HAPPENED}}</h3>
+          <p>{{DETAIL}}<a class="src" href="#s2">2</a></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 3. HISTORY (OPTIONAL) =====================
+       Origin story: first discovery, early campaigns, and for a
+       vulnerability whether it was exploited as a zero-day before disclosure.
+
+       DELETE THIS WHOLE SECTION when the subject is recent or nothing is
+       documented about its origins. An empty History section says "we did not
+       look"; no History section says "there is nothing to say". -->
+  <section class="alt">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">History</p>
+        <h2>{{HISTORY_HEADLINE}}</h2>
+        <p>{{HISTORY_STANDFIRST}}</p>
+      </div>
+
+      <div class="chrono">
+        <div class="entry">
+          <div class="when">{{DATE}}</div>
+          <h3>{{WHAT_HAPPENED}}</h3>
+          <p>{{DETAIL}}<a class="src" href="#s3">3</a></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 4. CONCLUSION ===================== -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Conclusion</p>
+        <h2>{{CONCLUSION_HEADLINE}}</h2>
+      </div>
+
+      <div class="prose">
+        <p>{{CONCLUSION_PARAGRAPH}}</p>
+      </div>
+
+      <div class="takeaways">
+        <div class="takeaway"><span class="n">1</span><p>{{TAKEAWAY}}</p></div>
+        <div class="takeaway"><span class="n">2</span><p>{{TAKEAWAY}}</p></div>
+        <div class="takeaway"><span class="n">3</span><p>{{TAKEAWAY}}</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 5. RISK & IMPACT ===================== -->
+  <section class="alt">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Risk &amp; Impact</p>
+        <h2>{{RISK_HEADLINE}}</h2>
+        <p>{{RISK_STANDFIRST}}</p>
+      </div>
+
+      <!-- Sector risk. Order HIGHEST FIRST. Every row needs a reason in
+           .why - a level with no justification is a guess with a colour on
+           it. Include sectors assessed as LOW or MINIMAL: saying who is NOT
+           likely to be hit is as useful as saying who is, and it shows the
+           assessment discriminates rather than painting everything red. -->
+      <div class="sectors">
+        <div class="sector critical">
+          <div class="name">{{SECTOR}}</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Critical</div>
+          <div class="why">{{WHY_THIS_SECTOR}}</div>
+        </div>
+        <div class="sector high">
+          <div class="name">{{SECTOR}}</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">High</div>
+          <div class="why">{{WHY_THIS_SECTOR}}</div>
+        </div>
+        <div class="sector moderate">
+          <div class="name">{{SECTOR}}</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Moderate</div>
+          <div class="why">{{WHY_THIS_SECTOR}}</div>
+        </div>
+        <div class="sector low">
+          <div class="name">{{SECTOR}}</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Low</div>
+          <div class="why">{{WHY_THIS_SECTOR}}</div>
+        </div>
+        <div class="sector minimal">
+          <div class="name">{{SECTOR}}</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Minimal</div>
+          <div class="why">{{WHY_THIS_SECTOR}}</div>
+        </div>
+      </div>
+
+      <div class="risklegend">
+        <div class="item"><span class="sw" style="background:var(--risk-critical)"></span> Critical — actively targeted</div>
+        <div class="item"><span class="sw" style="background:var(--risk-high)"></span> High — fits the victim profile</div>
+        <div class="item"><span class="sw" style="background:var(--risk-moderate)"></span> Moderate — plausible, not observed</div>
+        <div class="item"><span class="sw" style="background:var(--risk-low)"></span> Low — outside the pattern</div>
+        <div class="item"><span class="sw" style="background:var(--risk-minimal)"></span> Minimal — no indication</div>
+      </div>
+
+      <!-- This section answers WHO is at risk. It deliberately does NOT list attack
+           vectors - the companion ATT&CK flow report answers HOW, technique by
+           technique, and duplicating it here would put the same claim in two places
+           that can drift apart. Point the reader across instead. -->
+      <div class="callout">
+        <p><strong>{{RISK_BOTTOM_LINE_HEADING}}</strong> {{RISK_BOTTOM_LINE}}</p>
+        <p>
+          For <em>how</em> a compromise actually unfolds — the techniques, the tooling and the
+          order they run in — see the companion attack-flow report,
+          <code>{{FLOW_REPORT_FILENAME}}</code>.
+        </p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <h3>Sources</h3>
+    <ol class="sources">
+      <li id="s1">{{SOURCE_TITLE}} — <a href="{{URL}}">{{URL}}</a></li>
+      <li id="s2">{{SOURCE_TITLE}} — <a href="{{URL}}">{{URL}}</a></li>
+      <li id="s3">{{SOURCE_TITLE}} — <a href="{{URL}}">{{URL}}</a></li>
+    </ol>
+
+    <p class="note">
+      <strong>Confidence and sourcing.</strong> {{CONFIDENCE_STATEMENT}} — state which claims
+      are drawn from vendor or government reporting and which are analytical judgment, and
+      say plainly where reporting is thin. Sector risk levels are analyst assessments, not
+      measured values; they deliberately share a colour ramp with CVSS severity but are
+      rendered as meters rather than scores so the two are not confused.
+    </p>
+    <p class="note">
+      <strong>Pipeline.</strong> Step 1 of TI-Reporting. The companion ATT&amp;CK flow report
+      is built from the JSON handoff in <code>subjects/{{SLUG}}/handoff/</code>, of which this analysis
+      produces <code>analysis.json</code>.
+    </p>
+  </div>
+</footer>

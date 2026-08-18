@@ -1,0 +1,364 @@
+# Approved sources for ti-analysis
+# =================================
+# This skill researches threat actors, campaigns and vulnerabilities ONLY from the
+# sources listed here. If a claim cannot be traced to one of them, it does not go in
+# the report.
+#
+# Each entry carries:
+#   name    - as it should appear in the report's Sources list
+#   url     - landing page to search
+#   rss     - feed where one exists, else null
+#   tier    - primary        : publishes its own original research and telemetry
+#             corroborating  : reports on other people's research; good for timeline
+#                              and reach, weak as a sole basis for attribution
+#             reference      : structured lookup, not narrative reporting
+#   use_for - what this source is actually good for
+#
+# SOURCING RULES
+# --------------
+# 1. Attribution needs a PRIMARY source. "Actor X did Y" must rest on a tier:primary
+#    or government entry. A corroborating outlet reporting someone else's finding is
+#    a pointer to the primary, not a substitute for it.
+# 2. Corroborate across vendors where you can. Vendors use different names for the
+#    same actor and occasionally disagree on attribution; two independent primaries
+#    saying the same thing is materially stronger than one.
+# 3. Say when reporting is thin. "Only one vendor has reported this" is a finding and
+#    belongs in the report, not a gap to paper over.
+# 4. Prefer the original publication over a summary of it, always.
+# 5. Never cite: vendor marketing pages, unattributed blogs, social media posts,
+#    LLM-generated aggregators, or any source not listed here.
+#
+# NOTE: rss endpoints change without notice. Verify one before relying on it for
+# automated ingestion; the url is the durable field.
+
+# ---------------------------------------------------------------------------
+# PRIMARY RESEARCH — vendor threat intelligence teams
+# The backbone of an actor report. These publish first-party telemetry, campaign
+# analysis and named-actor tracking.
+# ---------------------------------------------------------------------------
+primary_research:
+  - name: Google Mandiant — Threat Intelligence
+    url: https://cloud.google.com/blog/topics/threat-intelligence
+    rss: https://cloud.google.com/feeds/mandiant-threat-intelligence.xml
+    tier: primary
+    use_for: APT campaign analysis, incident response findings, UNC/APT designations
+
+  - name: Microsoft Threat Intelligence
+    url: https://www.microsoft.com/en-us/security/blog/topic/threat-intelligence/
+    rss: https://www.microsoft.com/en-us/security/blog/feed/
+    tier: primary
+    use_for: Nation-state tracking, the Typhoon/Sandstorm/Blizzard weather naming taxonomy
+
+  - name: Palo Alto Unit 42
+    url: https://unit42.paloaltonetworks.com
+    rss: https://unit42.paloaltonetworks.com/feed/
+    tier: primary
+    use_for: Exploitation-in-the-wild timelines, malware analysis, post-exploitation detail
+
+  - name: Cisco Talos Intelligence
+    url: https://blog.talosintelligence.com
+    rss: https://feeds.feedburner.com/feedburner/Talos
+    tier: primary
+    use_for: Campaign research, commodity and targeted malware, network telemetry
+
+  - name: CrowdStrike Blog
+    url: https://www.crowdstrike.com/blog/
+    rss: https://www.crowdstrike.com/blog/feed/
+    tier: primary
+    use_for: eCrime and nation-state tracking, the SPIDER/BEAR/PANDA adversary taxonomy
+
+  - name: Trend Micro Research
+    url: https://www.trendmicro.com/en_us/research.html
+    rss: https://feeds.trendmicro.com/Anti-MalwareBlog/
+    tier: primary
+    use_for: Campaign analysis, ransomware ecosystems, regional targeting
+
+  - name: Rapid7 Blog
+    url: https://www.rapid7.com/blog/
+    rss: https://www.rapid7.com/blog/feed/
+    tier: primary
+    use_for: Exploitation analysis, attacker behaviour in IR engagements, PoC context
+
+  - name: Tenable Blog
+    url: https://www.tenable.com/blog
+    rss: https://www.tenable.com/blog/feed
+    tier: primary
+    use_for: Vulnerability exploitation context, exposure analysis
+
+  - name: Secureworks — Counter Threat Unit
+    url: https://www.secureworks.com/blog
+    rss: https://www.secureworks.com/rss?feed=blog
+    tier: primary
+    use_for: Named threat groups (GOLD/BRONZE/COBALT taxonomy), IR-derived findings
+
+  - name: ESET Research — WeLiveSecurity
+    url: https://www.welivesecurity.com
+    rss: https://feeds.feedburner.com/eset/blog
+    tier: primary
+    use_for: APT reporting, especially Eastern Europe and Latin America
+
+  - name: Kaspersky — Securelist
+    url: https://securelist.com
+    rss: https://securelist.com/feed/
+    tier: primary
+    use_for: Long-running APT tracking and deep malware analysis
+
+  - name: Check Point Research
+    url: https://research.checkpoint.com
+    rss: https://research.checkpoint.com/feed/
+    tier: primary
+    use_for: Campaign research, mobile and regional threat activity
+
+  - name: SentinelOne — SentinelLabs
+    url: https://www.sentinelone.com/labs/
+    rss: https://www.sentinelone.com/labs/feed/
+    tier: primary
+    use_for: Malware reverse engineering, wiper and ransomware analysis
+
+  - name: Volexity
+    url: https://www.volexity.com/blog/
+    rss: https://www.volexity.com/blog/feed/
+    tier: primary
+    use_for: Zero-day discovery and targeted-intrusion IR, often first to publish
+
+  - name: Proofpoint — Threat Insight
+    url: https://www.proofpoint.com/us/blog/threat-insight
+    rss: null
+    tier: primary
+    use_for: Email-delivered threats, initial access brokers, the TA### designations
+
+  - name: Symantec — Threat Hunter Team
+    url: https://www.security.com/threat-intelligence
+    rss: null
+    tier: primary
+    use_for: Long-horizon espionage tracking and victimology
+
+  - name: Sophos X-Ops
+    url: https://news.sophos.com/en-us/category/security-operations/
+    rss: https://news.sophos.com/en-us/feed/
+    tier: primary
+    use_for: Ransomware playbooks, attacker dwell-time and tooling detail
+
+  - name: Recorded Future — Insikt Group
+    url: https://www.recordedfuture.com/research
+    rss: https://www.recordedfuture.com/feed
+    tier: primary
+    use_for: Infrastructure tracking, state-aligned activity, strategic assessment
+
+  - name: Group-IB
+    url: https://www.group-ib.com/blog/
+    rss: null
+    tier: primary
+    use_for: eCrime, ransomware affiliates, APAC and EMEA activity
+
+  - name: Red Canary
+    url: https://redcanary.com/blog/
+    rss: https://redcanary.com/feed/
+    tier: primary
+    use_for: Technique prevalence, detection-centric analysis, annual threat report
+
+  - name: Dragos
+    url: https://www.dragos.com/blog/
+    rss: null
+    tier: primary
+    use_for: ICS and OT threat groups — use whenever the subject maps to the ICS matrix
+
+  - name: Elastic Security Labs
+    url: https://www.elastic.co/security-labs
+    rss: https://www.elastic.co/security-labs/rss/feed.xml
+    tier: primary
+    use_for: Malware analysis and detection engineering detail
+
+  - name: Fortinet — FortiGuard Labs
+    url: https://www.fortinet.com/blog/threat-research
+    rss: null
+    tier: primary
+    use_for: Exploitation telemetry, edge-device targeting
+
+# ---------------------------------------------------------------------------
+# GOVERNMENT AND CERT — authoritative attribution and mandated action
+# The strongest basis for attribution claims and for "this is being exploited now".
+# ---------------------------------------------------------------------------
+government:
+  - name: CISA Advisories
+    url: https://www.cisa.gov/news-events/advisories
+    rss: https://www.cisa.gov/feeds/advisories.xml
+    tier: primary
+    use_for: Joint advisories naming actors and TTPs, mitigation guidance
+
+  - name: CISA Known Exploited Vulnerabilities Catalog
+    url: https://www.cisa.gov/known-exploited-vulnerabilities-catalog
+    rss: null
+    tier: reference
+    use_for: Whether a CVE is confirmed exploited, and the federal remediation deadline
+
+  - name: NCSC UK
+    url: https://www.ncsc.gov.uk/section/keep-up-to-date/all-reports
+    rss: https://www.ncsc.gov.uk/api/1/services/v1/all-rss-feed.xml
+    tier: primary
+    use_for: UK and allied attribution statements, joint advisories
+
+  - name: Canadian Centre for Cyber Security
+    url: https://www.cyber.gc.ca/en/alerts-advisories
+    rss: null
+    tier: primary
+    use_for: Canadian advisories and sector-specific guidance
+
+  - name: Australian Cyber Security Centre
+    url: https://www.cyber.gov.au/about-us/view-all-content/alerts-and-advisories
+    rss: null
+    tier: primary
+    use_for: APAC advisories, frequent co-signer on joint attribution
+
+  - name: CERT-EU
+    url: https://cert.europa.eu/publications/threat-intelligence
+    rss: null
+    tier: primary
+    use_for: EU-institution threat landscape and advisories
+
+  - name: FBI IC3 — Industry Alerts
+    url: https://www.ic3.gov/Home/IndustryAlerts
+    rss: null
+    tier: primary
+    use_for: Ransomware and eCrime alerts, victim-reported statistics
+
+# ---------------------------------------------------------------------------
+# REFERENCE — structured lookup, not narrative
+# Use these to pin down identifiers and aliases, not to source a story.
+# ---------------------------------------------------------------------------
+reference:
+  - name: MITRE ATT&CK — Groups
+    url: https://attack.mitre.org/groups/
+    rss: null
+    tier: reference
+    use_for: Canonical G-IDs, alias lists, published technique mappings
+
+  - name: MITRE ATT&CK — Software
+    url: https://attack.mitre.org/software/
+    rss: null
+    tier: reference
+    use_for: Canonical S-IDs for tooling named in the Arsenal
+
+  - name: MITRE ATT&CK — Techniques
+    url: https://attack.mitre.org/techniques/
+    rss: null
+    tier: reference
+    use_for: VERIFYING a technique ID and its tactic before asserting it. Never correct an unfamiliar ID from memory.
+
+  - name: NVD — CVE Detail
+    url: https://nvd.nist.gov/vuln/detail/
+    rss: https://nvd.nist.gov/feeds/xml/cve/misc/nvd-rss.xml
+    tier: reference
+    use_for: CVSS score and vector, CWE, affected and fixed versions
+
+  - name: Malpedia (Fraunhofer FKIE)
+    url: https://malpedia.caad.fkie.fraunhofer.de
+    rss: null
+    tier: reference
+    use_for: Malware family identification and actor-to-family linkage with citations
+
+  - name: ETDA — Threat Actor Encyclopedia
+    url: https://apt.etda.or.th/cgi-bin/aptgroups.cgi
+    rss: null
+    tier: reference
+    use_for: Cross-vendor alias resolution when one actor carries five names
+
+# ---------------------------------------------------------------------------
+# CORROBORATING NEWS — timeline, reach and public impact
+# Good for establishing WHEN something became public and who was affected.
+# Not a sufficient basis for attribution on its own.
+# ---------------------------------------------------------------------------
+news:
+  - name: The Hacker News
+    url: https://thehackernews.com
+    rss: https://feeds.feedburner.com/TheHackersNews
+    tier: corroborating
+    use_for: Rapid coverage of new campaigns and disclosures
+
+  - name: BleepingComputer
+    url: https://www.bleepingcomputer.com
+    rss: https://www.bleepingcomputer.com/feed/
+    tier: corroborating
+    use_for: Ransomware incidents, victim disclosure, exploitation timelines
+
+  - name: The Record (Recorded Future News)
+    url: https://therecord.media
+    rss: https://therecord.media/feed/
+    tier: corroborating
+    use_for: Policy, attribution statements, geopolitical framing
+
+  - name: Krebs on Security
+    url: https://krebsonsecurity.com
+    rss: https://krebsonsecurity.com/feed/
+    tier: corroborating
+    use_for: eCrime ecosystems and investigative detail
+
+  - name: Dark Reading
+    url: https://www.darkreading.com
+    rss: https://www.darkreading.com/rss.xml
+    tier: corroborating
+    use_for: Sector impact and analyst commentary
+
+  - name: SecurityWeek
+    url: https://www.securityweek.com
+    rss: https://feeds.feedburner.com/Securityweek
+    tier: corroborating
+    use_for: Vendor advisory coverage and breach reporting
+
+  - name: CyberScoop
+    url: https://cyberscoop.com
+    rss: https://cyberscoop.com/feed/
+    tier: corroborating
+    use_for: Government and policy angles on attribution
+
+  - name: SANS Internet Storm Center
+    url: https://isc.sans.edu
+    rss: https://isc.sans.edu/rssfeed.xml
+    tier: corroborating
+    use_for: Early exploitation signals, scanning activity, honeypot telemetry
+
+# ---------------------------------------------------------------------------
+# VENDOR ADVISORIES — the authoritative word on a product's own flaw
+# ---------------------------------------------------------------------------
+vendor_advisories:
+  - name: Cisco Security Advisories
+    url: https://tools.cisco.com/security/center/publicationListing.x
+    rss: https://tools.cisco.com/security/center/eventResponses_20.xml
+    tier: primary
+    use_for: Cisco product flaws, fixed versions, exploitation status
+
+  - name: Microsoft Security Response Center
+    url: https://msrc.microsoft.com/update-guide
+    rss: https://msrc.microsoft.com/blog/feed/
+    tier: primary
+    use_for: Microsoft CVE detail and patch guidance
+
+  - name: Fortinet PSIRT Advisories
+    url: https://www.fortiguard.com/psirt
+    rss: null
+    tier: primary
+    use_for: FortiOS and FortiProxy advisories and fixed builds
+
+  - name: Ivanti Security Advisories
+    url: https://www.ivanti.com/blog/topics/security-advisory
+    rss: null
+    tier: primary
+    use_for: Edge-appliance advisories, a recurring initial-access target
+
+  - name: VMware / Broadcom Security Advisories
+    url: https://support.broadcom.com/security-advisory
+    rss: null
+    tier: primary
+    use_for: vSphere and ESXi advisories, common ransomware targets
+
+  - name: Oracle Critical Patch Updates
+    url: https://www.oracle.com/security-alerts/
+    rss: null
+    tier: primary
+    use_for: Quarterly CPU cycles across the Oracle estate
+
+  - name: Apache Security Reports
+    url: https://httpd.apache.org/security_report.html
+    rss: null
+    tier: primary
+    use_for: Apache project flaws, including library-level issues

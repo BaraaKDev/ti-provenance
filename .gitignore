@@ -1,0 +1,10 @@
+# Windows / editor cruft
+Thumbs.db
+desktop.ini
+*.tmp
+~$*
+
+# NOTE: output/*.pdf is deliberately NOT ignored.
+# It is derived and regenerable, but it is also the artefact that leaves the project and
+# lands in somebody's inbox. For an intelligence product the question "what exactly did we
+# publish, and when" has to be answerable, so the published PDF is tracked on purpose.

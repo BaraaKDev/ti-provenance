@@ -1,0 +1,148 @@
+{
+  "schema": "analysis/1.0",
+  "subject": "Akira",
+  "slug": "akira",
+  "subject_type": "campaign",
+  "matrix": "enterprise",
+  "attack_id": "G1024",
+  "aliases": ["GOLD SAHARA", "PUNK SPIDER", "Howling Scorpius", "Storm-1567"],
+  "objective": "extortion",
+  "objective_note": "Double extortion - data stolen first, encrypted second, and increasingly stolen without any encryption at all",
+  "cves": ["CVE-2020-3259", "CVE-2023-20269", "CVE-2024-40766"],
+  "vuln_relationship": "none",
+  "confidence": "published",
+  "facts": {
+    "attribution": "eCrime, ransomware-as-a-service",
+    "active_since": "March 2023",
+    "targets": "SMBs across North America, Europe and Australia",
+    "entry_vector": "Remote-access VPN without MFA"
+  },
+  "background": [
+    "Akira is a ransomware-as-a-service operation first observed in March 2023, tracked by MITRE as G1024 and by vendors as GOLD SAHARA, PUNK SPIDER, Howling Scorpius and Storm-1567. It runs a double-extortion model: affiliates steal data before encrypting it, then name victims on a Tor leak site styled after 1980s green-screen terminals, from which the operation takes its name. Reporting links its tooling and infrastructure to the defunct Conti operation, though the connection is described as an assessed association rather than an established one.",
+    "The defining characteristic is that Akira rarely needs a novel exploit. The recurring entry point across three years of reporting is a remote-access VPN protected by a password alone, reached either with credentials acquired beforehand or through a known flaw in the appliance itself. Every CVE attributed to the group sits in an internet-facing edge device - Cisco ASA and FTD, SonicWall SonicOS - and none is a zero-day. For a defender this inverts the usual priority: the control that most reliably stops an Akira intrusion is multi-factor authentication on remote access, not a faster patch cycle.",
+    "The tradecraft after entry is consistent enough across engagements to read as a documented playbook. Credentials are harvested with Mimikatz, LaZagne, LSASS memory dumps via comsvcs.dll and rundll32, ntdsutil against NTDS.dit, Veeam credential-dumping scripts and Kerberoasting. Persistence comes from newly created domain accounts - one recurring name is itadm - services registered with nssm.exe, and registry changes that hide the new accounts from the logon screen. Discovery runs on AdFind, Advanced IP Scanner, NetScan, net commands, Get-ADComputer and ping. Lateral movement uses RDP, SMB, WMI, wmiexec and PsExec. Defensive controls are removed rather than evaded: the vulnerable Zemana antimalware driver is loaded to terminate protection from kernel mode, Windows Defender is disabled through PowerShell, and vendor uninstall tools are turned against the products they belong to. Command and control runs over legitimate remote-access software - AnyDesk, DWAgent - a custom backdoor tracked as crome.exe, and, since late 2025, Ngrok tunnels. Data leaves through rclone, WinSCP, WinRAR, FileZilla and MEGA cloud storage, in one recorded case 483 GB. Backups are deleted or stopped before encryptors run against Windows, Linux and VMware ESXi, and more recently Nutanix AHV."
+  ],
+  "chronology": [
+    {
+      "date": "2023-03",
+      "event": "Akira emerges as a distinct ransomware operation",
+      "detail": "Operations begin against small and mid-sized businesses. Affiliates gain entry by logging in to VPN accounts that lack multi-factor authentication, using credentials acquired beforehand, then steal data before deploying a C++ encryptor built on ChaCha20 and KCipher2 with RSA key wrapping. Victims are published on a Tor leak site.",
+      "key": true,
+      "sources": [0, 2, 3]
+    },
+    {
+      "date": "2023-08",
+      "event": "Megazord Rust encryptor introduced",
+      "detail": "Some intrusions begin deploying Megazord, a Rust-based encryptor that appends .powerranges to encrypted files and requires a password supplied at runtime before it will execute. Its ransom note points at the same negotiation site as Akira, tying both payloads to one operation. Talos incident responders record the move to Rust as a deliberate rewrite away from the original C++ and Crypto++ codebase rather than a new family.",
+      "sources": [3, 5, 6]
+    },
+    {
+      "date": "2023-09",
+      "event": "Cisco ASA remote-access VPN exploited",
+      "detail": "Affiliates exploit CVE-2023-20269 in Cisco ASA and FTD to brute-force valid credentials against the remote-access VPN and establish clientless SSL VPN sessions through default connection profiles. CVE-2020-3259, an information-disclosure flaw in the same appliances that leaks memory contents to unauthenticated crafted GET requests, is named alongside it as a route to harvesting the credentials that make the first step work. Cisco ASA SSL VPN and AnyConnect endpoints without MFA remain the most common way in.",
+      "key": true,
+      "sources": [2, 3, 7, 8]
+    },
+    {
+      "date": "2023-10",
+      "event": "Shift to extortion-only operations",
+      "detail": "Intrusions are observed in which data is archived with WinRAR and moved out using rclone, WinSCP and MEGA cloud storage - 483 GB in one engagement - and the victim is then extorted without any encryptor being deployed at all. Dwell time across engagements ranges from under a day to 25 days.",
+      "key": true,
+      "sources": [2]
+    },
+    {
+      "date": "2024-04",
+      "event": "Joint international advisory published",
+      "detail": "The FBI, CISA, Europol EC3 and NCSC-NL publish AA24-109A. It documents Akira_v2, a Rust rewrite of the Linux and ESXi encryptor that accepts runtime arguments to target VMware ESXi virtual machine disk files, restrict execution to virtual machines only, stop running VMs before encrypting, set the encryption percentage and control CPU threading.",
+      "key": true,
+      "sources": [1, 3]
+    },
+    {
+      "date": "2024-11",
+      "event": "Assessed among the five most active ransomware operations",
+      "detail": "Unit 42 assesses the group as consistently ranking in the top five most active ransomware operations. Affiliates are recorded creating new domain accounts for persistence, dumping LSASS through comsvcs.dll, Kerberoasting, abusing the Zemana antimalware driver to terminate endpoint protection, and building their own virtual machines on compromised hosts to run outside host-level monitoring.",
+      "sources": [3]
+    },
+    {
+      "date": "2025-08",
+      "event": "SonicWall SSL VPN campaign begins",
+      "detail": "A surge of intrusions begins against SonicWall SSL VPN appliances, linked to CVE-2024-40766. Rapid7 records a consistent chain: access through the SSLVPN component, escalation to an elevated or service account, theft of files from network shares and file servers, deletion or stopping of backups, then encryption at the hypervisor level.",
+      "key": true,
+      "sources": [4, 9]
+    },
+    {
+      "date": "2025-09",
+      "event": "MFA enrolment abused through the Virtual Office Portal",
+      "detail": "Where a username and password had already been exposed, operators enrol their own MFA/TOTP token through SonicWall's publicly reachable Virtual Office Portal on port 4433, converting a stolen password into a fully enrolled VPN identity that satisfies the MFA challenge. Over-provisioned SSLVPN Default Users Group membership is recorded as a recurring contributing misconfiguration.",
+      "key": true,
+      "sources": [4]
+    },
+    {
+      "date": "2025-11",
+      "event": "Advisory reissued with a critical-infrastructure warning",
+      "detail": "The joint advisory is updated on 13 November 2025 with additional co-signers including DC3, HHS and European agencies, warning of an imminent threat to critical infrastructure. Operators are recorded establishing command and control through tunnelling utilities such as Ngrok to initiate encrypted sessions. The advisory records more than 250 affected organisations and approximately USD 244.17 million in ransomware proceeds as of late September 2025.",
+      "key": true,
+      "sources": [1]
+    }
+  ],
+  "risk": [
+    {
+      "sector": "Manufacturing",
+      "level": "critical",
+      "why": "Named as a primary target set by MITRE, CISA, Unit 42 and Sophos alike - the most consistently cited sector across three years of reporting."
+    },
+    {
+      "sector": "Professional services and consulting",
+      "level": "high",
+      "why": "Sits squarely in the observed SMB victim profile; named by both Unit 42 and Sophos among the recurring targets."
+    },
+    {
+      "sector": "Education",
+      "level": "high",
+      "why": "Named in Sophos victimology, and the sector's reliance on flat remote-access VPN estates matches the observed entry vector closely."
+    },
+    {
+      "sector": "Healthcare",
+      "level": "high",
+      "why": "The US Department of Health and Human Services co-signed the November 2025 advisory update, which is a direct signal of observed targeting."
+    },
+    {
+      "sector": "Construction and engineering",
+      "level": "high",
+      "why": "Listed by Unit 42 among the small and mid-sized business sectors the group concentrates on."
+    },
+    {
+      "sector": "Government",
+      "level": "moderate",
+      "why": "Appears in Sophos victimology, but the victim profile skews strongly toward private-sector SMBs rather than public bodies."
+    },
+    {
+      "sector": "Financial services",
+      "level": "moderate",
+      "why": "Plausible given the opportunistic targeting model, but no reviewed reporting places Akira in the sector specifically."
+    },
+    {
+      "sector": "Energy and utilities",
+      "level": "moderate",
+      "why": "The November 2025 update frames a critical-infrastructure threat in general terms; reporting does not place Akira intrusions in energy specifically."
+    },
+    {
+      "sector": "Aerospace and defence",
+      "level": "low",
+      "why": "Outside the documented pattern. The operation is financially motivated and targets organisations that pay quickly, not those with the strongest access controls."
+    }
+  ],
+  "sources": [
+    "https://attack.mitre.org/groups/G1024/",
+    "https://www.cisa.gov/news-events/cybersecurity-advisories/aa24-109a",
+    "https://www.sophos.com/en-us/blog/akira-again-the-ransomware-that-keeps-on-taking/",
+    "https://unit42.paloaltonetworks.com/threat-assessment-howling-scorpius-akira-ransomware/",
+    "https://www.rapid7.com/blog/post/dr-akira-ransomware-group-utilizing-sonicwall-devices-for-initial-access/",
+    "https://blog.talosintelligence.com/talos-ir-quarterly-trends-q1-2024/",
+    "https://www.trendmicro.com/vinfo/us/security/news/ransomware-spotlight/ransomware-spotlight-akira",
+    "https://nvd.nist.gov/vuln/detail/CVE-2020-3259",
+    "https://nvd.nist.gov/vuln/detail/CVE-2023-20269",
+    "https://nvd.nist.gov/vuln/detail/CVE-2024-40766"
+  ],
+  "report": "analysis.html"
+}

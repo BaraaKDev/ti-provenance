@@ -1,0 +1,107 @@
+{
+  "schema": "analysis/1.0",
+  "subject": "Agrius",
+  "slug": "agrius",
+  "subject_type": "campaign",
+  "matrix": "enterprise",
+  "attack_id": "G1030",
+  "aliases": ["Pink Sandstorm", "AMERICIUM", "Agonizing Serpens", "BlackShadow"],
+  "objective": "destruction",
+  "objective_note": "Wipers disguised as ransomware - destruction is the goal, payment is cover",
+  "cves": ["CVE-2018-13379"],
+  "vuln_relationship": "none",
+  "confidence": "published",
+  "facts": {
+    "attribution": "Iran, MOIS-linked",
+    "active_since": "2020",
+    "targets": "Israel and the wider Middle East",
+    "entry_vector": "FortiOS SSL VPN"
+  },
+  "background": [
+    "Agrius is an Iranian threat actor active since 2020, known for ransomware and wiper operations across the Middle East with a heavy emphasis on Israeli targets. Public reporting links the group to Iran's Ministry of Intelligence and Security.",
+    "The defining characteristic is that the ransomware is cover. Victims receive a ransom note, but the data has already been destroyed - payment recovers nothing. Treating an Agrius incident as an extortion event rather than a destructive one leads defenders to the wrong response.",
+    "Across its campaigns the group's documented tradecraft is consistent: entry through internet-facing applications, ASPXSpy web shells relaying commands to cmd.exe, the IPsec Helper backdoor registered as a Windows service, Plink renamed to systems.exe for tunnelling, the vulnerable GMER64.sys driver loaded to terminate EDR from kernel mode, Mimikatz against LSASS and the SAM hive, WinEggDrop and NBTscan for internal discovery, RDP tunnelled through web shells for lateral movement, 7zip archives staged in C:\\windows\\temp\\s\\, and exfiltration over PuTTY and WinSCP before the wipers run."
+  ],
+  "chronology": [
+    {
+      "date": "2020",
+      "event": "First observed operating against Israeli targets",
+      "detail": "Researchers began tracking the group as a distinct cluster operating in Israel. Initial access was achieved by exploiting internet-facing applications, including CVE-2018-13379 in FortiOS SSL VPN and SQL injection against web applications, with operator traffic routed through commercial VPN services to obscure origin.",
+      "key": true,
+      "sources": [0, 1, 2]
+    },
+    {
+      "date": "2020-11",
+      "event": "Apostle wiper developed",
+      "detail": "The Apostle wiper was built around November 2020. Early builds frequently failed to destroy files, so the group fell back to the DEADWOOD wiper to complete intrusions - an operational tell that destruction, not encryption, was the objective from the outset.",
+      "key": true,
+      "sources": [2]
+    },
+    {
+      "date": "2020-12",
+      "event": "Shirbit insurance targeted",
+      "detail": "The Israeli insurance company Shirbit was struck in a destructive operation presented publicly as a ransomware incident, following the group's pattern of data theft ahead of destruction.",
+      "sources": [2]
+    },
+    {
+      "date": "2021",
+      "event": "Bar-Ilan University and the IPsec Helper backdoor",
+      "detail": "Agrius targeted Bar-Ilan University, deploying the Apostle wiper alongside a custom .NET backdoor tracked as IPsec Helper, which was registered as a Windows service for persistence. Apostle was progressively reworked from a failing wiper into functional ransomware.",
+      "sources": [0, 2]
+    },
+    {
+      "date": "2022-12",
+      "event": "Diamond industry intrusions",
+      "detail": "The group was attributed to attempted disruptive intrusions against diamond industry organisations in South Africa, Israel and Hong Kong, marking the first widely reported expansion of targeting beyond Israel.",
+      "key": true,
+      "sources": [3, 4]
+    },
+    {
+      "date": "2023-05",
+      "event": "Moneybird ransomware deployed",
+      "detail": "A new ransomware strain written in C++ and tracked as Moneybird was deployed against Israeli organisations. Unlike the .NET-based Apostle, Moneybird represented a deliberate rewrite, indicating sustained tooling investment rather than opportunistic reuse.",
+      "key": true,
+      "sources": [3, 4]
+    }
+  ],
+  "risk": [
+    {
+      "sector": "Government",
+      "level": "critical",
+      "why": "Israeli government bodies are the stated focus of repeated destructive operations."
+    },
+    {
+      "sector": "Energy and utilities",
+      "level": "critical",
+      "why": "Targeted in destructive operations where the objective was disruption rather than revenue."
+    },
+    {
+      "sector": "Manufacturing and logistics",
+      "level": "high",
+      "why": "The December 2022 diamond-industry intrusions show targeting extends to high-value commercial supply chains."
+    },
+    {
+      "sector": "Financial services",
+      "level": "high",
+      "why": "The Shirbit insurance incident places financial services inside the observed victim set."
+    },
+    {
+      "sector": "Healthcare",
+      "level": "low",
+      "why": "Outside the documented targeting; no reporting places Agrius in this sector."
+    },
+    {
+      "sector": "Retail and hospitality",
+      "level": "minimal",
+      "why": "No indication of interest. Low geopolitical value to a state-aligned destructive actor."
+    }
+  ],
+  "sources": [
+    "https://attack.mitre.org/groups/G1030/",
+    "https://nvd.nist.gov/vuln/detail/CVE-2018-13379",
+    "https://www.sentinelone.com/labs/from-wiper-to-ransomware-the-evolution-of-agrius/",
+    "https://research.checkpoint.com/2023/agrius-deploys-moneybird-in-targeted-attacks-against-israeli-organizations/",
+    "https://thehackernews.com/2023/05/iranian-agrius-hackers-targeting.html"
+  ],
+  "report": "analysis.html"
+}

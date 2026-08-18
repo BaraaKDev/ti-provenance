@@ -1,0 +1,309 @@
+{
+  "schema": "mapping/1.0",
+  "subject": "Akira",
+  "slug": "akira",
+  "matrix": "enterprise",
+  "tactics": [
+    {
+      "tactic": "Initial Access",
+      "techniques": [
+        {
+          "id": "T1078",
+          "name": "Valid Accounts",
+          "usage": "Logs in to remote-access VPN accounts that carry no second factor, using credentials acquired before the intrusion begins. This is the single most common way in across three years of reporting, and it involves no exploitation at all.",
+          "tooling": []
+        },
+        {
+          "id": "T1190",
+          "name": "Exploit Public-Facing Application",
+          "usage": "Exploits the AAA separation flaw in Cisco ASA and FTD remote-access VPN to establish clientless SSL VPN sessions through default connection profiles.",
+          "tooling": [],
+          "via_cve": "CVE-2023-20269"
+        },
+        {
+          "id": "T1190",
+          "name": "Exploit Public-Facing Application",
+          "usage": "Sends crafted GET requests to the web services interface of the same Cisco ASA and FTD appliances to read back memory contents, harvesting the credentials that make the VPN logon work.",
+          "tooling": [],
+          "via_cve": "CVE-2020-3259"
+        },
+        {
+          "id": "T1190",
+          "name": "Exploit Public-Facing Application",
+          "usage": "Abuses improper access control in SonicWall SonicOS to reach the SSLVPN component of Gen5, Gen6 and Gen7 firewalls, the entry point for the campaign that began in August 2025.",
+          "tooling": [],
+          "via_cve": "CVE-2024-40766"
+        }
+      ]
+    },
+    {
+      "tactic": "Execution",
+      "techniques": [
+        {
+          "id": "T1059.001",
+          "name": "Command and Scripting Interpreter: PowerShell",
+          "usage": "Runs PowerShell to disable Windows Defender and to enumerate the domain with Get-ADComputer.",
+          "tooling": []
+        },
+        {
+          "id": "T1047",
+          "name": "Windows Management Instrumentation",
+          "usage": "Executes commands on remote hosts through WMI, including via wmiexec.",
+          "tooling": ["wmiexec"]
+        },
+        {
+          "id": "T1569.002",
+          "name": "System Services: Service Execution",
+          "usage": "Uses PsExec to run payloads on remote systems as a service.",
+          "tooling": ["PsExec"]
+        }
+      ]
+    },
+    {
+      "tactic": "Persistence",
+      "techniques": [
+        {
+          "id": "T1136.002",
+          "name": "Create Account: Domain Account",
+          "usage": "Creates new domain accounts to hold access independently of the credentials used to get in. One account name recurs across engagements: itadm.",
+          "tooling": []
+        },
+        {
+          "id": "T1543.003",
+          "name": "Create or Modify System Process: Windows Service",
+          "usage": "Registers tooling as an auto-starting Windows service using nssm.exe.",
+          "tooling": ["nssm.exe"]
+        },
+        {
+          "id": "T1098.005",
+          "name": "Account Manipulation: Device Registration",
+          "usage": "Where a password had already leaked, enrols an operator-controlled MFA/TOTP token through SonicWall's publicly reachable Virtual Office Portal on port 4433. The stolen password becomes a fully enrolled identity that satisfies the MFA challenge legitimately, so the logs record a successful second factor.",
+          "tooling": [],
+          "via_cve": "CVE-2024-40766"
+        }
+      ]
+    },
+    {
+      "tactic": "Privilege Escalation",
+      "techniques": [
+        {
+          "id": "T1078",
+          "name": "Valid Accounts",
+          "usage": "Moves from the initial VPN identity to an elevated or service account before touching file servers and backups. Reporting records the escalation as observed but does not document the mechanism, so this is mapped to the account use itself rather than to a named escalation technique.",
+          "tooling": []
+        }
+      ]
+    },
+    {
+      "tactic": "Stealth",
+      "techniques": [
+        {
+          "id": "T1564.002",
+          "name": "Hide Artifacts: Hidden Users",
+          "usage": "Edits the registry so the domain accounts it created do not appear on the Windows logon screen, keeping the new identity out of sight of anyone using the console.",
+          "tooling": []
+        },
+        {
+          "id": "T1564.006",
+          "name": "Hide Artifacts: Run Virtual Instance",
+          "usage": "Builds its own virtual machines on compromised hosts and works from inside them, so activity runs where host-level endpoint monitoring cannot see it.",
+          "tooling": []
+        }
+      ]
+    },
+    {
+      "tactic": "Defense Impairment",
+      "techniques": [
+        {
+          "id": "T1685",
+          "name": "Disable or Modify Tools",
+          "usage": "Loads the vulnerable Zemana antimalware driver to terminate endpoint protection from kernel mode, disables Windows Defender through PowerShell, and runs vendors' own uninstall utilities against their products. The controls are removed rather than evaded.",
+          "tooling": ["Zemana antimalware driver"]
+        }
+      ]
+    },
+    {
+      "tactic": "Credential Access",
+      "techniques": [
+        {
+          "id": "T1110",
+          "name": "Brute Force",
+          "usage": "Brute-forces the Cisco remote-access VPN to identify valid credentials, which the AAA separation flaw allows without authenticating first. Reporting does not distinguish guessing from spraying or stuffing, so this stays at the parent technique.",
+          "tooling": [],
+          "via_cve": "CVE-2023-20269"
+        },
+        {
+          "id": "T1003.001",
+          "name": "OS Credential Dumping: LSASS Memory",
+          "usage": "Dumps LSASS with Mimikatz, and separately by calling comsvcs.dll through rundll32 to avoid bringing a known tool to the host.",
+          "tooling": ["Mimikatz", "comsvcs.dll", "rundll32"]
+        },
+        {
+          "id": "T1003.003",
+          "name": "OS Credential Dumping: NTDS",
+          "usage": "Extracts the NTDS.dit domain database using ntdsutil, taking every domain credential at once rather than harvesting host by host.",
+          "tooling": ["ntdsutil"]
+        },
+        {
+          "id": "T1555",
+          "name": "Credentials from Password Stores",
+          "usage": "Harvests stored credentials with LaZagne, and runs scripts specifically to pull credentials out of Veeam backup infrastructure - the same systems it later deletes.",
+          "tooling": ["LaZagne"]
+        },
+        {
+          "id": "T1558.003",
+          "name": "Steal or Forge Kerberos Tickets: Kerberoasting",
+          "usage": "Requests service tickets and cracks them offline to recover service-account passwords.",
+          "tooling": []
+        }
+      ]
+    },
+    {
+      "tactic": "Discovery",
+      "techniques": [
+        {
+          "id": "T1087.002",
+          "name": "Account Discovery: Domain Account",
+          "usage": "Enumerates domain accounts and structure with AdFind, Get-ADComputer and net commands.",
+          "tooling": ["AdFind"]
+        },
+        {
+          "id": "T1046",
+          "name": "Network Service Discovery",
+          "usage": "Sweeps the internal network for reachable services with Advanced IP Scanner and NetScan.",
+          "tooling": ["Advanced IP Scanner", "NetScan"]
+        },
+        {
+          "id": "T1018",
+          "name": "Remote System Discovery",
+          "usage": "Identifies reachable hosts using ping sweeps and Get-ADComputer before selecting lateral movement targets.",
+          "tooling": []
+        }
+      ]
+    },
+    {
+      "tactic": "Lateral Movement",
+      "techniques": [
+        {
+          "id": "T1021.001",
+          "name": "Remote Services: Remote Desktop Protocol",
+          "usage": "Pivots between hosts over RDP using the credentials recovered from LSASS and NTDS.dit.",
+          "tooling": []
+        },
+        {
+          "id": "T1021.002",
+          "name": "Remote Services: SMB/Windows Admin Shares",
+          "usage": "Reaches administrative shares over SMB to move tooling and reach file servers.",
+          "tooling": []
+        }
+      ]
+    },
+    {
+      "tactic": "Collection",
+      "techniques": [
+        {
+          "id": "T1039",
+          "name": "Data from Network Shared Drive",
+          "usage": "Takes files from network shares and file servers, which is where the data that carries the extortion actually lives.",
+          "tooling": []
+        },
+        {
+          "id": "T1005",
+          "name": "Data from Local System",
+          "usage": "Collects files directly from compromised hosts alongside the share-based collection.",
+          "tooling": []
+        },
+        {
+          "id": "T1560.001",
+          "name": "Archive Collected Data: Archive via Utility",
+          "usage": "Compresses the collected data with WinRAR before moving it out - 483 GB in one recorded engagement.",
+          "tooling": ["WinRAR"]
+        }
+      ]
+    },
+    {
+      "tactic": "Command and Control",
+      "techniques": [
+        {
+          "id": "T1219.002",
+          "name": "Remote Access Tools: Remote Desktop Software",
+          "usage": "Installs AnyDesk and DWAgent for interactive control, so the operator channel is legitimate signed remote-support software rather than custom malware.",
+          "tooling": ["AnyDesk", "DWAgent"]
+        },
+        {
+          "id": "T1572",
+          "name": "Protocol Tunneling",
+          "usage": "Establishes encrypted sessions through tunnelling utilities such as Ngrok, recorded in the November 2025 advisory update.",
+          "tooling": ["Ngrok"]
+        }
+      ]
+    },
+    {
+      "tactic": "Exfiltration",
+      "techniques": [
+        {
+          "id": "T1567.002",
+          "name": "Exfiltration Over Web Service: Exfiltration to Cloud Storage",
+          "usage": "Pushes the staged archives to MEGA cloud storage using rclone.",
+          "tooling": ["rclone", "MEGA"]
+        },
+        {
+          "id": "T1048",
+          "name": "Exfiltration Over Alternative Protocol",
+          "usage": "Transfers data out over SFTP and FTP using WinSCP and FileZilla where cloud storage is not used.",
+          "tooling": ["WinSCP", "FileZilla"]
+        }
+      ]
+    },
+    {
+      "tactic": "Impact",
+      "techniques": [
+        {
+          "id": "T1489",
+          "name": "Service Stop",
+          "usage": "The Akira_v2 encryptor takes a runtime argument to stop running virtual machines before encrypting them, so no guest holds a file open when the disks are rewritten.",
+          "tooling": ["Akira_v2"]
+        },
+        {
+          "id": "T1490",
+          "name": "Inhibit System Recovery",
+          "usage": "Deletes or stops backups as a deliberate step before any encryptor runs, having already pulled the credentials for the Veeam infrastructure earlier in the intrusion.",
+          "tooling": []
+        },
+        {
+          "id": "T1486",
+          "name": "Data Encrypted for Impact",
+          "usage": "Encrypts at hypervisor level so one action reaches every guest at once. Four payloads across the same path: the original C++ Akira using ChaCha20 and KCipher2 with RSA key wrapping, the Rust Megazord appending .powerranges, the Rust Akira_v2 for Linux and ESXi targeting VMDK files, and a Nutanix AHV build.",
+          "tooling": ["Akira", "Megazord", "Akira_v2"]
+        },
+        {
+          "id": "T1657",
+          "name": "Financial Theft",
+          "usage": "Extorts payment by pairing stolen data with a Tor leak site. Since October 2023 some intrusions skip encryption entirely and extort on the stolen data alone, which makes the leak site rather than the encryptor the actual source of leverage.",
+          "tooling": []
+        }
+      ]
+    }
+  ],
+  "arsenal": [
+    { "name": "Akira", "sid": "S1129", "role": "Original C++ encryptor using ChaCha20 and KCipher2 with RSA key wrapping", "kind": "Ransomware" },
+    { "name": "Megazord", "sid": "S1191", "role": "Rust encryptor appending .powerranges, requires a password at runtime", "kind": "Ransomware" },
+    { "name": "Akira_v2", "sid": "S1194", "role": "Rust Linux and ESXi encryptor with runtime control over VM targeting and encryption percentage", "kind": "Ransomware" },
+    { "name": "Mimikatz", "sid": "S0002", "role": "Credential dumping from LSASS memory", "kind": "Cred access" },
+    { "name": "LaZagne", "role": "Harvests credentials from local password stores", "kind": "Cred access" },
+    { "name": "ntdsutil", "role": "Extracts the NTDS.dit domain credential database", "kind": "Cred access" },
+    { "name": "AdFind", "role": "Active Directory enumeration", "kind": "Discovery" },
+    { "name": "Advanced IP Scanner", "role": "Internal network sweep for reachable hosts and services", "kind": "Discovery" },
+    { "name": "NetScan", "role": "Network service discovery alongside Advanced IP Scanner", "kind": "Discovery" },
+    { "name": "PsExec", "role": "Remote service execution for lateral movement", "kind": "Lateral movement" },
+    { "name": "AnyDesk", "role": "Legitimate remote-desktop software used as the operator channel", "kind": "Remote access" },
+    { "name": "DWAgent", "role": "Second remote-support agent used for interactive control", "kind": "Remote access" },
+    { "name": "Ngrok", "role": "Tunnelling utility establishing encrypted C2 sessions", "kind": "Tunnelling" },
+    { "name": "rclone", "sid": "S1040", "role": "Bulk exfiltration to MEGA cloud storage", "kind": "Exfiltration" },
+    { "name": "WinSCP", "role": "Exfiltration over SFTP", "kind": "Exfiltration" },
+    { "name": "FileZilla", "role": "Exfiltration over FTP", "kind": "Exfiltration" },
+    { "name": "WinRAR", "role": "Archives collected data before transfer", "kind": "Collection" },
+    { "name": "nssm.exe", "role": "Registers tooling as a persistent Windows service", "kind": "Persistence" },
+    { "name": "Zemana antimalware driver", "role": "Vulnerable driver loaded to terminate endpoint protection from kernel mode", "kind": "Defense impairment" }
+  ]
+}

@@ -1,0 +1,649 @@
+<title>Akira — Threat Analysis</title>
+
+<style>
+  /* ---- Tokens: shared across TI-Reporting - see CLAUDE.md ---- */
+  :root {
+    color-scheme: light;
+
+    --ground: #f6f4f2;
+    --surface: #ffffff;
+    --surface-2: #efece7;
+    --ink: #1b1e24;
+    --muted: #5c6470;
+    --hair: #ddd8d1;
+    --hair-strong: #c8c2b8;
+
+    /* ACCENT - extortion objective: ember red, same values the flow report uses. */
+    --ember: #cf4a1f;
+    --ember-ink: #a8380f;
+    --ember-wash: rgba(207, 74, 31, 0.10);
+    --steel: #346b8f;
+    --steel-wash: rgba(52, 107, 143, 0.10);
+    --spine: #b9b2a8;
+
+    /* SECTOR RISK - shares the CVSS ramp, separate tokens, different form. */
+    --risk-critical: #a4161a;  --risk-critical-wash: rgba(164, 22, 26, 0.10);
+    --risk-high:     #b3541e;  --risk-high-wash:     rgba(179, 84, 30, 0.10);
+    --risk-moderate: #8a6a00;  --risk-moderate-wash: rgba(138, 106, 0, 0.10);
+    --risk-low:      #4a6b2a;  --risk-low-wash:      rgba(74, 107, 42, 0.10);
+    --risk-minimal:  #5c6470;  --risk-minimal-wash:  rgba(92, 100, 112, 0.10);
+
+    --shadow: 0 1px 2px rgba(20,22,26,.06), 0 8px 24px rgba(20,22,26,.05);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.65; -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 940px; margin: 0 auto; padding: 0 24px; }
+
+  /* ================= 1. COVER ================= */
+  .cover {
+    position: relative; overflow: hidden;
+    border-bottom: 1px solid var(--hair);
+    background:
+      radial-gradient(120% 90% at 88% -5%, var(--ember-wash), transparent 62%),
+      var(--surface);
+  }
+  .cover .wrap { position: relative; z-index: 2; padding-top: 84px; padding-bottom: 76px; }
+
+  .covermotif {
+    position: absolute; top: -40px; right: -60px; width: 460px; height: 460px;
+    color: var(--ember); pointer-events: none; z-index: 1;
+  }
+  .covermotif .arcs   { opacity: .16; }
+  .covermotif .rail   { opacity: .30; }
+  .covermotif .dots   { opacity: .22; }
+
+  .tlp {
+    display: inline-block; font-family: ui-monospace, Consolas, monospace;
+    font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
+    padding: 4px 10px; border-radius: 4px; margin-bottom: 26px;
+    background: var(--surface-2); border: 1px solid var(--hair-strong); color: var(--muted);
+  }
+  .tlp.clear { color: var(--muted); }
+  .tlp.green { color: var(--risk-low);      border-color: color-mix(in srgb, var(--risk-low) 40%, transparent);      background: var(--risk-low-wash); }
+  .tlp.amber { color: var(--risk-high);     border-color: color-mix(in srgb, var(--risk-high) 40%, transparent);     background: var(--risk-high-wash); }
+  .tlp.red   { color: var(--risk-critical); border-color: color-mix(in srgb, var(--risk-critical) 40%, transparent); background: var(--risk-critical-wash); }
+
+  .eyebrow {
+    font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+    font-size: 12px; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--muted); margin: 0 0 18px; display: flex; align-items: center; gap: 12px;
+  }
+  .eyebrow::after { content: ""; flex: 1; height: 1px; background: var(--hair-strong); }
+  .idtag { color: var(--ember-ink); font-weight: 600; }
+
+  .cover h1 {
+    font-size: clamp(44px, 8vw, 78px); line-height: .96; letter-spacing: -.025em;
+    font-weight: 800; margin: 0 0 10px; text-wrap: balance; max-width: 16ch;
+  }
+  .cover h1 .accent { color: var(--ember); }
+  .cover .standfirst {
+    font-size: clamp(17px, 2.4vw, 21px); color: var(--muted);
+    max-width: 60ch; margin: 20px 0 0;
+  }
+  .covermeta {
+    margin-top: 42px; display: grid; gap: 1px;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    background: var(--hair); border: 1px solid var(--hair); border-radius: 12px; overflow: hidden;
+  }
+  .covermeta div { background: var(--surface); padding: 15px 18px; }
+  .covermeta .k { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0 0 5px; }
+  .covermeta .v { font-size: 15px; font-weight: 600; margin: 0; }
+
+  /* ================= Sections ================= */
+  section { padding: 62px 0; }
+  section.alt { background: var(--surface); border-top: 1px solid var(--hair); border-bottom: 1px solid var(--hair); }
+  .section-head { margin-bottom: 38px; }
+  .section-head .eyebrow { margin-bottom: 10px; }
+  .section-head h2 {
+    font-size: clamp(27px, 4vw, 35px); letter-spacing: -.015em;
+    font-weight: 800; margin: 0; text-wrap: balance;
+  }
+  .section-head p { color: var(--muted); max-width: 64ch; margin: 12px 0 0; font-size: 16px; }
+
+  .prose { max-width: 68ch; }
+  .prose p { margin: 0 0 18px; font-size: 16.5px; }
+  .prose p:last-child { margin-bottom: 0; }
+  .prose strong { font-weight: 700; }
+  .prose h3 {
+    font-size: 20px; font-weight: 700; letter-spacing: -.01em;
+    margin: 34px 0 12px; text-wrap: balance;
+  }
+
+  .src {
+    font-family: ui-monospace, Consolas, monospace; font-size: 11px; font-weight: 700;
+    color: var(--steel); background: var(--steel-wash);
+    border: 1px solid color-mix(in srgb, var(--steel) 24%, transparent);
+    padding: 0 5px; border-radius: 4px; vertical-align: 1px; margin-left: 3px;
+    text-decoration: none; white-space: nowrap;
+  }
+
+  /* ================= 2. CHRONOLOGY ================= */
+  .chrono { position: relative; padding-left: 116px; }
+  .chrono::before {
+    content: ""; position: absolute; left: 92px; top: 10px; bottom: 10px;
+    width: 3px; border-radius: 3px;
+    background: linear-gradient(to bottom, var(--spine) 0%, var(--spine) 45%, var(--ember) 100%);
+  }
+  .entry { position: relative; margin-bottom: 30px; }
+  .entry:last-child { margin-bottom: 0; }
+  .entry .when {
+    position: absolute; left: -116px; top: 1px; width: 76px; text-align: right;
+    font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; font-weight: 700;
+    color: var(--ember-ink); letter-spacing: .02em;
+  }
+  .entry::after {
+    content: ""; position: absolute; left: -27px; top: 7px;
+    width: 11px; height: 11px; border-radius: 50%;
+    background: var(--surface); border: 3px solid var(--spine); z-index: 2;
+  }
+  .entry.key::after { border-color: var(--ember); background: var(--ember); }
+  .entry h3 { margin: 0 0 8px; font-size: 18.5px; font-weight: 700; letter-spacing: -.01em; }
+  .entry p { margin: 0 0 12px; font-size: 16px; max-width: 62ch; }
+  .entry p:last-child { margin-bottom: 0; }
+
+  /* ================= 4. CONCLUSION ================= */
+  .callout {
+    margin-top: 28px; padding: 20px 22px;
+    background: var(--surface); border: 1px solid var(--ember);
+    border-left: 4px solid var(--ember); border-radius: 12px; font-size: 16.5px;
+  }
+  section.alt .callout { background: var(--ground); }
+  .callout strong { color: var(--ember-ink); }
+  .callout p { margin: 0 0 14px; }
+  .callout p:last-child { margin: 0; }
+
+  .takeaways { display: grid; gap: 12px; margin-top: 26px; }
+  .takeaway {
+    display: grid; grid-template-columns: 30px 1fr; gap: 0 14px; align-items: start;
+    background: var(--surface); border: 1px solid var(--hair);
+    border-radius: 12px; padding: 16px 18px; box-shadow: var(--shadow);
+  }
+  section.alt .takeaway { background: var(--ground); }
+  .takeaway .n {
+    display: flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--ember-wash); color: var(--ember-ink);
+    border: 1px solid color-mix(in srgb, var(--ember) 28%, transparent);
+    font-family: ui-monospace, Consolas, monospace; font-size: 12px; font-weight: 700;
+  }
+  .takeaway p { margin: 0; font-size: 15.5px; }
+
+  /* ================= 5. RISK & IMPACT ================= */
+  .sectors {
+    border: 1px solid var(--hair); border-radius: 14px; overflow: hidden;
+    background: var(--surface); box-shadow: var(--shadow);
+  }
+  section.alt .sectors { background: var(--ground); }
+  .sector {
+    display: grid; grid-template-columns: minmax(150px, 1.1fr) 104px 92px 2fr;
+    gap: 16px; align-items: center;
+    padding: 15px 20px; border-bottom: 1px solid var(--hair);
+  }
+  .sector:last-child { border-bottom: none; }
+  .sector .name { font-weight: 700; font-size: 15.5px; }
+  .sector .why { font-size: 14px; color: var(--muted); }
+
+  .meter { display: flex; gap: 3px; }
+  .meter i {
+    display: block; height: 9px; flex: 1; border-radius: 2px;
+    background: var(--hair-strong); opacity: .5;
+  }
+  .level {
+    font-family: ui-monospace, Consolas, monospace; font-size: 10.5px; font-weight: 700;
+    letter-spacing: .1em; text-transform: uppercase; text-align: center;
+    padding: 3px 8px; border-radius: 100px; white-space: nowrap;
+  }
+
+  .sector.critical .meter i:nth-child(-n+5) { background: var(--risk-critical); opacity: 1; }
+  .sector.high     .meter i:nth-child(-n+4) { background: var(--risk-high);     opacity: 1; }
+  .sector.moderate .meter i:nth-child(-n+3) { background: var(--risk-moderate); opacity: 1; }
+  .sector.low      .meter i:nth-child(-n+2) { background: var(--risk-low);      opacity: 1; }
+  .sector.minimal  .meter i:nth-child(-n+1) { background: var(--risk-minimal);  opacity: 1; }
+
+  .sector.critical .level { color: #fff; background: var(--risk-critical); }
+  .sector.high     .level { color: var(--risk-high);     background: var(--risk-high-wash);     border: 1px solid color-mix(in srgb, var(--risk-high) 32%, transparent); }
+  .sector.moderate .level { color: var(--risk-moderate); background: var(--risk-moderate-wash); border: 1px solid color-mix(in srgb, var(--risk-moderate) 32%, transparent); }
+  .sector.low      .level { color: var(--risk-low);      background: var(--risk-low-wash);      border: 1px solid color-mix(in srgb, var(--risk-low) 32%, transparent); }
+  .sector.minimal  .level { color: var(--risk-minimal);  background: var(--risk-minimal-wash);  border: 1px solid var(--hair-strong); }
+
+  .risklegend {
+    display: flex; flex-wrap: wrap; gap: 18px; margin-top: 20px;
+    padding: 14px 18px; background: var(--surface-2);
+    border: 1px solid var(--hair); border-radius: 12px;
+    font-size: 13px; color: var(--muted);
+  }
+  .risklegend .item { display: flex; align-items: center; gap: 8px; }
+  .risklegend .sw { width: 22px; height: 8px; border-radius: 2px; }
+
+  /* ================= Footer ================= */
+  footer { border-top: 1px solid var(--hair); padding: 40px 0 64px; color: var(--muted); font-size: 14px; }
+  footer h3 { font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin: 0 0 14px; }
+  footer a { color: var(--ember-ink); }
+  .sources { counter-reset: s; display: grid; gap: 8px; margin: 0 0 26px; padding: 0; list-style: none; }
+  /* Counter absolutely positioned, not a grid column: an <li> holding a text node AND an
+     <a> produces three grid items, so the anchor wrapped into the 30px counter column and
+     the URL rendered about four characters wide. */
+  .sources li {
+    counter-increment: s; position: relative; padding-left: 40px;
+    font-size: 13.5px; overflow-wrap: anywhere;
+  }
+  .sources li::before {
+    content: counter(s); position: absolute; left: 0; top: 2px;
+    font-family: ui-monospace, Consolas, monospace; font-size: 11px;
+    font-weight: 700; color: var(--steel); background: var(--steel-wash);
+    border: 1px solid color-mix(in srgb, var(--steel) 24%, transparent);
+    border-radius: 4px; text-align: center; width: 30px; height: 20px; line-height: 18px;
+  }
+  .note {
+    margin-top: 12px; padding: 14px 16px; background: var(--surface-2);
+    border: 1px dashed var(--hair-strong); border-radius: 10px; color: var(--muted);
+    font-size: 13.5px;
+  }
+  code { font-family: ui-monospace, Consolas, monospace; font-size: .9em; background: var(--surface-2); padding: 1px 5px; border-radius: 3px; }
+</style>
+
+<!-- ===================== 1. COVER ===================== -->
+<header class="cover">
+  <svg class="covermotif" viewBox="0 0 400 400" fill="none" aria-hidden="true">
+    <g class="arcs" stroke="currentColor" stroke-width="1.1">
+      <circle cx="286" cy="132" r="46"/>
+      <circle cx="286" cy="132" r="86"/>
+      <circle cx="286" cy="132" r="126"/>
+      <circle cx="286" cy="132" r="166"/>
+    </g>
+    <g class="rail" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+      <path d="M286 46 V318"/>
+    </g>
+    <g class="dots" fill="currentColor">
+      <circle cx="286" cy="86"  r="7"/>
+      <circle cx="286" cy="150" r="7"/>
+      <circle cx="286" cy="214" r="7"/>
+      <circle cx="286" cy="278" r="7"/>
+      <circle cx="196" cy="188" r="4"/>
+      <circle cx="352" cy="242" r="4"/>
+      <circle cx="230" cy="300" r="4"/>
+    </g>
+  </svg>
+
+  <div class="wrap">
+    <span class="tlp clear">TLP:CLEAR</span>
+
+    <p class="eyebrow">Campaign Analysis <span class="idtag">G1024</span></p>
+    <h1>Akira<span class="accent">.</span></h1>
+    <p class="standfirst">
+      A ransomware operation that has taken a quarter of a billion dollars without needing a
+      single zero-day — every documented way in is a remote-access appliance protected by a
+      password alone.
+    </p>
+
+    <div class="covermeta">
+      <div><p class="k">Subject type</p><p class="v">Campaign &middot; actor + CVEs</p></div>
+      <div><p class="k">Attribution</p><p class="v">eCrime, financially motivated</p></div>
+      <div><p class="k">First observed</p><p class="v">March 2023</p></div>
+      <div><p class="k">Assessed risk</p><p class="v">Critical</p></div>
+      <div><p class="k">Report date</p><p class="v">16 August 2026</p></div>
+      <div><p class="k">Analyst</p><p class="v">Threat Intelligence</p></div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ===================== 2. OVERVIEW ===================== -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Overview</p>
+        <h2>Three years of the same way in</h2>
+      </div>
+
+      <div class="prose">
+        <p>
+          Akira is a ransomware-as-a-service operation first observed in <strong>March 2023</strong>,
+          tracked by MITRE as G1024<a class="src" href="#s1">1</a> and by vendors as GOLD SAHARA,
+          PUNK SPIDER, Howling Scorpius and Storm-1567. It runs a double-extortion model:
+          affiliates steal data before encrypting it, then name victims on a Tor leak site styled
+          after 1980s green-screen terminals, from which the operation takes its
+          name<a class="src" href="#s4">4</a>. Reporting links its tooling and infrastructure to the
+          defunct Conti operation, though that connection is consistently described as an
+          <em>assessed association</em> rather than an established one<a class="src" href="#s7">7</a>.
+        </p>
+        <p>
+          The defining characteristic is that Akira <strong>rarely needs a novel exploit</strong>.
+          The recurring entry point across three years of reporting is a remote-access VPN protected
+          by a password alone, reached either with credentials acquired beforehand or through a known
+          flaw in the appliance itself<a class="src" href="#s3">3</a>. Every CVE attributed to the
+          group sits in an internet-facing edge device — Cisco ASA and FTD, SonicWall SonicOS — and
+          none is a zero-day. For a defender this inverts the usual priority: the control that most
+          reliably stops an Akira intrusion is multi-factor authentication on remote access, not a
+          faster patch cycle.
+        </p>
+        <p>
+          The tradecraft after entry is consistent enough across engagements to read as a documented
+          playbook. Credentials are harvested with Mimikatz, LaZagne, LSASS memory dumps via
+          <code>comsvcs.dll</code>, <code>ntdsutil</code> against NTDS.dit, Veeam credential-dumping
+          scripts and Kerberoasting. Persistence comes from newly created domain accounts — one
+          recurring name is <code>itadm</code> — services registered with <code>nssm.exe</code>, and
+          registry changes that hide those accounts from the logon screen<a class="src" href="#s3">3</a>.
+          Defensive controls are removed rather than evaded: the vulnerable Zemana antimalware driver
+          is loaded to terminate protection from kernel mode, Windows Defender is disabled through
+          PowerShell, and vendor uninstall tools are turned against the products they belong
+          to<a class="src" href="#s4">4</a>. Data leaves through rclone, WinSCP, WinRAR, FileZilla and
+          MEGA — 483 GB in one recorded engagement — and backups are deleted or stopped before any
+          encryptor runs<a class="src" href="#s3">3</a>.
+        </p>
+      </div>
+
+      <h3 style="font-size:20px;font-weight:700;margin:38px 0 22px;">Activity, oldest first</h3>
+
+      <div class="chrono">
+        <div class="entry key">
+          <div class="when">2023-03</div>
+          <h3>Akira emerges as a distinct ransomware operation</h3>
+          <p>
+            Operations begin against small and mid-sized businesses. Affiliates gain entry by logging
+            in to VPN accounts that lack multi-factor authentication, using credentials acquired
+            beforehand, then steal data before deploying a C++ encryptor built on ChaCha20 and
+            KCipher2 with RSA key wrapping. Victims are published on a Tor leak
+            site.<a class="src" href="#s1">1</a><a class="src" href="#s3">3</a><a class="src" href="#s4">4</a>
+          </p>
+        </div>
+
+        <div class="entry">
+          <div class="when">2023-08</div>
+          <h3>Megazord Rust encryptor introduced</h3>
+          <p>
+            Some intrusions begin deploying Megazord, a Rust-based encryptor that appends
+            <code>.powerranges</code> to encrypted files and requires a password supplied at runtime
+            before it will execute. Its ransom note points at the same negotiation site as Akira,
+            tying both payloads to one operation. Talos incident responders record the move to Rust
+            as a deliberate rewrite away from the original C++ and Crypto++ codebase rather than a
+            new family.<a class="src" href="#s4">4</a><a class="src" href="#s6">6</a><a class="src" href="#s7">7</a>
+          </p>
+        </div>
+
+        <div class="entry key">
+          <div class="when">2023-09</div>
+          <h3>Cisco ASA remote-access VPN exploited</h3>
+          <p>
+            Affiliates exploit <strong>CVE-2023-20269</strong> in Cisco ASA and FTD to brute-force
+            valid credentials against the remote-access VPN and establish clientless SSL VPN sessions
+            through default connection profiles. <strong>CVE-2020-3259</strong>, an
+            information-disclosure flaw in the same appliances that leaks memory contents to
+            unauthenticated crafted GET requests, is named alongside it as a route to harvesting the
+            credentials that make the first step work. Cisco ASA SSL VPN and AnyConnect endpoints
+            without MFA remain the most common way
+            in.<a class="src" href="#s3">3</a><a class="src" href="#s4">4</a><a class="src" href="#s8">8</a><a class="src" href="#s9">9</a>
+          </p>
+        </div>
+
+        <div class="entry key">
+          <div class="when">2023-10</div>
+          <h3>Shift to extortion-only operations</h3>
+          <p>
+            Intrusions are observed in which data is archived with WinRAR and moved out using rclone,
+            WinSCP and MEGA cloud storage — 483 GB in one engagement — and the victim is then extorted
+            <strong>without any encryptor being deployed at all</strong>. Dwell time across
+            engagements ranges from under a day to 25 days.<a class="src" href="#s3">3</a>
+          </p>
+        </div>
+
+        <div class="entry key">
+          <div class="when">2024-04</div>
+          <h3>Joint international advisory published</h3>
+          <p>
+            The FBI, CISA, Europol EC3 and NCSC-NL publish AA24-109A. It documents
+            <strong>Akira_v2</strong>, a Rust rewrite of the Linux and ESXi encryptor that accepts
+            runtime arguments to target VMware ESXi virtual machine disk files, restrict execution to
+            virtual machines only, stop running VMs before encrypting, set the encryption percentage
+            and control CPU threading.<a class="src" href="#s2">2</a><a class="src" href="#s4">4</a>
+          </p>
+        </div>
+
+        <div class="entry">
+          <div class="when">2024-11</div>
+          <h3>Assessed among the five most active ransomware operations</h3>
+          <p>
+            Unit 42 assesses the group as consistently ranking in the top five most active ransomware
+            operations. Affiliates are recorded creating new domain accounts for persistence, dumping
+            LSASS through <code>comsvcs.dll</code>, Kerberoasting, abusing the Zemana antimalware
+            driver to terminate endpoint protection, and building their own virtual machines on
+            compromised hosts to run outside host-level monitoring.<a class="src" href="#s4">4</a>
+          </p>
+        </div>
+
+        <div class="entry key">
+          <div class="when">2025-08</div>
+          <h3>SonicWall SSL VPN campaign begins</h3>
+          <p>
+            A surge of intrusions begins against SonicWall SSL VPN appliances, linked to
+            <strong>CVE-2024-40766</strong>. Rapid7 records a consistent chain: access through the
+            SSLVPN component, escalation to an elevated or service account, theft of files from
+            network shares and file servers, deletion or stopping of backups, then encryption at the
+            hypervisor level.<a class="src" href="#s5">5</a><a class="src" href="#s10">10</a>
+          </p>
+        </div>
+
+        <div class="entry key">
+          <div class="when">2025-09</div>
+          <h3>MFA enrolment abused through the Virtual Office Portal</h3>
+          <p>
+            Where a username and password had already been exposed, operators enrol
+            <strong>their own MFA/TOTP token</strong> through SonicWall's publicly reachable Virtual
+            Office Portal on port 4433, converting a stolen password into a fully enrolled VPN
+            identity that satisfies the MFA challenge legitimately. Over-provisioned SSLVPN Default
+            Users Group membership is recorded as a recurring contributing
+            misconfiguration.<a class="src" href="#s5">5</a>
+          </p>
+        </div>
+
+        <div class="entry key">
+          <div class="when">2025-11</div>
+          <h3>Advisory reissued with a critical-infrastructure warning</h3>
+          <p>
+            The joint advisory is updated on 13 November 2025 with additional co-signers including
+            DC3, HHS and European agencies, warning of an <strong>imminent threat to critical
+            infrastructure</strong>. Operators are recorded establishing command and control through
+            tunnelling utilities such as Ngrok to initiate encrypted sessions. The advisory records
+            more than <strong>250 affected organisations</strong> and approximately
+            <strong>USD 244.17 million</strong> in ransomware proceeds as of late September
+            2025.<a class="src" href="#s2">2</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- History section deliberately omitted: the group's origin is fully covered by the
+       first chronology entry, and the only pre-history available - a possible Conti
+       lineage - is an assessed association rather than documented fact. A History
+       section here would restate the Overview rather than add to it. -->
+
+  <!-- ===================== 4. CONCLUSION ===================== -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Conclusion</p>
+        <h2>The payload keeps changing; the way in does not</h2>
+      </div>
+
+      <div class="prose">
+        <p>
+          Across three years Akira has rewritten its encryptor twice, added platforms from Windows to
+          Linux, VMware ESXi and Nutanix AHV, and at times abandoned encryption entirely in favour of
+          pure data extortion. What has not changed once is the entry point. Every documented
+          intrusion begins at a remote-access service reachable from the internet and protected by a
+          single factor — whether that factor is stolen, brute-forced through a Cisco flaw, or
+          bypassed by enrolling a fresh token through a SonicWall portal the operator could reach
+          without authenticating. An organisation that models Akira as a malware problem will keep
+          buying the wrong control.
+        </p>
+      </div>
+
+      <div class="takeaways">
+        <div class="takeaway"><span class="n">1</span><p>
+          <strong>MFA on remote access stops more Akira intrusions than patching does.</strong> Every
+          CVE attributed to the group sits in an edge appliance and none was a zero-day; the recurring
+          entry point is a VPN account protected by a password alone.
+        </p></div>
+        <div class="takeaway"><span class="n">2</span><p>
+          <strong>Enrolled MFA is not enforced MFA.</strong> In the SonicWall campaign operators
+          enrolled their own TOTP token through a publicly reachable portal, so the challenge was
+          satisfied legitimately. A successful MFA event in the logs is not evidence the account is
+          controlled by its owner.
+        </p></div>
+        <div class="takeaway"><span class="n">3</span><p>
+          <strong>Encryption is now optional.</strong> Since October 2023 the group has run
+          extortion-only intrusions in which nothing is encrypted. A recovery plan built entirely
+          around restoring from backup answers only half of what this actor does.
+        </p></div>
+        <div class="takeaway"><span class="n">4</span><p>
+          <strong>Backups are a target before they are a remedy.</strong> The observed chain deletes
+          or stops backups as a deliberate step before encryptors run, and does so at hypervisor level
+          where a single action reaches every guest at once.
+        </p></div>
+        <div class="takeaway"><span class="n">5</span><p>
+          <strong>Detection anchored to the encryptor will age badly.</strong> C++ Akira, Rust
+          Megazord, Akira_v2 and the Nutanix AHV build are four payloads on one unchanged intrusion
+          path. Detection built on the path outlives detection built on the file.
+        </p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 5. RISK & IMPACT ===================== -->
+  <section class="alt">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Risk &amp; Impact</p>
+        <h2>Who this actor actually hits</h2>
+        <p>
+          Akira is opportunistic rather than strategic: it selects on exposure and ability to pay, not
+          on sector. The levels below therefore track where victims have actually been observed, not
+          which sectors sound most consequential.
+        </p>
+      </div>
+
+      <div class="sectors">
+        <div class="sector critical">
+          <div class="name">Manufacturing</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Critical</div>
+          <div class="why">Named as a primary target set by MITRE, CISA, Unit 42 and Sophos alike — the most consistently cited sector across three years of reporting.</div>
+        </div>
+        <div class="sector high">
+          <div class="name">Professional services and consulting</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">High</div>
+          <div class="why">Sits squarely in the observed SMB victim profile; named by both Unit 42 and Sophos among the recurring targets.</div>
+        </div>
+        <div class="sector high">
+          <div class="name">Education</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">High</div>
+          <div class="why">Named in Sophos victimology, and the sector's reliance on flat remote-access VPN estates matches the observed entry vector closely.</div>
+        </div>
+        <div class="sector high">
+          <div class="name">Healthcare</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">High</div>
+          <div class="why">The US Department of Health and Human Services co-signed the November 2025 advisory update, which is a direct signal of observed targeting.</div>
+        </div>
+        <div class="sector high">
+          <div class="name">Construction and engineering</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">High</div>
+          <div class="why">Listed by Unit 42 among the small and mid-sized business sectors the group concentrates on.</div>
+        </div>
+        <div class="sector moderate">
+          <div class="name">Government</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Moderate</div>
+          <div class="why">Appears in Sophos victimology, but the victim profile skews strongly toward private-sector SMBs rather than public bodies.</div>
+        </div>
+        <div class="sector moderate">
+          <div class="name">Financial services</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Moderate</div>
+          <div class="why">Plausible given the opportunistic targeting model, but no reviewed reporting places Akira in the sector specifically.</div>
+        </div>
+        <div class="sector moderate">
+          <div class="name">Energy and utilities</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Moderate</div>
+          <div class="why">The November 2025 update frames a critical-infrastructure threat in general terms; reporting does not place Akira intrusions in energy specifically.</div>
+        </div>
+        <div class="sector low">
+          <div class="name">Aerospace and defence</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Low</div>
+          <div class="why">Outside the documented pattern. The operation is financially motivated and selects organisations that pay quickly, not those with the strongest access controls.</div>
+        </div>
+      </div>
+
+      <div class="risklegend">
+        <div class="item"><span class="sw" style="background:var(--risk-critical)"></span> Critical — actively targeted</div>
+        <div class="item"><span class="sw" style="background:var(--risk-high)"></span> High — fits the victim profile</div>
+        <div class="item"><span class="sw" style="background:var(--risk-moderate)"></span> Moderate — plausible, not observed</div>
+        <div class="item"><span class="sw" style="background:var(--risk-low)"></span> Low — outside the pattern</div>
+        <div class="item"><span class="sw" style="background:var(--risk-minimal)"></span> Minimal — no indication</div>
+      </div>
+
+      <div class="callout">
+        <p>
+          <strong>Bottom line.</strong> Exposure to Akira is decided by the authentication on your
+          remote-access estate, not by your industry. A mid-sized manufacturer with enforced,
+          phishing-resistant MFA on every VPN account is a harder target than a large enterprise
+          carrying one legacy appliance with single-factor logon — and the group has consistently
+          gone for whichever it finds first.
+        </p>
+        <p>
+          For <em>how</em> a compromise actually unfolds — the techniques, the tooling and the
+          order they run in — see the companion attack-flow report,
+          <code>akira-G1024-attack-flow.html</code>.
+        </p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <h3>Sources</h3>
+    <ol class="sources">
+      <li id="s1">MITRE ATT&amp;CK — Groups: Akira (G1024) — <a href="https://attack.mitre.org/groups/G1024/">https://attack.mitre.org/groups/G1024/</a></li>
+      <li id="s2">CISA — #StopRansomware: Akira Ransomware (AA24-109A), updated 13 November 2025 — <a href="https://www.cisa.gov/news-events/cybersecurity-advisories/aa24-109a">https://www.cisa.gov/news-events/cybersecurity-advisories/aa24-109a</a></li>
+      <li id="s3">Sophos X-Ops — Akira, again: the ransomware that keeps on taking — <a href="https://www.sophos.com/en-us/blog/akira-again-the-ransomware-that-keeps-on-taking/">https://www.sophos.com/en-us/blog/akira-again-the-ransomware-that-keeps-on-taking/</a></li>
+      <li id="s4">Palo Alto Unit 42 — Threat Assessment: Howling Scorpius (Akira Ransomware) — <a href="https://unit42.paloaltonetworks.com/threat-assessment-howling-scorpius-akira-ransomware/">https://unit42.paloaltonetworks.com/threat-assessment-howling-scorpius-akira-ransomware/</a></li>
+      <li id="s5">Rapid7 — Akira Ransomware Group Utilizing SonicWall Devices for Initial Access — <a href="https://www.rapid7.com/blog/post/dr-akira-ransomware-group-utilizing-sonicwall-devices-for-initial-access/">https://www.rapid7.com/blog/post/dr-akira-ransomware-group-utilizing-sonicwall-devices-for-initial-access/</a></li>
+      <li id="s6">Cisco Talos — Talos IR trends: BEC attacks surge, while weaknesses in MFA persist (Q1 2024) — <a href="https://blog.talosintelligence.com/talos-ir-quarterly-trends-q1-2024/">https://blog.talosintelligence.com/talos-ir-quarterly-trends-q1-2024/</a></li>
+      <li id="s7">Trend Micro — Ransomware Spotlight: Akira — <a href="https://www.trendmicro.com/vinfo/us/security/news/ransomware-spotlight/ransomware-spotlight-akira">https://www.trendmicro.com/vinfo/us/security/news/ransomware-spotlight/ransomware-spotlight-akira</a></li>
+      <li id="s8">NVD — CVE-2020-3259 (Cisco ASA/FTD information disclosure, CVSS 7.5, CWE-200, in CISA KEV) — <a href="https://nvd.nist.gov/vuln/detail/CVE-2020-3259">https://nvd.nist.gov/vuln/detail/CVE-2020-3259</a></li>
+      <li id="s9">NVD — CVE-2023-20269 (Cisco ASA/FTD VPN AAA separation, CVSS 9.1, CWE-863/CWE-288) — <a href="https://nvd.nist.gov/vuln/detail/CVE-2023-20269">https://nvd.nist.gov/vuln/detail/CVE-2023-20269</a></li>
+      <li id="s10">NVD — CVE-2024-40766 (SonicWall SonicOS improper access control, CVSS 9.8, CWE-284, in CISA KEV) — <a href="https://nvd.nist.gov/vuln/detail/CVE-2024-40766">https://nvd.nist.gov/vuln/detail/CVE-2024-40766</a></li>
+    </ol>
+
+    <p class="note">
+      <strong>Confidence and sourcing.</strong> The chronology, tooling and victimology are drawn
+      from vendor and government reporting and are stated as reported. The Conti lineage is an
+      assessed association carried by multiple vendors, not an established fact, and is marked as
+      such in the text. Sector risk levels are <em>analyst assessments</em>, not measured values;
+      they deliberately share a colour ramp with CVSS severity but are rendered as meters rather
+      than scores so the two are not confused. One sourcing limitation is worth stating plainly:
+      the CISA advisory pages block automated retrieval, so the figures attributed to AA24-109A —
+      the victim count, the proceeds total and the November 2025 Ngrok detail — were taken from
+      summaries of that advisory rather than read from the advisory text directly. They should be
+      confirmed against the primary before being quoted externally.
+    </p>
+    <p class="note">
+      <strong>Pipeline.</strong> Step 1 of TI-Reporting. The companion ATT&amp;CK flow report
+      is built from the JSON handoff in <code>subjects/akira/handoff/</code>, of which this analysis
+      produces <code>analysis.json</code>.
+    </p>
+  </div>
+</footer>

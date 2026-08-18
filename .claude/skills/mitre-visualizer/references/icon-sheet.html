@@ -1,0 +1,628 @@
+<title>Tactic Icon Sheet</title>
+
+<style>
+  /* Single-theme by design, matching the attack-flow references. */
+  :root {
+    color-scheme: light;
+
+    --ground: #f6f4f2;
+    --surface: #ffffff;
+    --surface-2: #efece7;
+    --ink: #1b1e24;
+    --muted: #5c6470;
+    --hair: #ddd8d1;
+    --hair-strong: #c8c2b8;
+    --ember: #cf4a1f;
+    --ember-ink: #a8380f;
+    --ember-wash: rgba(207, 74, 31, 0.10);
+    --steel: #346b8f;
+    --steel-wash: rgba(52, 107, 143, 0.10);
+    --spine: #b9b2a8;
+    --shadow: 0 1px 2px rgba(20, 22, 26, 0.06), 0 8px 24px rgba(20, 22, 26, 0.05);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 24px; }
+
+  /* ---------- Hero ---------- */
+  header {
+    border-bottom: 1px solid var(--hair);
+    background: radial-gradient(120% 80% at 85% -10%, var(--ember-wash), transparent 60%), var(--surface);
+  }
+  .hero { padding: 60px 0 46px; }
+  .eyebrow {
+    font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+    font-size: 12px; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--muted); margin: 0 0 18px; display: flex; align-items: center; gap: 12px;
+  }
+  .eyebrow::after { content: ""; flex: 1; height: 1px; background: var(--hair-strong); }
+  h1 {
+    font-size: clamp(36px, 6vw, 58px); line-height: 1; letter-spacing: -.02em;
+    font-weight: 800; margin: 0; text-wrap: balance;
+  }
+  h1 .accent { color: var(--ember); }
+  .lede { font-size: clamp(16px, 2.2vw, 19px); color: var(--muted); max-width: 64ch; margin: 18px 0 0; }
+
+  .counts {
+    margin-top: 34px; display: grid; gap: 1px;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    background: var(--hair); border: 1px solid var(--hair); border-radius: 12px; overflow: hidden;
+  }
+  .count { background: var(--surface); padding: 16px 18px; }
+  .count .k { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0 0 6px; }
+  .count .v { font-size: 15px; font-weight: 600; margin: 0; font-variant-numeric: tabular-nums; }
+
+  /* ---------- Sections ---------- */
+  section { padding: 56px 0; }
+  .section-head { margin-bottom: 32px; }
+  .section-head .eyebrow { margin-bottom: 10px; }
+  .section-head h2 {
+    font-size: clamp(24px, 3.6vw, 32px); letter-spacing: -.01em; font-weight: 800;
+    margin: 0; text-wrap: balance;
+  }
+  .section-head p { color: var(--muted); max-width: 68ch; margin: 12px 0 0; font-size: 15.5px; }
+
+  /* ---------- Encoding legend ---------- */
+  .encodings { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-top: 8px; }
+  .encoding {
+    display: flex; gap: 14px; align-items: flex-start;
+    background: var(--surface-2); border: 1px solid var(--hair);
+    border-radius: 12px; padding: 16px 18px;
+  }
+  .encoding .demo { display: flex; gap: 8px; flex-shrink: 0; }
+  .encoding h3 { margin: 0 0 4px; font-size: 14px; font-weight: 700; }
+  .encoding p { margin: 0; font-size: 13.5px; color: var(--muted); }
+
+  /* ---------- Icon chip (matches .ticon in the flow template) ---------- */
+  .ticon {
+    width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--steel-wash); color: var(--steel);
+    border: 1px solid color-mix(in srgb, var(--steel) 26%, transparent);
+  }
+  .ticon svg { width: 22px; height: 22px; display: block; }
+  .ticon.heat {
+    background: color-mix(in srgb, var(--ember-wash) 70%, var(--steel-wash));
+    color: color-mix(in srgb, var(--ember) 62%, var(--steel));
+    border-color: color-mix(in srgb, var(--ember) 24%, transparent);
+  }
+  .ticon.impact {
+    background: var(--ember-wash); color: var(--ember);
+    border-color: color-mix(in srgb, var(--ember) 34%, transparent);
+  }
+  .ticon.sm { width: 32px; height: 32px; border-radius: 8px; }
+  .ticon.sm svg { width: 18px; height: 18px; }
+
+  /* ---------- Icon grid ---------- */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+  .tile {
+    background: var(--surface); border: 1px solid var(--hair); border-radius: 12px;
+    padding: 16px 18px; box-shadow: var(--shadow);
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .tile.new { border-color: color-mix(in srgb, var(--ember) 40%, var(--hair)); }
+  .tile-top { display: flex; gap: 13px; align-items: flex-start; }
+  .tile-id { flex: 1; min-width: 0; }
+  .tile-name {
+    margin: 0; font-size: 15.5px; font-weight: 700; letter-spacing: -.01em;
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .ta {
+    font-family: ui-monospace, Consolas, monospace; font-size: 11px; font-weight: 600;
+    color: var(--steel); background: var(--steel-wash);
+    padding: 1px 6px; border-radius: 4px;
+  }
+  .badge {
+    font-family: ui-monospace, Consolas, monospace; font-size: 9.5px; font-weight: 700;
+    letter-spacing: .1em; text-transform: uppercase;
+    color: var(--ember-ink); background: var(--ember-wash);
+    border: 1px solid color-mix(in srgb, var(--ember) 30%, transparent);
+    padding: 1px 6px; border-radius: 100px;
+  }
+  .tile-desc { margin: 5px 0 0; font-size: 13.5px; color: var(--muted); }
+
+  details {
+    border-top: 1px dashed var(--hair-strong); padding-top: 10px; margin-top: auto;
+  }
+  summary {
+    cursor: pointer; font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+    font-weight: 700; color: var(--muted); list-style: none;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary::before { content: "▸ "; display: inline-block; transition: transform .15s ease; }
+  details[open] summary::before { content: "▾ "; }
+  summary:focus-visible { outline: 2px solid var(--steel); outline-offset: 3px; border-radius: 3px; }
+  details pre {
+    margin: 10px 0 0; padding: 11px 12px; background: var(--surface-2);
+    border: 1px solid var(--hair); border-radius: 8px;
+    font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; line-height: 1.5;
+    color: var(--ink); overflow-x: auto; white-space: pre-wrap; word-break: break-all;
+  }
+
+  /* ---------- Reuse table ---------- */
+  .reuse-wrap { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  thead th {
+    text-align: left; font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--muted); font-weight: 700; padding: 0 14px 10px 0;
+    border-bottom: 1px solid var(--hair-strong); white-space: nowrap;
+  }
+  tbody td { padding: 10px 14px 10px 0; border-bottom: 1px solid var(--hair); vertical-align: middle; }
+  tbody tr:last-child td { border-bottom: none; }
+  td.icon-cell { width: 44px; padding-right: 14px; }
+  .tname { font-weight: 600; }
+  .reuse-note { color: var(--muted); font-size: 13.5px; }
+  tr.flag td { background: var(--ember-wash); }
+  tr.flag .tname { color: var(--ember-ink); }
+
+  .callout {
+    margin-top: 22px; padding: 16px 18px;
+    background: var(--surface-2); border: 1px dashed var(--hair-strong);
+    border-radius: 12px; font-size: 14px; color: var(--muted);
+  }
+  .callout strong { color: var(--ink); }
+
+  footer {
+    border-top: 1px solid var(--hair); padding: 32px 0 56px;
+    color: var(--muted); font-size: 13.5px;
+  }
+  footer a { color: var(--ember-ink); }
+  code.path { font-family: ui-monospace, Consolas, monospace; font-size: .92em; color: var(--ink); }
+</style>
+
+<header>
+  <div class="wrap hero">
+    <p class="eyebrow">mitre-visualizer <span style="color:var(--ember-ink);font-weight:600">reference</span></p>
+    <h1>Tactic Icon Sheet<span class="accent">.</span></h1>
+    <p class="lede">
+      Every tactic across all three ATT&amp;CK matrices, rendered at working size. Eighteen unique
+      icons cover thirty-nine tactics — because the matrices overlap heavily, and reusing an icon
+      is what lets a reader move between an Enterprise flow and an ICS flow without relearning
+      the vocabulary.
+    </p>
+
+    <div class="counts">
+      <div class="count"><p class="k">Enterprise</p><p class="v">15 tactics</p></div>
+      <div class="count"><p class="k">Mobile</p><p class="v">12 tactics</p></div>
+      <div class="count"><p class="k">ICS</p><p class="v">12 tactics</p></div>
+      <div class="count"><p class="k">Unique icons</p><p class="v">18</p></div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- ============ ENCODINGS ============ -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Read this first</p>
+        <h2>Two marks that carry meaning</h2>
+        <p>
+          These repeat deliberately across the set. Keep them consistent when adding an icon —
+          a slash used decoratively would break the reading of every icon that uses it properly.
+        </p>
+      </div>
+
+      <div class="encodings">
+        <div class="encoding">
+          <span class="demo">
+            <span class="ticon sm" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.2 12S5.8 5.8 12 5.8 21.8 12 21.8 12 18.2 18.2 12 18.2 2.2 12 2.2 12z"/><circle cx="12" cy="12" r="2.6"/><path d="M4.1 20.2L19.9 3.8"/></svg></span>
+            <span class="ticon sm" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8.6a6 6 0 1 0-12 0c0 6.4-2.4 8.2-2.4 8.2h16.8S18 15 18 8.6z"/><path d="M13.7 20.4a2 2 0 0 1-3.4 0"/><path d="M3.6 3.6l16.8 16.8"/></svg></span>
+          </span>
+          <div>
+            <h3>A diagonal slash negates the capability</h3>
+            <p>Stealth, Defense Impairment, ICS Evasion and Inhibit Response Function. Nothing else.</p>
+          </div>
+        </div>
+
+        <div class="encoding">
+          <span class="demo">
+            <span class="ticon sm impact" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5.6" rx="7.8" ry="2.9"/><path d="M19.8 5.6v12.8c0 1.6-3.5 2.9-7.8 2.9s-7.8-1.3-7.8-2.9V5.6"/><path d="M8.7 10.9l6.6 6.6M15.3 10.9l-6.6 6.6"/></svg></span>
+            <span class="ticon sm impact" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.8 21.2V11.6L8 14.8V11.6L13.2 14.8V5.2H20.8V21.2Z"/><path d="M15.4 9.8l3.8 3.8M19.2 9.8l-3.8 3.8"/></svg></span>
+          </span>
+          <div>
+            <h3>An X inside an object destroys that object</h3>
+            <p>The container says <em>what</em> was destroyed: a database for Enterprise, a plant for ICS.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout">
+        <strong>Colour is not part of the icon.</strong> Every path uses <code class="path">stroke="currentColor"</code>,
+        so the chip inherits its phase colour — steel for access phases, warming through
+        <span class="ticon sm heat" style="display:inline-flex;vertical-align:middle;width:22px;height:22px;border-radius:6px" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><circle cx="12" cy="12" r="9"/><path d="M12 12l6.4-5.3"/></svg></span>
+        escalation, to ember at the objective. Never hard-code a hex value in a path.
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ENTERPRISE ============ -->
+  <section style="background:var(--surface); border-top:1px solid var(--hair); border-bottom:1px solid var(--hair);">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Matrix 01 — Enterprise</p>
+        <h2>Fifteen tactics</h2>
+        <p>
+          The set most flows use. Note <strong>Stealth</strong> (TA0005, renamed from Defense Evasion)
+          and <strong>Defense Impairment</strong> (TA0112, newly split out of it) — avoiding the sensor
+          versus disabling it.
+        </p>
+      </div>
+
+      <div class="grid">
+
+        <div class="tile">
+          <div class="tile-top">
+            <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.4" cy="10.4" r="6.6"/><path d="M15.2 15.2l5.6 5.6"/><path d="M10.4 7.1v6.6M7.1 10.4h6.6"/></svg></span>
+            <div class="tile-id">
+              <p class="tile-name">Reconnaissance <span class="ta">TA0043</span></p>
+              <p class="tile-desc">Magnifier with crosshairs — surveying a target before touching it.</p>
+            </div>
+          </div>
+          <details><summary>SVG source</summary><pre>&lt;circle cx="10.4" cy="10.4" r="6.6"/&gt;
+&lt;path d="M15.2 15.2l5.6 5.6"/&gt;
+&lt;path d="M10.4 7.1v6.6M7.1 10.4h6.6"/&gt;</pre></details>
+        </div>
+
+        <div class="tile">
+          <div class="tile-top">
+            <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.7 2.6 15.3 0 18M12 3c-2.6 2.7-2.6 15.3 0 18"/></svg></span>
+            <div class="tile-id">
+              <p class="tile-name">Resource Development <span class="ta">TA0042</span></p>
+              <p class="tile-desc">Globe with meridians — acquiring infrastructure, VPNs, domains.</p>
+            </div>
+          </div>
+          <details><summary>SVG source</summary><pre>&lt;circle cx="12" cy="12" r="9"/&gt;
+&lt;path d="M3 12h18M12 3c2.6 2.7 2.6 15.3 0 18M12 3c-2.6 2.7-2.6 15.3 0 18"/&gt;</pre></details>
+        </div>
+
+        <div class="tile">
+          <div class="tile-top">
+            <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5l7.5 3.2v6c0 4.4-3.1 8.1-7.5 9.6-4.4-1.5-7.5-5.2-7.5-9.6v-6L12 2.5z"/><path d="M13.2 7.8l-2.9 4.7h3.4l-2.9 4.2"/></svg></span>
+            <div class="tile-id">
+              <p class="tile-name">Initial Access <span class="ta">TA0001</span></p>
+              <p class="tile-desc">Shield pierced by a bolt — the perimeter being broken.</p>
+            </div>
+          </div>
+          <details><summary>SVG source</summary><pre>&lt;path d="M12 2.5l7.5 3.2v6c0 4.4-3.1 8.1-7.5 9.6-4.4-1.5-7.5-5.2-7.5-9.6v-6L12 2.5z"/&gt;
+&lt;path d="M13.2 7.8l-2.9 4.7h3.4l-2.9 4.2"/&gt;</pre></details>
+        </div>
+
+        <div class="tile">
+          <div class="tile-top">
+            <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.8" y="4.2" width="18.4" height="15.6" rx="2.2"/><path d="M7 9.5l3 2.9-3 2.9M13 15.3h4.2"/></svg></span>
+            <div class="tile-id">
+              <p class="tile-name">Execution <span class="ta">TA0002</span></p>
+              <p class="tile-desc">Terminal prompt — code running on the host.</p>
+            </div>
+          </div>
+          <details><summary>SVG source</summary><pre>&lt;rect x="2.8" y="4.2" width="18.4" height="15.6" rx="2.2"/&gt;
+&lt;path d="M7 9.5l3 2.9-3 2.9M13 15.3h4.2"/&gt;</pre></details>
+        </div>
+
+        <div class="tile">
+          <div class="tile-top">
+            <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4.6" r="2.3"/><path d="M12 6.9v14.2M5 12v1.2a7 7 0 0 0 14 0V12"/><path d="M3.2 12h4.2M16.6 12h4.2"/></svg></span>
+            <div class="tile-id">
+              <p class="tile-name">Persistence <span class="ta">TA0003</span></p>
+              <p class="tile-desc">Anchor — the foothold that survives reboot.</p>
+            </div>
+          </div>
+          <details><summary>SVG source</summary><pre>&lt;circle cx="12" cy="4.6" r="2.3"/&gt;
+&lt;path d="M12 6.9v14.2M5 12v1.2a7 7 0 0 0 14 0V12"/&gt;
+&lt;path d="M3.2 12h4.2M16.6 12h4.2"/&gt;</pre></details>
+        </div>
+
+        <div class="tile new">
+          <div class="tile-top">
+            <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.8 20.6H7.9V15.5H13V10.4H18.1V5.3H21.2"/></svg></span>
+            <div class="tile-id">
+              <p class="tile-name">Privilege Escalation <span class="ta">TA0004</span> <span class="badge">Revised</span></p>
+              <p class="tile-desc">Ascending staircase — climbing privilege levels. Previously a shield, which collided with Initial Access and read as "defence" rather than "climb".</p>
+            </div>
+          </div>
+          <details><summary>SVG source</summary><pre>&lt;path d="M2.8 20.6H7.9V15.5H13V10.4H18.1V5.3H21.2"/&gt;</pre></details>
+        </div>
+
+        <div class="tile">
+          <div class="tile-top">
+            <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.2 12S5.8 5.8 12 5.8 21.8 12 21.8 12 18.2 18.2 12 18.2 2.2 12 2.2 12z"/><circle cx="12" cy="12" r="2.6"/><path d="M4.1 20.2L19.9 3.8"/></svg></span>
+            <div class="tile-id">
+              <p class="tile-name">Stealth <span class="ta">TA0005</span></p>
+              <p class="tile-desc">Struck-through eye — moving without being seen. Renamed by MITRE from Defense Evasion; the rename is Enterprise-only.</p>
+            </div>
+          </div>
+          <details><summary>SVG source</summary><pre>&lt;path d="M2.2 12S5.8 5.8 12 5.8 21.8 12 21.8 12 18.2 18.2 12 18.2 2.2 12 2.2 12z"/&gt;
+&lt;circle cx="12" cy="12" r="2.6"/&gt;
+&lt;path d="M4.1 20.2L19.9 3.8"/&gt;</pre></details>
+        </div>
+
+        <div class="tile">
+          <div class="tile-top">
+            <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8.6a6 6 0 1 0-12 0c0 6.4-2.4 8.2-2.4 8.2h16.8S18 15 18 8.6z"/><path d="M13.7 20.4a2 2 0 0 1-3.4 0"/><path d="M3.6 3.6l16.8 16.8"/></svg></span>
+            <div class="tile-id">
+              <p class="tile-name">Defense Impairment <span class="ta">TA0112</span></p>
+              <p class="tile-desc">Silenced bell — the alarm itself is broken. EDR kills, log clearing, BYOVD driver abuse (T1685).</p>
+            </div>
+          </div>
+          <details><summary>SVG source</summary><pre>&lt;path d="M18 8.6a6 6 0 1 0-12 0c0 6.4-2.4 8.2-2.4 8.2h16.8S18 15 18 8.6z"/&gt;
+&lt;path d="M13.7 20.4a2 2 0 0 1-3.4 0"/&gt;
+&lt;path d="M3.6 3.6l16.8 16.8"/&gt;</pre></details>
+        </div>
+
+        <div class="tile">
+          <div class="tile-top">
+            <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.8" cy="12" r="4.3"/><path d="M12.1 12h9.1M17.6 12v3.9M20.4 12v2.8"/></svg></span>
+            <div class="tile-id">
+              <p class="tile-name">Credential Access <span class="ta">TA0006</span></p>
+              <p class="tile-desc">Key — stolen secrets.</p>
+            </div>
+          </div>
+          <details><summary>SVG source</summary><pre>&lt;circle cx="7.8" cy="12" r="4.3"/&gt;
+&lt;path d="M12.1 12h9.1M17.6 12v3.9M20.4 12v2.8"/&gt;</pre></details>
+        </div>
+
+        <div class="tile">
+          <div class="tile-top">
+            <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.6"/><circle cx="12" cy="12" r="1.1"/><path d="M12 12l6.4-5.3"/></svg></span>
+            <div class="tile-id">
+              <p class="tile-name">Discovery <span class="ta">TA0007</span></p>
+              <p class="tile-desc">Radar sweep — mapping the internal terrain.</p>
+            </div>
+          </div>
+          <details><summary>SVG source</summary><pre>&lt;circle cx="12" cy="12" r="9"/&gt;
+&lt;circle cx="12" cy="12" r="4.6"/&gt;
+&lt;circle cx="12" cy="12" r="1.1"/&gt;
+&lt;path d="M12 12l6.4-5.3"/&gt;</pre></details>
+        </div>
+
+        <div class="tile">
+          <div class="tile-top">
+            <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="1.8" y="7.8" width="7.4" height="8.4" rx="1.6"/><rect x="14.8" y="7.8" width="7.4" height="8.4" rx="1.6"/><path d="M9.6 12h4.8M12.4 9.6l2.4 2.4-2.4 2.4"/></svg></span>
+            <div class="tile-id">
+              <p class="tile-name">Lateral Movement <span class="ta">TA0008</span></p>
+              <p class="tile-desc">Host to host with a directed hop.</p>
+            </div>
+          </div>
+          <details><summary>SVG source</summary><pre>&lt;rect x="1.8" y="7.8" width="7.4" height="8.4" rx="1.6"/&gt;
+&lt;rect x="14.8" y="7.8" width="7.4" height="8.4" rx="1.6"/&gt;
+&lt;path d="M9.6 12h4.8M12.4 9.6l2.4 2.4-2.4 2.4"/&gt;</pre></details>
+        </div>
+
+        <div class="tile">
+          <div class="tile-top">
+            <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8l9.2 4.6-9.2 4.6-9.2-4.6L12 2.8z"/><path d="M2.8 12L12 16.6 21.2 12"/><path d="M2.8 16.6L12 21.2l9.2-4.6"/></svg></span>
+            <div class="tile-id">
+              <p class="tile-name">Collection <span class="ta">TA0009</span></p>
+              <p class="tile-desc">Stacked layers — data gathered and staged.</p>
+            </div>
+          </div>
+          <details><summary>SVG source</summary><pre>&lt;path d="M12 2.8l9.2 4.6-9.2 4.6-9.2-4.6L12 2.8z"/&gt;
+&lt;path d="M2.8 12L12 16.6 21.2 12"/&gt;
+&lt;path d="M2.8 16.6L12 21.2l9.2-4.6"/&gt;</pre></details>
+        </div>
+
+        <div class="tile">
+          <div class="tile-top">
+            <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2.2"/><path d="M7.9 7.9a5.8 5.8 0 0 0 0 8.2M16.1 16.1a5.8 5.8 0 0 0 0-8.2"/><path d="M5 5a9.9 9.9 0 0 0 0 14M19 19a9.9 9.9 0 0 0 0-14"/></svg></span>
+            <div class="tile-id">
+              <p class="tile-name">Command and Control <span class="ta">TA0011</span></p>
+              <p class="tile-desc">Broadcast waves — the beacon channel home.</p>
+            </div>
+          </div>
+          <details><summary>SVG source</summary><pre>&lt;circle cx="12" cy="12" r="2.2"/&gt;
+&lt;path d="M7.9 7.9a5.8 5.8 0 0 0 0 8.2M16.1 16.1a5.8 5.8 0 0 0 0-8.2"/&gt;
+&lt;path d="M5 5a9.9 9.9 0 0 0 0 14M19 19a9.9 9.9 0 0 0 0-14"/&gt;</pre></details>
+        </div>
+
+        <div class="tile">
+          <div class="tile-top">
+            <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4.2 14.8v4a2.2 2.2 0 0 0 2.2 2.2h11.2a2.2 2.2 0 0 0 2.2-2.2v-4"/><path d="M12 2.9v12.2M7.9 7l4.1-4.1L16.1 7"/></svg></span>
+            <div class="tile-id">
+              <p class="tile-name">Exfiltration <span class="ta">TA0010</span></p>
+              <p class="tile-desc">Data leaving the container.</p>
+            </div>
+          </div>
+          <details><summary>SVG source</summary><pre>&lt;path d="M4.2 14.8v4a2.2 2.2 0 0 0 2.2 2.2h11.2a2.2 2.2 0 0 0 2.2-2.2v-4"/&gt;
+&lt;path d="M12 2.9v12.2M7.9 7l4.1-4.1L16.1 7"/&gt;</pre></details>
+        </div>
+
+        <div class="tile">
+          <div class="tile-top">
+            <span class="ticon impact" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5.6" rx="7.8" ry="2.9"/><path d="M19.8 5.6v12.8c0 1.6-3.5 2.9-7.8 2.9s-7.8-1.3-7.8-2.9V5.6"/><path d="M8.7 10.9l6.6 6.6M15.3 10.9l-6.6 6.6"/></svg></span>
+            <div class="tile-id">
+              <p class="tile-name">Impact <span class="ta">TA0040</span></p>
+              <p class="tile-desc">Database struck through — destruction, encryption, denial of <em>data</em>.</p>
+            </div>
+          </div>
+          <details><summary>SVG source</summary><pre>&lt;ellipse cx="12" cy="5.6" rx="7.8" ry="2.9"/&gt;
+&lt;path d="M19.8 5.6v12.8c0 1.6-3.5 2.9-7.8 2.9s-7.8-1.3-7.8-2.9V5.6"/&gt;
+&lt;path d="M8.7 10.9l6.6 6.6M15.3 10.9l-6.6 6.6"/&gt;</pre></details>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ICS ============ -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Matrix 02 — ICS</p>
+        <h2>Three tactics Enterprise doesn't have</h2>
+        <p>
+          ICS shares nine tactic names with Enterprise, but adds two that exist only where cyber
+          meets physics — and redefines Impact to mean equipment rather than data.
+        </p>
+      </div>
+
+      <div class="grid">
+
+        <div class="tile new">
+          <div class="tile-top">
+            <span class="ticon heat" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8.3 3h7.4L21 8.3v7.4L15.7 21H8.3L3 15.7V8.3L8.3 3z"/><path d="M4.8 4.8l14.4 14.4"/></svg></span>
+            <div class="tile-id">
+              <p class="tile-name">Inhibit Response Function <span class="ta">TA0107</span> <span class="badge">New</span></p>
+              <p class="tile-desc">Emergency-stop octagon, slashed — safety systems prevented from reacting. Defense Impairment breaks the <em>security</em> stack; this breaks the <em>safety</em> stack.</p>
+            </div>
+          </div>
+          <details><summary>SVG source</summary><pre>&lt;path d="M8.3 3h7.4L21 8.3v7.4L15.7 21H8.3L3 15.7V8.3L8.3 3z"/&gt;
+&lt;path d="M4.8 4.8l14.4 14.4"/&gt;</pre></details>
+        </div>
+
+        <div class="tile new">
+          <div class="tile-top">
+            <span class="ticon heat" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.4 18a8.6 8.6 0 0 1 17.2 0"/><path d="M12 18l5.2-6.2"/><circle cx="12" cy="18" r="1.4"/></svg></span>
+            <div class="tile-id">
+              <p class="tile-name">Impair Process Control <span class="ta">TA0106</span> <span class="badge">New</span></p>
+              <p class="tile-desc">Gauge driven off-scale — setpoints, actuators and process values manipulated.</p>
+            </div>
+          </div>
+          <details><summary>SVG source</summary><pre>&lt;path d="M3.4 18a8.6 8.6 0 0 1 17.2 0"/&gt;
+&lt;path d="M12 18l5.2-6.2"/&gt;
+&lt;circle cx="12" cy="18" r="1.4"/&gt;</pre></details>
+        </div>
+
+        <div class="tile new">
+          <div class="tile-top">
+            <span class="ticon impact" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.8 21.2V11.6L8 14.8V11.6L13.2 14.8V5.2H20.8V21.2Z"/><path d="M15.4 9.8l3.8 3.8M19.2 9.8l-3.8 3.8"/></svg></span>
+            <div class="tile-id">
+              <p class="tile-name">Impact — ICS <span class="ta">TA0105</span> <span class="badge">New</span></p>
+              <p class="tile-desc">Plant struck through — loss of control, loss of safety, physical damage. Use instead of the database icon for ICS flows.</p>
+            </div>
+          </div>
+          <details><summary>SVG source</summary><pre>&lt;path d="M2.8 21.2V11.6L8 14.8V11.6L13.2 14.8V5.2H20.8V21.2Z"/&gt;
+&lt;path d="M15.4 9.8l3.8 3.8M19.2 9.8l-3.8 3.8"/&gt;</pre></details>
+        </div>
+
+      </div>
+
+      <div class="callout">
+        <strong>The remaining nine ICS tactics reuse Enterprise icons.</strong>
+        Initial Access <span class="ta">TA0108</span>, Execution <span class="ta">TA0104</span>,
+        Persistence <span class="ta">TA0110</span>, Privilege Escalation <span class="ta">TA0111</span>,
+        Discovery <span class="ta">TA0102</span>, Lateral Movement <span class="ta">TA0109</span>,
+        Collection <span class="ta">TA0100</span>, Command and Control <span class="ta">TA0101</span>,
+        and <strong>Evasion</strong> <span class="ta">TA0103</span> — which uses the Stealth eye but
+        keeps its own shorter label, <em>Evasion</em>.
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ MOBILE ============ -->
+  <section style="background:var(--surface); border-top:1px solid var(--hair); border-bottom:1px solid var(--hair);">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Matrix 03 — Mobile</p>
+        <h2>Twelve tactics, no new icons</h2>
+        <p>
+          Every Mobile tactic name already exists in the Enterprise set. The one trap is the label:
+          Mobile did <strong>not</strong> get the Stealth rename.
+        </p>
+      </div>
+
+      <div class="reuse-wrap">
+        <table>
+          <thead>
+            <tr><th></th><th>Mobile tactic</th><th>TA ID</th><th>Icon</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="icon-cell"><span class="ticon sm" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5l7.5 3.2v6c0 4.4-3.1 8.1-7.5 9.6-4.4-1.5-7.5-5.2-7.5-9.6v-6L12 2.5z"/><path d="M13.2 7.8l-2.9 4.7h3.4l-2.9 4.2"/></svg></span></td>
+              <td class="tname">Initial Access</td><td><span class="ta">TA0027</span></td><td class="reuse-note">Initial Access</td>
+            </tr>
+            <tr>
+              <td class="icon-cell"><span class="ticon sm" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.8" y="4.2" width="18.4" height="15.6" rx="2.2"/><path d="M7 9.5l3 2.9-3 2.9M13 15.3h4.2"/></svg></span></td>
+              <td class="tname">Execution</td><td><span class="ta">TA0041</span></td><td class="reuse-note">Execution</td>
+            </tr>
+            <tr>
+              <td class="icon-cell"><span class="ticon sm" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4.6" r="2.3"/><path d="M12 6.9v14.2M5 12v1.2a7 7 0 0 0 14 0V12"/><path d="M3.2 12h4.2M16.6 12h4.2"/></svg></span></td>
+              <td class="tname">Persistence</td><td><span class="ta">TA0028</span></td><td class="reuse-note">Persistence</td>
+            </tr>
+            <tr>
+              <td class="icon-cell"><span class="ticon sm" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.8 20.6H7.9V15.5H13V10.4H18.1V5.3H21.2"/></svg></span></td>
+              <td class="tname">Privilege Escalation</td><td><span class="ta">TA0029</span></td><td class="reuse-note">Privilege Escalation</td>
+            </tr>
+            <tr class="flag">
+              <td class="icon-cell"><span class="ticon sm" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.2 12S5.8 5.8 12 5.8 21.8 12 21.8 12 18.2 18.2 12 18.2 2.2 12 2.2 12z"/><circle cx="12" cy="12" r="2.6"/><path d="M4.1 20.2L19.9 3.8"/></svg></span></td>
+              <td class="tname">Defense Evasion</td><td><span class="ta">TA0030</span></td><td class="reuse-note">Stealth eye — but keep the <strong>Defense Evasion</strong> label</td>
+            </tr>
+            <tr>
+              <td class="icon-cell"><span class="ticon sm" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.8" cy="12" r="4.3"/><path d="M12.1 12h9.1M17.6 12v3.9M20.4 12v2.8"/></svg></span></td>
+              <td class="tname">Credential Access</td><td><span class="ta">TA0031</span></td><td class="reuse-note">Credential Access</td>
+            </tr>
+            <tr>
+              <td class="icon-cell"><span class="ticon sm" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.6"/><circle cx="12" cy="12" r="1.1"/><path d="M12 12l6.4-5.3"/></svg></span></td>
+              <td class="tname">Discovery</td><td><span class="ta">TA0032</span></td><td class="reuse-note">Discovery</td>
+            </tr>
+            <tr>
+              <td class="icon-cell"><span class="ticon sm" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="1.8" y="7.8" width="7.4" height="8.4" rx="1.6"/><rect x="14.8" y="7.8" width="7.4" height="8.4" rx="1.6"/><path d="M9.6 12h4.8M12.4 9.6l2.4 2.4-2.4 2.4"/></svg></span></td>
+              <td class="tname">Lateral Movement</td><td><span class="ta">TA0033</span></td><td class="reuse-note">Lateral Movement</td>
+            </tr>
+            <tr>
+              <td class="icon-cell"><span class="ticon sm" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8l9.2 4.6-9.2 4.6-9.2-4.6L12 2.8z"/><path d="M2.8 12L12 16.6 21.2 12"/><path d="M2.8 16.6L12 21.2l9.2-4.6"/></svg></span></td>
+              <td class="tname">Collection</td><td><span class="ta">TA0035</span></td><td class="reuse-note">Collection</td>
+            </tr>
+            <tr>
+              <td class="icon-cell"><span class="ticon sm" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2.2"/><path d="M7.9 7.9a5.8 5.8 0 0 0 0 8.2M16.1 16.1a5.8 5.8 0 0 0 0-8.2"/><path d="M5 5a9.9 9.9 0 0 0 0 14M19 19a9.9 9.9 0 0 0 0-14"/></svg></span></td>
+              <td class="tname">Command and Control</td><td><span class="ta">TA0037</span></td><td class="reuse-note">Command and Control</td>
+            </tr>
+            <tr>
+              <td class="icon-cell"><span class="ticon sm" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4.2 14.8v4a2.2 2.2 0 0 0 2.2 2.2h11.2a2.2 2.2 0 0 0 2.2-2.2v-4"/><path d="M12 2.9v12.2M7.9 7l4.1-4.1L16.1 7"/></svg></span></td>
+              <td class="tname">Exfiltration</td><td><span class="ta">TA0036</span></td><td class="reuse-note">Exfiltration</td>
+            </tr>
+            <tr>
+              <td class="icon-cell"><span class="ticon sm impact" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5.6" rx="7.8" ry="2.9"/><path d="M19.8 5.6v12.8c0 1.6-3.5 2.9-7.8 2.9s-7.8-1.3-7.8-2.9V5.6"/><path d="M8.7 10.9l6.6 6.6M15.3 10.9l-6.6 6.6"/></svg></span></td>
+              <td class="tname">Impact</td><td><span class="ta">TA0034</span></td><td class="reuse-note">Impact (database)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FALLBACK ============ -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">When nothing fits</p>
+        <h2>The fallback marker</h2>
+      </div>
+      <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr))">
+        <div class="tile">
+          <div class="tile-top">
+            <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.6"/><path d="M12 7.8v4.6M12 15.8v.1"/></svg></span>
+            <div class="tile-id">
+              <p class="tile-name">Non-ATT&amp;CK phase</p>
+              <p class="tile-desc">For report-specific steps like "Victim Selection". Use this rather than inventing an icon that competes with the set.</p>
+            </div>
+          </div>
+          <details><summary>SVG source</summary><pre>&lt;circle cx="12" cy="12" r="8.6"/&gt;
+&lt;path d="M12 7.8v4.6M12 15.8v.1"/&gt;</pre></details>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>
+      Tactic lists verified against
+      <a href="https://attack.mitre.org/tactics/enterprise/">Enterprise</a>,
+      <a href="https://attack.mitre.org/tactics/mobile/">Mobile</a> and
+      <a href="https://attack.mitre.org/tactics/ics/">ICS</a> matrices on 2026-08-14.
+      Paths are the source of truth in <code class="path">tactic-icons.md</code>; this sheet renders them.
+    </p>
+  </div>
+</footer>

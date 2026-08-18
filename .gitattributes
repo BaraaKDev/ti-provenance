@@ -1,0 +1,15 @@
+# Store every file byte-for-byte. No newline conversion, no charset guessing.
+#
+# This is deliberate and load-bearing. CLAUDE.md records four separate occasions where an
+# encoding transform silently corrupted this project - a BOM that broke skill discovery, an
+# ANSI read that shredded 22 techniques, an em-dash that became a parser error. Git's default
+# on Windows (core.autocrlf=true) is another such transform. Turning it off here stops version
+# control from becoming the fifth trap.
+#
+# The cost is that a file authored with CRLF stays CRLF in the repo. That is the correct
+# trade: the scripts are pure ASCII and the validators read with explicit encoding, so byte
+# fidelity matters far more here than newline tidiness.
+* -text
+
+# Mark the deliverable binary so git never attempts a textual diff on it.
+*.pdf binary

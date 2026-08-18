@@ -1,0 +1,212 @@
+{
+  "schema": "mapping/1.0",
+  "subject": "Agrius",
+  "slug": "agrius",
+  "matrix": "enterprise",
+  "tactics": [
+    {
+      "tactic": "Resource Development",
+      "techniques": [
+        {
+          "id": "T1583",
+          "name": "Acquire Infrastructure",
+          "usage": "Routes operator traffic through commercial VPN services such as ProtonVPN, so scanning and intrusion do not trace back.",
+          "tooling": ["ProtonVPN"]
+        }
+      ]
+    },
+    {
+      "tactic": "Initial Access",
+      "techniques": [
+        {
+          "id": "T1190",
+          "name": "Exploit Public-Facing Application",
+          "usage": "Path traversal against the FortiOS SSL VPN portal retrieves system files without authenticating; the credentials inside are then used to connect as a real user. MITRE also names SQL injection as a second route, presented as an example rather than an exhaustive list.",
+          "tooling": [],
+          "via_cve": "CVE-2018-13379"
+        }
+      ]
+    },
+    {
+      "tactic": "Execution",
+      "techniques": [
+        {
+          "id": "T1059.003",
+          "name": "Command and Scripting Interpreter: Windows Command Shell",
+          "usage": "ASPXSpy web shells relay operator input to cmd.exe on the compromised server.",
+          "tooling": ["ASPXSpy"]
+        }
+      ]
+    },
+    {
+      "tactic": "Persistence",
+      "techniques": [
+        {
+          "id": "T1505.003",
+          "name": "Server Software Component: Web Shell",
+          "usage": "Plants multiple ASPXSpy variants as durable re-entry points.",
+          "tooling": ["ASPXSpy"]
+        },
+        {
+          "id": "T1543.003",
+          "name": "Create or Modify System Process: Windows Service",
+          "usage": "Registers the IPsec Helper backdoor as an auto-starting service.",
+          "tooling": ["IPsec Helper"]
+        }
+      ]
+    },
+    {
+      "tactic": "Stealth",
+      "techniques": [
+        {
+          "id": "T1036",
+          "name": "Masquerading",
+          "usage": "Renames the Plink tunnelling tool to systems.exe to blend with system binaries.",
+          "tooling": ["Plink"]
+        },
+        {
+          "id": "T1140",
+          "name": "Deobfuscate/Decode Files or Information",
+          "usage": "Deploys base64-encoded ASPXSpy variants to slip past signature matching.",
+          "tooling": []
+        },
+        {
+          "id": "T1078.002",
+          "name": "Valid Accounts: Domain Accounts",
+          "usage": "Reuses valid domain credentials so subsequent activity reads as legitimate.",
+          "tooling": []
+        }
+      ]
+    },
+    {
+      "tactic": "Defense Impairment",
+      "techniques": [
+        {
+          "id": "T1685",
+          "name": "Disable or Modify Tools",
+          "usage": "Loads the vulnerable GMER64.sys driver to terminate EDR and antivirus services from kernel mode.",
+          "tooling": ["GMER64.sys"]
+        }
+      ]
+    },
+    {
+      "tactic": "Credential Access",
+      "techniques": [
+        {
+          "id": "T1003.001",
+          "name": "OS Credential Dumping: LSASS Memory",
+          "usage": "Mimikatz dumps plaintext and hashed credentials from memory.",
+          "tooling": ["Mimikatz"]
+        },
+        {
+          "id": "T1003.002",
+          "name": "OS Credential Dumping: Security Account Manager",
+          "usage": "Extracts the local SAM hive.",
+          "tooling": []
+        },
+        {
+          "id": "T1110.003",
+          "name": "Brute Force: Password Spraying",
+          "usage": "Sprays recovered credentials over SMB to widen access.",
+          "tooling": []
+        }
+      ]
+    },
+    {
+      "tactic": "Discovery",
+      "techniques": [
+        {
+          "id": "T1046",
+          "name": "Network Service Discovery",
+          "usage": "Scans hosts and services with the WinEggDrop port scanner.",
+          "tooling": ["WinEggDrop"]
+        },
+        {
+          "id": "T1018",
+          "name": "Remote System Discovery",
+          "usage": "Enumerates reachable hosts with NBTscan.",
+          "tooling": ["NBTscan"]
+        }
+      ]
+    },
+    {
+      "tactic": "Lateral Movement",
+      "techniques": [
+        {
+          "id": "T1021.001",
+          "name": "Remote Services: Remote Desktop Protocol",
+          "usage": "Tunnels RDP through web shells and Plink to pivot deeper into the estate.",
+          "tooling": ["Plink"]
+        },
+        {
+          "id": "T1570",
+          "name": "Lateral Tool Transfer",
+          "usage": "Pulls payloads from file-sharing sites rather than hosting infrastructure itself.",
+          "tooling": ["ufile.io", "easyupload.io"]
+        }
+      ]
+    },
+    {
+      "tactic": "Collection",
+      "techniques": [
+        {
+          "id": "T1119",
+          "name": "Automated Collection",
+          "usage": "Custom sql.net4.exe queries SQL databases and extracts personally identifiable information.",
+          "tooling": ["sql.net4.exe"]
+        },
+        {
+          "id": "T1005",
+          "name": "Data from Local System",
+          "usage": "Gathers files from database and other critical servers.",
+          "tooling": []
+        },
+        {
+          "id": "T1560.001",
+          "name": "Archive Collected Data: Archive via Utility",
+          "usage": "Compresses the haul with 7zip before transfer.",
+          "tooling": ["7zip"]
+        },
+        {
+          "id": "T1074.001",
+          "name": "Data Staged: Local Data Staging",
+          "usage": "Parks archives in C:\\windows\\temp\\s\\ ahead of exfiltration.",
+          "tooling": []
+        }
+      ]
+    },
+    {
+      "tactic": "Exfiltration",
+      "techniques": [
+        {
+          "id": "T1041",
+          "name": "Exfiltration Over C2 Channel",
+          "usage": "Moves staged archives out using PuTTY and WinSCP.",
+          "tooling": ["PuTTY", "WinSCP"]
+        }
+      ]
+    },
+    {
+      "tactic": "Impact",
+      "techniques": [
+        {
+          "id": "T1485",
+          "name": "Data Destruction",
+          "usage": "Detonates wipers that present a ransom note while the data is already unrecoverable. Destruction is the objective; the ransomware is cover.",
+          "tooling": ["Apostle", "DEADWOOD", "MultiLayer Wiper", "BFG Agonizer", "Moneybird"]
+        }
+      ]
+    }
+  ],
+  "arsenal": [
+    { "name": "ASPXSpy", "sid": "S0073", "role": "ASP.NET web shell used for execution and persistence", "kind": "Web shell" },
+    { "name": "IPsec Helper", "sid": "S1132", "role": "Post-exploitation remote-access framework run as a service", "kind": "Backdoor" },
+    { "name": "Mimikatz", "sid": "S0002", "role": "Credential dumping from LSASS memory", "kind": "Cred access" },
+    { "name": "NBTscan", "sid": "S0590", "role": "NetBIOS scanner for remote-host discovery", "kind": "Discovery" },
+    { "name": "Apostle", "sid": "S1133", "role": "Wiper masquerading as ransomware", "kind": "Wiper" },
+    { "name": "DEADWOOD", "sid": "S1134", "role": "Standalone data-destruction wiper", "kind": "Wiper" },
+    { "name": "MultiLayer Wiper", "sid": "S1135", "role": "Multi-stage file-destruction tool", "kind": "Wiper" },
+    { "name": "BFG Agonizer", "sid": "S1136", "role": "Wiper used in later destructive operations", "kind": "Wiper" },
+    { "name": "Moneybird", "sid": "S1137", "role": "Ransomware providing cover for destruction", "kind": "Ransomware" }
+  ]
+}

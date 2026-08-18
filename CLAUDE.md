@@ -219,8 +219,10 @@ Two things the exporter fixes before printing, both of which would otherwise rui
   information. The wrapper forces `print-color-adjust: exact`, widens the 940px reading column
   to the printable width so nothing is clipped, and stops cards breaking across pages.
 
-Run it **after** `Verify-Bulletin.ps1` passes, not before. The PDF is a faithful render of
-whatever it is given, including a bulletin with a placeholder still in it.
+**The exporter runs `Verify-Bulletin.ps1` itself and refuses on failure.** That gate is not
+politeness — the PDF is a faithful render of whatever it is handed, including a bulletin with
+a surviving placeholder or no remediation guidance at all, and the PDF is the artefact that
+leaves the project. `-SkipVerify` overrides it when you know why you are overriding.
 
 **Check the PDF by eye once.** The verifier can confirm the HTML is structurally sound and the
 exporter can confirm the PDF is well-formed, but neither can see a clipped column or a colour

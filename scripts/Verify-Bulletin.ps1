@@ -191,11 +191,26 @@ process {
         if ($t -match '(?s)<div class="flowpart">(.*?)<!-- BULLETIN:DEFENCE -->') { $flowHalf = $matches[1] }
         elseif ($t -match '(?s)<div class="flowpart">(.*)')                        { $flowHalf = $matches[1] }
         $hasRemed = $flowHalf -match '(?i)>\s*Remediation'
-        $defOk = (-not $defM.Success) -or [string]::IsNullOrWhiteSpace($defM.Groups[1].Value) -or ($defM.Groups[1].Value -notmatch '\{\{')
-        $results += Test-Check 'defensive guidance resolved' $defOk $(
-            if (-not $defOk -and $hasRemed) { 'still a placeholder - the flow carries Remediation, so empty the region' }
-            elseif (-not $defOk) { 'still a placeholder, and the flow has no Remediation part' }
-            elseif ($hasRemed) { 'carried by the flow report' } else { 'written into the bulletin' })
+        # The region's own content, with HTML comments stripped - an intentionally-emptied
+        # region carries a comment explaining why, and that must not read as content.
+        $defBody = ''
+        if ($defM.Success) { $defBody = ([regex]::Replace($defM.Groups[1].Value, '(?s)<!--.*?-->', '')).Trim() }
+        $defPlaceholder = $defBody -match '\{\{'
+
+        # The question that actually matters is not "is the region tidy" but "does this
+        # bulletin carry remediation guidance AT ALL". Emptying the region is correct only
+        # when part 2 supplies it. An actor flow has no CVEs and so no Remediation section,
+        # which is exactly when an emptied region silently ships a bulletin with none - and
+        # the earlier version of this check reported that as "written into the bulletin".
+        $remedSomewhere = $hasRemed -or ($defBody.Length -gt 0)
+        $defOk = (-not $defPlaceholder) -and $remedSomewhere
+        $results += Test-Check 'bulletin carries remediation guidance' $defOk $(
+            if ($defPlaceholder -and $hasRemed) { 'still a placeholder - part 2 carries Remediation, so empty the region' }
+            elseif ($defPlaceholder) { 'still a placeholder, and part 2 has no Remediation section' }
+            elseif (-not $remedSomewhere) { 'NONE - part 2 has no Remediation and BULLETIN:DEFENCE is empty' }
+            elseif ($hasRemed -and $defBody.Length -gt 0) { 'part 2 Remediation, plus a defence section' }
+            elseif ($hasRemed) { 'carried by part 2 Remediation' }
+            else { 'written into BULLETIN:DEFENCE' })
 
         # A filled editorial region must carry its own heading. Without one the section renders
         # as an unlabelled slab of prose that reads as a continuation of whatever preceded it -

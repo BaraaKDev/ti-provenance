@@ -37,7 +37,13 @@ param(
 
     # Letter by default - this project is North American. A4 for everywhere else.
     [ValidateSet('Letter', 'A4')]
-    [string]$PageSize = 'Letter'
+    [string]$PageSize = 'Letter',
+
+    # Export without running Verify-Bulletin first. The gate exists because the PDF is a
+    # faithful render of whatever it is handed, including a bulletin with a surviving
+    # placeholder or no remediation guidance at all - and the PDF is the artefact that
+    # leaves the project, so an unchecked one is the expensive kind of mistake.
+    [switch]$SkipVerify
 )
 
 begin {
@@ -185,6 +191,23 @@ process {
             Write-Host "  REFUSED: output/$pdfName exists. Re-run with -Force."
             $anyFailed = $true
             continue
+        }
+
+        # Gate on the verifier rather than trusting the operator to have run it. Its output is
+        # suppressed unless it fails, so a clean export stays quiet.
+        if (-not $SkipVerify) {
+            $vb = Join-Path $PSScriptRoot 'Verify-Bulletin.ps1'
+            if (Test-Path -LiteralPath $vb) {
+                $global:LASTEXITCODE = 0
+                $vout = (& $vb -Path $dir 6>&1 | Out-String)
+                if ($LASTEXITCODE -ne 0) {
+                    Write-Host "  REFUSED: Verify-Bulletin failed - not exporting an unchecked bulletin."
+                    ($vout -split "`r?`n" | Where-Object { $_ -match '\[FAIL\]' }) | ForEach-Object { Write-Host "         $($_.Trim())" }
+                    Write-Host "         Fix it, or pass -SkipVerify if you know why you are overriding."
+                    $anyFailed = $true
+                    continue
+                }
+            }
         }
 
         # Wrap the fragment in a real document and append the print rules.

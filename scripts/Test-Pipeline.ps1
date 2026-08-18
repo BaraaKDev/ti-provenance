@@ -308,6 +308,27 @@ Write-Text $hp $body
 $r = Invoke-Target $VBULL @{ Path = $hf }
 Assert 'editorial region stripped of its heading' ($r.Code -eq 1 -and $r.Out -match 'no eyebrow') "exit $($r.Code)"
 
+# The worse variant of the same failure: the whole defence section deleted rather than just its
+# heading. For a subject whose part 2 has no Remediation this leaves a bulletin with no
+# remediation guidance anywhere, and the earlier check reported that as "written into the
+# bulletin" - a pass that asserted the opposite of the truth.
+$nf = New-Fixture 'no-remediation' -WithReports
+Invoke-Target $MERGE @{ Path = $nf } | Out-Null
+$np = Join-Path $nf 'bulletin\no-remediation-threat-bulletin.html'
+$nb = (Read-Text $np) -replace '\{\{[^}]*\}\}', 'filled'
+$mk = 'BULLETIN:DEFENCE'
+$a = $nb.IndexOf($mk); $b = $nb.IndexOf($mk, $a + 1)
+$nb = $nb.Substring(0, $nb.IndexOf('>', $a) + 1) + $nb.Substring($nb.LastIndexOf('<', $b))
+# Strip part 2's own Remediation too, so nothing supplies guidance from either half.
+$nb = [regex]::Replace($nb, '(?i)(<p class="eyebrow">)\s*Remediation\s*(</p>)', '${1}Fixes${2}')
+Write-Text $np $nb
+$r = Invoke-Target $VBULL @{ Path = $nf }
+Assert 'a bulletin with no remediation guidance at all' ($r.Code -eq 1 -and $r.Out -match 'NONE') "exit $($r.Code)"
+
+# Export must not ship a bulletin the verifier would reject.
+$r = Invoke-Target $EXPORT @{ Path = $nf; Force = $true }
+Assert 'export refuses a bulletin that fails verification' ($r.Code -eq 1 -and $r.Out -match 'not exporting an unchecked') "exit $($r.Code)"
+
 # ================================================================ 5. contract drift
 Set-Group '5. Contract drift'
 

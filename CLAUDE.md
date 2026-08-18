@@ -289,9 +289,32 @@ Everywhere else they are project-relative and start with `subjects/` or `scripts
 scripts from this directory.
 
 **Project scripts vs skill scripts.** `scripts/` at the project root holds steps 4 and 5 —
-`Merge-Bulletin.ps1`, `Verify-Bulletin.ps1` and `Export-Bulletin.ps1`. They are not part of any
-skill, because these are the steps that must see both halves at once. Nothing in a skill may
-reference them.
+`Merge-Bulletin.ps1`, `Verify-Bulletin.ps1` and `Export-Bulletin.ps1` — plus the test harness.
+They are not part of any skill, because these are the steps that must see both halves at once.
+Nothing in a skill may reference them.
+
+**Run the harness before committing a script change.**
+
+```powershell
+.\scripts\Test-Pipeline.ps1                  # ~40 checks, a few seconds
+.\scripts\Test-Pipeline.ps1 -IncludeExport   # adds the PDF round trip, ~15s more
+```
+
+It exists because **every bug that has actually shipped here was invisible to the checks in
+place at the time**. So it deliberately runs what nobody runs by hand: each script in the exact
+invocation form its own `.EXAMPLE` documents (including true pipeline binding, where state
+leaks between items), an empty pipeline against every verifier, and a fixture per known failure
+mode — malformed JSON, a pre-rename tactic name, an undeclared `via_cve`, a lone CVE marked as
+a chain, a blank `usage`, reversed chronology, two flow reports, two bulletins.
+
+It also asserts the things this file *claims*: the three `Verify-Mapping.ps1` copies are
+byte-identical, no skill references another, every script is pure ASCII and parses, nothing
+carries a BOM, no local shadows a `begin{}` constant by casing, and the schema docs still
+document every field the validator enforces.
+
+Fixtures are built under `%TEMP%` and removed afterwards. Nothing is written to `subjects/` or
+`output/`. The harness has been mutation-tested: reintroducing the `$TACTICS` collision trips
+three separate checks, and removing a zero-input guard trips exactly one.
 
 **PowerShell 5.1, no Python.** This machine has no Python interpreter despite `.pyc` files
 elsewhere in the workspace. PS 5.1 has bitten this project **four separate times**; all four

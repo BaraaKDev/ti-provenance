@@ -103,7 +103,22 @@ table { font-size: 12px !important; }
    overleaf. It has to move as one block. */
 h1, h2, h3, .section-head, .partrule { break-after: avoid !important; page-break-after: avoid !important; }
 .section-head { break-inside: avoid !important; page-break-inside: avoid !important; }
-.partrule { break-before: page !important; page-break-before: always !important; }
+
+/* EVERY SECTION STARTS A PAGE.
+   A bulletin is a reference document - printed, filed, and flipped through to find one
+   part. A section that begins two thirds down a page is hard to locate and reads as a
+   continuation of the section above it rather than a new subject. On screen the coloured
+   band and the rule above each .section-head carry that separation; on paper a page break
+   is what does it. The cost is trailing whitespace at the foot of some pages, which is the
+   correct trade for a document meant to be navigated rather than scrolled. */
+section, footer { break-before: page !important; page-break-before: always !important; }
+
+/* Two deliberate exceptions.
+   The cover is page one, so nothing precedes it to break from.
+   The Part 2 divider is an introduction to the flow hero, not a section in its own right -
+   left alone it would take a whole page to say two lines, so the hero is pinned to it. */
+.cover { break-before: auto !important; page-break-before: auto !important; }
+.flowpart > header { break-before: avoid !important; page-break-before: avoid !important; }
 
 /* The hero fact grids are auto-fit at minmax(150px, 1fr). On screen that gives three columns
    for six fields - two tidy rows. The narrower print column fits four, so six fields leave

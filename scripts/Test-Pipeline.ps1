@@ -296,6 +296,18 @@ Assert 'two bulletins in one folder' ($r.Code -eq 1 -and $r.Out -match 'expected
 $r = Invoke-Target $VBULL @{ Path = $f }
 Assert 'freshly merged bulletin still has placeholders' ($r.Code -eq 1 -and $r.Out -match 'placeholder') "exit $($r.Code)"
 
+# A filled editorial region that lost its heading renders as an unlabelled slab of prose,
+# reading as a continuation of whatever preceded it. That happened for real when a hand-edit
+# replaced the placeholder body and dropped the eyebrow with it, and every other check passed.
+$hf = New-Fixture 'headless-region' -WithReports
+Invoke-Target $MERGE @{ Path = $hf } | Out-Null
+$hp = Join-Path $hf 'bulletin\headless-region-threat-bulletin.html'
+$body = (Read-Text $hp) -replace '\{\{[^}]*\}\}', 'filled'
+$body = [regex]::Replace($body, '(?s)(<!-- BULLETIN:DEFENCE -->.*?)<p class="eyebrow">[^<]*</p>', '$1')
+Write-Text $hp $body
+$r = Invoke-Target $VBULL @{ Path = $hf }
+Assert 'editorial region stripped of its heading' ($r.Code -eq 1 -and $r.Out -match 'no eyebrow') "exit $($r.Code)"
+
 # ================================================================ 5. contract drift
 Set-Group '5. Contract drift'
 

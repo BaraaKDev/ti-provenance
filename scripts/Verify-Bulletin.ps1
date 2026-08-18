@@ -181,12 +181,31 @@ process {
 
         # Defence is legitimately EMPTY when the flow report already carries Remediation, but a
         # surviving placeholder is a failure either way.
-        $hasRemed = $t -match '(?i)>\s*Remediation'
+        # Scoped to part 2 deliberately: a hand-written defence section may use the word
+        # "Remediation" in its own heading, and searching the whole page would then report that
+        # the flow carries it when the bulletin does.
+        # Bounded at the DEFENCE marker, not run to end of file: the defence region sits AFTER
+        # the flow wrapper closes, so an unbounded capture swallows it and reports the flow as
+        # carrying a Remediation section that the bulletin actually wrote itself.
+        $flowHalf = ''
+        if ($t -match '(?s)<div class="flowpart">(.*?)<!-- BULLETIN:DEFENCE -->') { $flowHalf = $matches[1] }
+        elseif ($t -match '(?s)<div class="flowpart">(.*)')                        { $flowHalf = $matches[1] }
+        $hasRemed = $flowHalf -match '(?i)>\s*Remediation'
         $defOk = (-not $defM.Success) -or [string]::IsNullOrWhiteSpace($defM.Groups[1].Value) -or ($defM.Groups[1].Value -notmatch '\{\{')
         $results += Test-Check 'defensive guidance resolved' $defOk $(
             if (-not $defOk -and $hasRemed) { 'still a placeholder - the flow carries Remediation, so empty the region' }
             elseif (-not $defOk) { 'still a placeholder, and the flow has no Remediation part' }
             elseif ($hasRemed) { 'carried by the flow report' } else { 'written into the bulletin' })
+
+        # A filled editorial region must carry its own heading. Without one the section renders
+        # as an unlabelled slab of prose that reads as a continuation of whatever preceded it -
+        # which is exactly what happened when a hand-edit replaced the placeholder body and
+        # dropped the eyebrow with it. Every other check passed.
+        $headBad = @()
+        if ($sumM.Success -and $sumM.Groups[1].Value -match '<section' -and $sumM.Groups[1].Value -notmatch 'class="eyebrow"') { $headBad += 'SUMMARY' }
+        if ($defM.Success -and $defM.Groups[1].Value -match '<section' -and $defM.Groups[1].Value -notmatch 'class="eyebrow"') { $headBad += 'DEFENCE' }
+        $results += Test-Check 'filled editorial regions carry a heading' ($headBad.Count -eq 0) $(
+            if ($headBad.Count) { "no eyebrow in: " + ($headBad -join ', ') } else { 'headings present' })
 
         # ---- 6. leftovers and duplicates
         $ph = [regex]::Matches($t, '\{\{[A-Za-z0-9_ .,:;\-]+\}\}')

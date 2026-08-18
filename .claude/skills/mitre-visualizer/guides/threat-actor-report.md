@@ -47,24 +47,34 @@ its development budget goes.
 - `.facts` strip: attribution, active since, objective, primary targets.
 - The lede should state what makes this actor *different*, not what makes it a threat actor.
 
-## Worked examples
+## Worked example
 
-- `subjects/akira/reports/akira-G1024-attack-flow.html` — financially motivated ransomware, and
-  the canonical reference for tone, density and phase copy. Also shows how a flow with **no
-  exploitation phase** is handled: Akira logs in with valid credentials rather than
-  exploiting anything, so there is no CVE and this is correctly an actor report.
-- `subjects/andariel/reports/andariel-G0138-attack-flow.html` — state espionage. Read alongside
-  Akira to see the same grammar carry a different objective, and for two cases Akira does not
-  show: a **retuned accent** for a non-destructive objective, and a **sparse mapping** handled
-  honestly, with an objective phase carrying no technique ID at all and a footer caveat naming
-  the empty tactics.
+`subjects/andariel/reports/andariel-G0138-attack-flow.html` — state espionage, and the
+reference for this report type. Four things it shows that a destruction crew cannot:
+
+- **A retuned accent.** Covert violet rather than alarm red, because the objective is quiet
+  collection. The colour is an assertion about intent.
+- **An objective phase that is Collection, not Impact**, carrying the **Exfiltration icon** —
+  data leaving the container — because the goal is theft rather than destruction. The struck-
+  through database would have stated something false.
+- **A deliberate ordering departure.** The ransomware phase sits *before* the objective,
+  because its proceeds fund the collection that follows, and the transition says so. This is
+  `flow-craft.md`'s "causality outranks the tables" rule used in anger.
+- **Six empty tactics** named in a footer caveat rather than padded, plus a provenance note
+  explaining that the mapping is *derived* and differs from MITRE's published G0138 entry.
 
 ## A routing lesson worth internalising
 
-There is deliberately **no destruction-crew example here**. Agrius would have been the
-obvious one, but MITRE documents a specific CVE for its initial access, which makes it a
-**campaign** subject — see `subjects/agrius/reports/agrius-fortios-campaign-flow.html`.
+There is deliberately **no destruction or extortion example in this guide**, and that is not
+an oversight. Both obvious candidates turned out to be campaigns:
+
+| Candidate | Why it is not an actor report |
+|---|---|
+| Agrius | MITRE documents CVE-2018-13379 for its initial access → `subjects/agrius/reports/agrius-fortios-campaign-flow.html` |
+| Akira | Three CVEs across Cisco and SonicWall, carrying five `via_cve` tags → `subjects/akira/reports/akira-G1024-attack-flow.html` |
 
 Before starting an actor report, check whether the mapping names a CVE in Initial Access. If
 it does, this is the wrong guide: writing an actor report anyway produces a page that
-silently omits the one thing a defender can act on today.
+silently omits the one thing a defender can act on today. **Both examples above were nearly
+written as actor reports** — Akira in particular reads as a pure ransomware crew until you
+notice that every documented way in is a named, patchable flaw.

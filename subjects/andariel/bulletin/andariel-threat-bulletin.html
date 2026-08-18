@@ -1,0 +1,1333 @@
+<title>Andariel - Threat Bulletin</title>
+<style>
+/* ============================================================================
+   BULLETIN - Andariel
+   Merged by scripts/Merge-Bulletin.ps1. Do not hand-edit the CSS: regenerate.
+   Part 1 CSS is verbatim from analysis.html.
+   Part 2 CSS is rewritten to sit under .flowpart, because the two halves share
+   class names ('high' and 'low' mean different things in each).
+   ============================================================================ */
+
+/* ---------- part 1: analysis (unscoped) ---------- */
+
+  /* ---- Tokens: shared across TI-Reporting - see CLAUDE.md ---- */
+  :root {
+    color-scheme: light;
+
+    /* Neutrals carry a faint cool bias to sit with the violet accent. */
+    --ground: #f5f4f7;
+    --surface: #ffffff;
+    --surface-2: #eceaf0;
+    --ink: #1b1e24;
+    --muted: #5c6470;
+    --hair: #dad7e0;
+    --hair-strong: #c3bfcc;
+
+    /* ACCENT - espionage objective: covert violet, NOT the ember red used for
+       destruction and extortion. The colour is an assertion about intent. */
+    --ember: #6d3fa3;
+    --ember-ink: #57318a;
+    --ember-wash: rgba(109, 63, 163, 0.10);
+    --steel: #2f6b78;
+    --steel-wash: rgba(47, 107, 120, 0.10);
+    --spine: #b4aec2;
+
+    /* SECTOR RISK - shares the CVSS ramp, separate tokens, different form. */
+    --risk-critical: #a4161a;  --risk-critical-wash: rgba(164, 22, 26, 0.10);
+    --risk-high:     #b3541e;  --risk-high-wash:     rgba(179, 84, 30, 0.10);
+    --risk-moderate: #8a6a00;  --risk-moderate-wash: rgba(138, 106, 0, 0.10);
+    --risk-low:      #4a6b2a;  --risk-low-wash:      rgba(74, 107, 42, 0.10);
+    --risk-minimal:  #5c6470;  --risk-minimal-wash:  rgba(92, 100, 112, 0.10);
+
+    --shadow: 0 1px 2px rgba(20,22,26,.06), 0 8px 24px rgba(20,22,26,.05);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.65; -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 940px; margin: 0 auto; padding: 0 24px; }
+
+  /* ================= 1. COVER ================= */
+  .cover {
+    position: relative; overflow: hidden;
+    border-bottom: 1px solid var(--hair);
+    background:
+      radial-gradient(120% 90% at 88% -5%, var(--ember-wash), transparent 62%),
+      var(--surface);
+  }
+  .cover .wrap { position: relative; z-index: 2; padding-top: 84px; padding-bottom: 76px; }
+
+  .covermotif {
+    position: absolute; top: -40px; right: -60px; width: 460px; height: 460px;
+    color: var(--ember); pointer-events: none; z-index: 1;
+  }
+  .covermotif .arcs   { opacity: .16; }
+  .covermotif .rail   { opacity: .30; }
+  .covermotif .dots   { opacity: .22; }
+
+  .tlp {
+    display: inline-block; font-family: ui-monospace, Consolas, monospace;
+    font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
+    padding: 4px 10px; border-radius: 4px; margin-bottom: 26px;
+    background: var(--surface-2); border: 1px solid var(--hair-strong); color: var(--muted);
+  }
+  .tlp.clear { color: var(--muted); }
+  .tlp.green { color: var(--risk-low);      border-color: color-mix(in srgb, var(--risk-low) 40%, transparent);      background: var(--risk-low-wash); }
+  .tlp.amber { color: var(--risk-high);     border-color: color-mix(in srgb, var(--risk-high) 40%, transparent);     background: var(--risk-high-wash); }
+  .tlp.red   { color: var(--risk-critical); border-color: color-mix(in srgb, var(--risk-critical) 40%, transparent); background: var(--risk-critical-wash); }
+
+  .eyebrow {
+    font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+    font-size: 12px; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--muted); margin: 0 0 18px; display: flex; align-items: center; gap: 12px;
+  }
+  .eyebrow::after { content: ""; flex: 1; height: 1px; background: var(--hair-strong); }
+  .idtag { color: var(--ember-ink); font-weight: 600; }
+
+  .cover h1 {
+    font-size: clamp(44px, 8vw, 78px); line-height: .96; letter-spacing: -.025em;
+    font-weight: 800; margin: 0 0 10px; text-wrap: balance; max-width: 16ch;
+  }
+  .cover h1 .accent { color: var(--ember); }
+  .cover .standfirst {
+    font-size: clamp(17px, 2.4vw, 21px); color: var(--muted);
+    max-width: 60ch; margin: 20px 0 0;
+  }
+  .covermeta {
+    margin-top: 42px; display: grid; gap: 1px;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    background: var(--hair); border: 1px solid var(--hair); border-radius: 12px; overflow: hidden;
+  }
+  .covermeta div { background: var(--surface); padding: 15px 18px; }
+  .covermeta .k { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0 0 5px; }
+  .covermeta .v { font-size: 15px; font-weight: 600; margin: 0; }
+
+  /* ================= Sections ================= */
+  section { padding: 62px 0; }
+  section.alt { background: var(--surface); border-top: 1px solid var(--hair); border-bottom: 1px solid var(--hair); }
+  .section-head { margin-bottom: 38px; }
+  .section-head .eyebrow { margin-bottom: 10px; }
+  .section-head h2 {
+    font-size: clamp(27px, 4vw, 35px); letter-spacing: -.015em;
+    font-weight: 800; margin: 0; text-wrap: balance;
+  }
+  .section-head p { color: var(--muted); max-width: 64ch; margin: 12px 0 0; font-size: 16px; }
+
+  .prose { max-width: 68ch; }
+  .prose p { margin: 0 0 18px; font-size: 16.5px; }
+  .prose p:last-child { margin-bottom: 0; }
+  .prose strong { font-weight: 700; }
+  .prose h3 {
+    font-size: 20px; font-weight: 700; letter-spacing: -.01em;
+    margin: 34px 0 12px; text-wrap: balance;
+  }
+
+  .src {
+    font-family: ui-monospace, Consolas, monospace; font-size: 11px; font-weight: 700;
+    color: var(--steel); background: var(--steel-wash);
+    border: 1px solid color-mix(in srgb, var(--steel) 24%, transparent);
+    padding: 0 5px; border-radius: 4px; vertical-align: 1px; margin-left: 3px;
+    text-decoration: none; white-space: nowrap;
+  }
+
+  /* ================= 2. CHRONOLOGY ================= */
+  .chrono { position: relative; padding-left: 116px; }
+  .chrono::before {
+    content: ""; position: absolute; left: 92px; top: 10px; bottom: 10px;
+    width: 3px; border-radius: 3px;
+    background: linear-gradient(to bottom, var(--spine) 0%, var(--spine) 45%, var(--ember) 100%);
+  }
+  .entry { position: relative; margin-bottom: 30px; }
+  .entry:last-child { margin-bottom: 0; }
+  .entry .when {
+    position: absolute; left: -116px; top: 1px; width: 76px; text-align: right;
+    font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; font-weight: 700;
+    color: var(--ember-ink); letter-spacing: .02em;
+  }
+  .entry::after {
+    content: ""; position: absolute; left: -27px; top: 7px;
+    width: 11px; height: 11px; border-radius: 50%;
+    background: var(--surface); border: 3px solid var(--spine); z-index: 2;
+  }
+  .entry.key::after { border-color: var(--ember); background: var(--ember); }
+  .entry h3 { margin: 0 0 8px; font-size: 18.5px; font-weight: 700; letter-spacing: -.01em; }
+  .entry p { margin: 0 0 12px; font-size: 16px; max-width: 62ch; }
+  .entry p:last-child { margin-bottom: 0; }
+
+  /* ================= 4. CONCLUSION ================= */
+  .callout {
+    margin-top: 28px; padding: 20px 22px;
+    background: var(--surface); border: 1px solid var(--ember);
+    border-left: 4px solid var(--ember); border-radius: 12px; font-size: 16.5px;
+  }
+  section.alt .callout { background: var(--ground); }
+  .callout strong { color: var(--ember-ink); }
+  .callout p { margin: 0 0 14px; }
+  .callout p:last-child { margin: 0; }
+
+  .takeaways { display: grid; gap: 12px; margin-top: 26px; }
+  .takeaway {
+    display: grid; grid-template-columns: 30px 1fr; gap: 0 14px; align-items: start;
+    background: var(--surface); border: 1px solid var(--hair);
+    border-radius: 12px; padding: 16px 18px; box-shadow: var(--shadow);
+  }
+  section.alt .takeaway { background: var(--ground); }
+  .takeaway .n {
+    display: flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--ember-wash); color: var(--ember-ink);
+    border: 1px solid color-mix(in srgb, var(--ember) 28%, transparent);
+    font-family: ui-monospace, Consolas, monospace; font-size: 12px; font-weight: 700;
+  }
+  .takeaway p { margin: 0; font-size: 15.5px; }
+
+  /* ================= 5. RISK & IMPACT ================= */
+  .sectors {
+    border: 1px solid var(--hair); border-radius: 14px; overflow: hidden;
+    background: var(--surface); box-shadow: var(--shadow);
+  }
+  section.alt .sectors { background: var(--ground); }
+  .sector {
+    display: grid; grid-template-columns: minmax(150px, 1.1fr) 104px 92px 2fr;
+    gap: 16px; align-items: center;
+    padding: 15px 20px; border-bottom: 1px solid var(--hair);
+  }
+  .sector:last-child { border-bottom: none; }
+  .sector .name { font-weight: 700; font-size: 15.5px; }
+  .sector .why { font-size: 14px; color: var(--muted); }
+
+  .meter { display: flex; gap: 3px; }
+  .meter i {
+    display: block; height: 9px; flex: 1; border-radius: 2px;
+    background: var(--hair-strong); opacity: .5;
+  }
+  .level {
+    font-family: ui-monospace, Consolas, monospace; font-size: 10.5px; font-weight: 700;
+    letter-spacing: .1em; text-transform: uppercase; text-align: center;
+    padding: 3px 8px; border-radius: 100px; white-space: nowrap;
+  }
+
+  .sector.critical .meter i:nth-child(-n+5) { background: var(--risk-critical); opacity: 1; }
+  .sector.high     .meter i:nth-child(-n+4) { background: var(--risk-high);     opacity: 1; }
+  .sector.moderate .meter i:nth-child(-n+3) { background: var(--risk-moderate); opacity: 1; }
+  .sector.low      .meter i:nth-child(-n+2) { background: var(--risk-low);      opacity: 1; }
+  .sector.minimal  .meter i:nth-child(-n+1) { background: var(--risk-minimal);  opacity: 1; }
+
+  .sector.critical .level { color: #fff; background: var(--risk-critical); }
+  .sector.high     .level { color: var(--risk-high);     background: var(--risk-high-wash);     border: 1px solid color-mix(in srgb, var(--risk-high) 32%, transparent); }
+  .sector.moderate .level { color: var(--risk-moderate); background: var(--risk-moderate-wash); border: 1px solid color-mix(in srgb, var(--risk-moderate) 32%, transparent); }
+  .sector.low      .level { color: var(--risk-low);      background: var(--risk-low-wash);      border: 1px solid color-mix(in srgb, var(--risk-low) 32%, transparent); }
+  .sector.minimal  .level { color: var(--risk-minimal);  background: var(--risk-minimal-wash);  border: 1px solid var(--hair-strong); }
+
+  .risklegend {
+    display: flex; flex-wrap: wrap; gap: 18px; margin-top: 20px;
+    padding: 14px 18px; background: var(--surface-2);
+    border: 1px solid var(--hair); border-radius: 12px;
+    font-size: 13px; color: var(--muted);
+  }
+  .risklegend .item { display: flex; align-items: center; gap: 8px; }
+  .risklegend .sw { width: 22px; height: 8px; border-radius: 2px; }
+
+  /* ================= Footer ================= */
+  footer { border-top: 1px solid var(--hair); padding: 40px 0 64px; color: var(--muted); font-size: 14px; }
+  footer h3 { font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin: 0 0 14px; }
+  footer a { color: var(--ember-ink); }
+  .sources { counter-reset: s; display: grid; gap: 8px; margin: 0 0 26px; padding: 0; list-style: none; }
+  /* Counter absolutely positioned, not a grid column: a list item holding a text node AND
+     an anchor produces three grid items, so the anchor wrapped into the 30px counter column
+     and the URL rendered about four characters wide. */
+  .sources li {
+    counter-increment: s; position: relative; padding-left: 40px;
+    font-size: 13.5px; overflow-wrap: anywhere;
+  }
+  .sources li::before {
+    content: counter(s); position: absolute; left: 0; top: 2px;
+    font-family: ui-monospace, Consolas, monospace; font-size: 11px;
+    font-weight: 700; color: var(--steel); background: var(--steel-wash);
+    border: 1px solid color-mix(in srgb, var(--steel) 24%, transparent);
+    border-radius: 4px; text-align: center; width: 30px; height: 20px; line-height: 18px;
+  }
+  .note {
+    margin-top: 12px; padding: 14px 16px; background: var(--surface-2);
+    border: 1px dashed var(--hair-strong); border-radius: 10px; color: var(--muted);
+    font-size: 13.5px;
+  }
+  code { font-family: ui-monospace, Consolas, monospace; font-size: .9em; background: var(--surface-2); padding: 1px 5px; border-radius: 3px; }
+
+
+/* ---------- part 2: attack flow (scoped under .flowpart) ---------- */
+.flowpart {
+    color-scheme: light;
+
+    
+    --ground: #f5f4f7;
+    --surface: #ffffff;
+    --surface-2: #eceaf0;
+    --ink: #1b1e24;
+    --muted: #5c6470;
+    --hair: #dad7e0;
+    --hair-strong: #c3bfcc;
+    
+    --ember: #6d3fa3;
+    --ember-ink: #57318a;
+    --ember-wash: rgba(109, 63, 163, 0.10);
+    --steel: #2f6b78;
+    --steel-wash: rgba(47, 107, 120, 0.10);
+    --spine: #b4aec2;
+    --shadow: 0 1px 2px rgba(20,22,26,.06), 0 8px 24px rgba(20,22,26,.05);
+  }
+.flowpart * { box-sizing: border-box; }
+.flowpart {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.55; -webkit-font-smoothing: antialiased;
+  }
+.flowpart .wrap { max-width: 940px; margin: 0 auto; padding: 0 24px; }
+.flowpart header {
+    border-bottom: 1px solid var(--hair);
+    background: radial-gradient(120% 80% at 85% -10%, var(--ember-wash), transparent 60%), var(--surface);
+  }
+.flowpart .hero { padding: 64px 0 52px; }
+.flowpart .eyebrow {
+    font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+    font-size: 12px; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--muted); margin: 0 0 18px; display: flex; align-items: center; gap: 12px;
+  }
+.flowpart .eyebrow::after { content: ""; flex: 1; height: 1px; background: var(--hair-strong); }
+.flowpart .idtag { color: var(--ember-ink); font-weight: 600; }
+.flowpart h1 {
+    font-size: clamp(40px, 7vw, 68px); line-height: .98; letter-spacing: -.02em;
+    font-weight: 800; margin: 0 0 8px; text-wrap: balance;
+  }
+.flowpart h1 .destruct { color: var(--ember); }
+.flowpart .lede { font-size: clamp(17px, 2.4vw, 20px); color: var(--muted); max-width: 62ch; margin: 18px 0 0; }
+.flowpart .aliases { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.flowpart .aliases .label { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-right: 4px; }
+.flowpart .chip {
+    font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; padding: 4px 10px;
+    border: 1px solid var(--hair-strong); border-radius: 100px; color: var(--ink); background: var(--surface-2);
+  }
+.flowpart .facts {
+    margin-top: 36px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1px; background: var(--hair); border: 1px solid var(--hair); border-radius: 12px; overflow: hidden;
+  }
+.flowpart .fact { background: var(--surface); padding: 16px 18px; }
+.flowpart .fact .k { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0 0 6px; }
+.flowpart .fact .v { font-size: 15px; font-weight: 600; margin: 0; }
+.flowpart .fact .v.bad { color: var(--ember-ink); }
+.flowpart section { padding: 60px 0; }
+.flowpart .section-head { margin-bottom: 40px; }
+.flowpart .section-head .eyebrow { margin-bottom: 10px; }
+.flowpart .section-head h2 { font-size: clamp(26px, 4vw, 34px); letter-spacing: -.01em; font-weight: 800; margin: 0; text-wrap: balance; }
+.flowpart .section-head p { color: var(--muted); max-width: 64ch; margin: 12px 0 0; font-size: 15.5px; }
+.flowpart .flow { position: relative; padding-left: 34px; }
+.flowpart .flow::before {
+    content: ""; position: absolute; left: 11px; top: 6px; bottom: 40px; width: 3px; border-radius: 3px;
+    background: linear-gradient(to bottom, var(--spine) 0%, var(--spine) 40%, var(--ember) 100%);
+  }
+.flowpart .phase { position: relative; margin-bottom: 14px; }
+.flowpart .node {
+    position: absolute; left: -34px; top: 22px; width: 25px; height: 25px; border-radius: 50%;
+    background: var(--surface); border: 3px solid var(--spine);
+    display: flex; align-items: center; justify-content: center;
+    font-family: ui-monospace, Consolas, monospace; font-size: 11px; font-weight: 700;
+    color: var(--muted); z-index: 2;
+  }
+.flowpart .phase.impact .node { border-color: var(--ember); background: var(--ember); color: #fff; }
+.flowpart .card { background: var(--surface); border: 1px solid var(--hair); border-radius: 14px; padding: 20px 22px; box-shadow: var(--shadow); }
+.flowpart .phase.impact .card {
+    border-color: var(--ember);
+    background: linear-gradient(0deg, var(--ember-wash), var(--ember-wash)), var(--surface);
+  }
+.flowpart .card-top { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-bottom: 6px; }
+.flowpart .ticon {
+    width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--steel-wash); color: var(--steel);
+    border: 1px solid color-mix(in srgb, var(--steel) 26%, transparent);
+  }
+.flowpart .ticon svg { width: 19px; height: 19px; display: block; }
+.flowpart .phase.impact .ticon {
+    background: var(--ember-wash); color: var(--ember);
+    border-color: color-mix(in srgb, var(--ember) 34%, transparent);
+  }
+.flowpart .tactic { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--steel); font-weight: 700; }
+.flowpart .phase.heat .ticon {
+    background: color-mix(in srgb, var(--ember-wash) 70%, var(--steel-wash));
+    color: color-mix(in srgb, var(--ember) 62%, var(--steel));
+    border-color: color-mix(in srgb, var(--ember) 24%, transparent);
+  }
+.flowpart .phase.heat .tactic { color: color-mix(in srgb, var(--ember-ink) 72%, var(--steel)); }
+.flowpart .phase.impact .tactic { color: var(--ember-ink); }
+.flowpart .card h3 { font-size: 19px; margin: 2px 0 10px; font-weight: 700; letter-spacing: -.01em; width: 100%; }
+.flowpart .card p { margin: 0 0 14px; color: var(--muted); font-size: 14.5px; }
+.flowpart .card p:last-child { margin-bottom: 0; }
+.flowpart .ttps { display: flex; flex-direction: column; gap: 8px; }
+.flowpart .ttp { display: flex; gap: 12px; align-items: baseline; font-size: 14px; }
+.flowpart .tid {
+    font-family: ui-monospace, Consolas, monospace; font-size: 12px; font-weight: 600;
+    color: var(--steel); background: var(--steel-wash); padding: 2px 7px; border-radius: 5px;
+    white-space: nowrap; flex-shrink: 0; min-width: 78px; text-align: center;
+  }
+.flowpart .ttp .desc { color: var(--ink); }
+.flowpart .tool {
+    font-family: ui-monospace, Consolas, monospace; font-size: .92em;
+    color: var(--ember-ink); background: var(--ember-wash); padding: 1px 5px; border-radius: 4px;
+  }
+.flowpart .transition {
+    padding: 6px 0 6px 6px; font-size: 12.5px; color: var(--muted); font-style: italic;
+    display: flex; align-items: center; gap: 8px;
+  }
+.flowpart .transition svg { flex-shrink: 0; color: var(--spine); }
+.flowpart .arsenal { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
+.flowpart .weapon {
+    background: var(--surface); border: 1px solid var(--hair); border-left: 3px solid var(--steel);
+    border-radius: 10px; padding: 16px 18px;
+  }
+.flowpart .weapon.destruct { border-left-color: var(--ember); }
+.flowpart .weapon .wname {
+    font-family: ui-monospace, Consolas, monospace; font-weight: 700; font-size: 15px; margin: 0 0 2px;
+    display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
+  }
+.flowpart .weapon .sid { font-size: 11px; color: var(--muted); font-weight: 500; }
+.flowpart .weapon .role { font-size: 13px; color: var(--muted); margin: 6px 0 0; }
+.flowpart .weapon .kind { display: inline-block; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; font-weight: 700; margin-top: 10px; color: var(--steel); }
+.flowpart .weapon.destruct .kind { color: var(--ember); }
+.flowpart .legend {
+    display: flex; flex-wrap: wrap; gap: 20px; margin-top: 28px; padding: 16px 20px;
+    background: var(--surface-2); border: 1px solid var(--hair); border-radius: 12px;
+    font-size: 13px; color: var(--muted);
+  }
+.flowpart .legend .item { display: flex; align-items: center; gap: 9px; }
+.flowpart .legend .keys { display: flex; gap: 5px; }
+.flowpart .legend .ticon { width: 26px; height: 26px; border-radius: 7px; }
+.flowpart .legend .ticon svg { width: 14px; height: 14px; }
+.flowpart .legend .ticon.heat {
+    background: color-mix(in srgb, var(--ember-wash) 70%, var(--steel-wash));
+    color: color-mix(in srgb, var(--ember) 62%, var(--steel));
+    border-color: color-mix(in srgb, var(--ember) 24%, transparent);
+  }
+.flowpart .legend .ticon.impact {
+    background: var(--ember-wash); color: var(--ember);
+    border-color: color-mix(in srgb, var(--ember) 34%, transparent);
+  }
+.flowpart .legend .spinekey {
+    width: 26px; height: 8px; border-radius: 4px; flex-shrink: 0;
+    background: linear-gradient(90deg, var(--spine), var(--ember));
+  }
+.flowpart footer { border-top: 1px solid var(--hair); padding: 34px 0 56px; color: var(--muted); font-size: 13.5px; }
+.flowpart footer a { color: var(--ember-ink); }
+.flowpart footer .note {
+    margin-top: 10px; padding: 14px 16px; background: var(--surface-2);
+    border: 1px dashed var(--hair-strong); border-radius: 10px; color: var(--muted);
+  }
+.flowpart code.path { font-family: ui-monospace, Consolas, monospace; font-size: .92em; color: var(--ink); }
+
+
+
+/* ---------- bulletin chrome (step 4 only) ---------- */
+.partrule { border-top: 1px solid var(--hair); background: var(--ground); }
+.partrule .wrap { padding: 46px 0 8px; }
+.partrule .pnum {
+  display: inline-block; font-size: .68rem; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--ember); border: 1px solid var(--ember); border-radius: 2px;
+  padding: 3px 8px; margin-bottom: 12px;
+}
+.partrule h2 { font-size: 1.5rem; margin: 0; color: var(--ink); }
+.partrule p  { color: var(--muted); margin: 6px 0 0; max-width: 62ch; }
+
+.bsummary, .bdefence { border-top: 1px solid var(--hair); background: var(--surface); }
+.bsummary .wrap, .bdefence .wrap { padding: 40px 0; }
+.bslede { color: var(--ink); max-width: 68ch; }
+.bskey { margin: 18px 0 0; padding: 0; list-style: none; }
+.bskey li {
+  border-left: 2px solid var(--ember); padding: 4px 0 4px 14px;
+  margin-bottom: 10px; color: var(--ink); max-width: 68ch;
+}
+.bsteps { margin: 18px 0 0; padding-left: 20px; color: var(--ink); max-width: 68ch; }
+.bsteps li { margin-bottom: 10px; }
+.bwhat { display: block; font-weight: 600; }
+.bwhy  { display: block; color: var(--muted); font-size: .9rem; }
+
+/* The flow report carries its own hero. Inside a bulletin the cover already introduced the
+   subject, so the hero is demoted rather than repeated at cover scale. */
+.flowpart > header { padding-top: 0; }
+.flowpart header h1 { font-size: 1.9rem; }
+.flowpart header .lede { font-size: 1rem; }
+</style>
+
+<!-- ===================== 1. COVER ===================== -->
+<header class="cover">
+  <svg class="covermotif" viewBox="0 0 400 400" fill="none" aria-hidden="true">
+    <g class="arcs" stroke="currentColor" stroke-width="1.1">
+      <circle cx="286" cy="132" r="46"/>
+      <circle cx="286" cy="132" r="86"/>
+      <circle cx="286" cy="132" r="126"/>
+      <circle cx="286" cy="132" r="166"/>
+    </g>
+    <g class="rail" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+      <path d="M286 46 V318"/>
+    </g>
+    <g class="dots" fill="currentColor">
+      <circle cx="286" cy="86"  r="7"/>
+      <circle cx="286" cy="150" r="7"/>
+      <circle cx="286" cy="214" r="7"/>
+      <circle cx="286" cy="278" r="7"/>
+      <circle cx="196" cy="188" r="4"/>
+      <circle cx="352" cy="242" r="4"/>
+      <circle cx="230" cy="300" r="4"/>
+    </g>
+  </svg>
+
+  <div class="wrap">
+    <span class="tlp clear">TLP:CLEAR</span>
+
+    <p class="eyebrow">Threat Actor Analysis <span class="idtag">G0138</span></p>
+    <h1>Andariel<span class="accent">.</span></h1>
+    <p class="standfirst">
+      A state intelligence operation that pays for itself — ransoming hospitals to fund the
+      theft of submarine, missile and uranium-processing designs, sometimes against the same
+      victim on the same day.
+    </p>
+
+    <div class="covermeta">
+      <div><p class="k">Subject type</p><p class="v">Threat actor &middot; state</p></div>
+      <div><p class="k">Attribution</p><p class="v">North Korea &middot; RGB 3rd Bureau</p></div>
+      <div><p class="k">First observed</p><p class="v">2009</p></div>
+      <div><p class="k">Assessed risk</p><p class="v">Critical</p></div>
+      <div><p class="k">Report date</p><p class="v">17 August 2026</p></div>
+      <div><p class="k">Analyst</p><p class="v">Threat Intelligence</p></div>
+    </div>
+  </div>
+</header>
+
+<!-- BULLETIN:SUMMARY -->
+  <section class="bsummary">
+    <div class="wrap">
+      <p class="eyebrow">Executive summary</p>
+      <p class="bslede">
+        Andariel is a North Korean state intelligence operation that pays for itself. It ransoms
+        hospitals, and spends the proceeds stealing submarine, missile and uranium-enrichment
+        designs — sometimes running both against the same victim on the same day. Since around
+        2023 it has got in by exploiting unpatched internet-facing web servers rather than by
+        phishing, then held those servers with web shells and worked outward using signed
+        remote-management software as its command channel.
+      </p>
+      <ul class="bskey">
+        <li>
+          <strong>A ransomware incident from this actor is not evidence that espionage is absent.</strong>
+          The agencies observed both against one entity on the same day. Scoping an incident as
+          "just ransomware" and closing it after recovery is precisely how the collection half
+          survives the response.
+        </li>
+        <li>
+          <strong>You can calculate your exposure instead of guessing it.</strong> The collection
+          requirement is published in unusual detail — autonomous underwater vehicles, phased-array
+          radar, uranium processing, nuclear waste storage. Check your own drawings and bills of
+          materials against that list and you get a real answer.
+        </li>
+        <li>
+          <strong>Two sectors, two different defensive problems.</strong> Defence, nuclear and
+          engineering are collection targets and need detection of quiet, long-dwell access.
+          Healthcare is the funding target and needs ransomware resilience. A small number of
+          organisations are both.
+        </li>
+        <li>
+          <strong>The way in changed, so defences tuned to the old one will miss.</strong> Phishing
+          awareness was the right control for the group's earlier tradecraft. The primary route is
+          now n-day exploitation of internet-facing servers, which is a patch-latency problem.
+        </li>
+        <li>
+          <strong>Reading a CVE list is not exploiting it.</strong> The advisory records more than
+          forty vulnerabilities researched in the National Vulnerability Database. That is
+          reconnaissance. Treating all of them as attributed exploitation would inflate the threat
+          and pull patching priority away from the handful actually named as used.
+        </li>
+      </ul>
+    </div>
+  </section><!-- /BULLETIN:SUMMARY -->
+
+
+
+<main>
+
+  <!-- ===================== 2. OVERVIEW ===================== -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Overview</p>
+        <h2>Espionage that funds itself</h2>
+      </div>
+
+      <div class="prose">
+        <p>
+          Andariel is a North Korean state-sponsored group attributed to the Reconnaissance
+          General Bureau's <strong>3rd Bureau</strong>, based in Pyongyang and Sinuiju, and
+          assessed to be a subset of the Lazarus Group. Vendors track the same actor as Onyx
+          Sleet, Silent Chollima, Stonefly, APT45, DarkSeoul and
+          PLUTONIUM.<a class="src" href="#s1">1</a><a class="src" href="#s2">2</a> MITRE dates
+          the group to at least 2009; Microsoft dates its own first observation to 2014. The
+          gap reflects when each organisation began tracking rather than a disagreement about
+          the group.<a class="src" href="#s1">1</a><a class="src" href="#s3">3</a>
+        </p>
+        <p>
+          The defining characteristic is that <strong>the espionage pays for itself</strong>.
+          The group runs ransomware against healthcare entities and uses the proceeds to fund
+          intelligence collection, and the authoring agencies record cases where ransomware and
+          espionage were run against the same entity — in some instances on the same
+          day.<a class="src" href="#s2">2</a> Most state-sponsored collection is a cost centre;
+          this one is not. That is why a single victim can be hit by two operations that look
+          like completely different actors, and why an incident that opens as a ransomware
+          event may not close as one.
+        </p>
+        <p>
+          What they are collecting is stated unusually plainly. The advisory lists the
+          requirements: tanks and self-propelled howitzers, littoral combat ships, submarines,
+          torpedoes and autonomous underwater vehicles, fighter aircraft and UAVs, missiles and
+          missile defence, satellites and nano-satellite technology, phased-array radar,
+          uranium processing and enrichment, nuclear waste storage, nuclear power plants,
+          shipbuilding and marine engineering, robotics, additive manufacturing and machining.
+          The material sought is contract specifications, bills of materials, design drawings
+          and engineering documents.<a class="src" href="#s2">2</a>
+        </p>
+        <p>
+          Tradecraft has shifted. Historically the group led with spear-phishing; Microsoft
+          records a move to exploiting <strong>n-day vulnerabilities in public-facing web
+          servers</strong> as the primary route in from around 2023, using both public and
+          custom exploits, followed by web shells. Post-access tooling is a large custom RAT
+          family — TigerRAT, SmallTiger, Dora RAT, ValidAlpha, LightHand, DurianBeacon,
+          NukeSped, Atharvan and Goat RAT — packed with Themida and VMProtect, alongside
+          commodity tooling including the Sliver C2 framework, Ngrok, masscan, 3Proxy, PuTTY
+          and Mimikatz, and abuse of legitimate remote monitoring and management
+          software.<a class="src" href="#s2">2</a><a class="src" href="#s3">3</a>
+        </p>
+      </div>
+
+      <h3 style="font-size:20px;font-weight:700;margin:38px 0 22px;">Activity, oldest first</h3>
+
+      <div class="chrono">
+        <div class="entry key">
+          <div class="when">2009</div>
+          <h3>Earliest tracked activity against South Korean targets</h3>
+          <p>
+            MITRE dates the group to at least 2009, operating against South Korean government
+            agencies, military organisations and domestic companies, and against financial
+            institutions including ATMs, banks and cryptocurrency exchanges. Early operations
+            used watering-hole attacks carrying zero-day exploits, spear-phishing attachments,
+            drive-by compromise and ActiveX exploitation, and hid payload code inside PNG and
+            BMP images using steganography.<a class="src" href="#s1">1</a>
+          </p>
+        </div>
+
+        <div class="entry">
+          <div class="when">2020</div>
+          <h3>TigerRAT enters the toolset</h3>
+          <p>
+            The custom TigerRAT backdoor came into use, providing keylogging and screen
+            recording against compromised hosts — capabilities aimed at watching an operator
+            work rather than at moving files in bulk.<a class="src" href="#s3">3</a>
+          </p>
+        </div>
+
+        <div class="entry key">
+          <div class="when">2021-05</div>
+          <h3>Maui ransomware deployed against healthcare</h3>
+          <p>
+            Maui ransomware was used against US healthcare and public health organisations,
+            encrypting servers responsible for diagnostics, electronic health records and
+            imaging. The proceeds funded intelligence collection, making these victims a
+            <em>revenue source</em> rather than a collection target.<a class="src" href="#s4">4</a>
+          </p>
+        </div>
+
+        <div class="entry key">
+          <div class="when">2021-12</div>
+          <h3>Log4Shell exploitation of public-facing web servers</h3>
+          <p>
+            The group began widespread exploitation of internet-facing web servers through
+            known vulnerabilities, with <strong>CVE-2021-44228</strong> in Apache Log4j named
+            as the example, deploying web shells to hold the foothold and reach applications
+            and data behind it.<a class="src" href="#s2">2</a><a class="src" href="#s3">3</a>
+          </p>
+        </div>
+
+        <div class="entry key">
+          <div class="when">2023</div>
+          <h3>N-day exploitation replaces phishing as the primary way in</h3>
+          <p>
+            Microsoft records the group mostly exploiting n-day vulnerabilities from around
+            this point, using publicly available and custom exploits rather than leading with
+            spear-phishing. Named targets include Confluence, PaperCut, TeamCity and Apache
+            ActiveMQ. The group is separately recorded <em>researching</em> vulnerabilities in
+            the NIST National Vulnerability Database — reconnaissance, and not evidence that it
+            exploited every CVE it read.<a class="src" href="#s2">2</a><a class="src" href="#s3">3</a>
+          </p>
+        </div>
+
+        <div class="entry key">
+          <div class="when">2023-12</div>
+          <h3>1.2 TB taken from South Korean defence contractors</h3>
+          <p>
+            Microsoft records the theft of 1.2 terabytes of data from South Korean defence
+            contractors, the largest single collection volume attributed to the group in
+            reviewed reporting.<a class="src" href="#s3">3</a>
+          </p>
+        </div>
+
+        <div class="entry">
+          <div class="when">2024-02</div>
+          <h3>SmallTiger backdoor identified</h3>
+          <p>
+            A C++ backdoor tracked as SmallTiger was identified, carrying layered obfuscation,
+            and was subsequently used against South Korean defence organisations. It sits
+            alongside TigerRAT rather than replacing it.<a class="src" href="#s3">3</a>
+          </p>
+        </div>
+
+        <div class="entry">
+          <div class="when">2024-05</div>
+          <h3>Dora RAT deployed against South Korean organisations</h3>
+          <p>
+            Dora RAT, written in Go, was deployed against South Korean educational
+            institutions, construction companies and manufacturing organisations — a widening
+            of targeting beyond the defence and nuclear core.<a class="src" href="#s3">3</a>
+          </p>
+        </div>
+
+        <div class="entry key">
+          <div class="when">2024-07-25</div>
+          <h3>Eight-agency joint advisory published</h3>
+          <p>
+            The FBI, CNMF, CISA, DC3, NSA, the Republic of Korea's National Intelligence
+            Service and National Police Agency, and the UK's NCSC published AA24-207A. It sets
+            out the collection requirements in detail and records the group launching
+            ransomware and conducting espionage against the same entity, in some cases on the
+            same day.<a class="src" href="#s2">2</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- History section deliberately omitted: the chronology opens at the earliest tracked
+       activity, so the origin story is already the first entry. -->
+
+  <!-- ===================== 4. CONCLUSION ===================== -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Conclusion</p>
+        <h2>Two operations, one actor, sometimes one day</h2>
+      </div>
+
+      <div class="prose">
+        <p>
+          Andariel breaks the assumption most triage rests on: that a ransomware incident and a
+          state espionage incident are different problems belonging to different actors with
+          different responses. Here they are the same organisation, funded by the first to
+          perform the second, and the agencies have watched both run against a single victim
+          within a single day. A hospital that pays a ransom may be underwriting the theft of
+          reactor designs from a company it has never heard of, and a defence manufacturer
+          that treats a ransomware alert as a commodity nuisance may be watching the funding
+          arm of the operation that is already inside it.
+        </p>
+      </div>
+
+      <div class="takeaways">
+        <div class="takeaway"><span class="n">1</span><p>
+          <strong>A ransomware event from this actor is not evidence that espionage is absent.</strong>
+          The agencies observed both against the same entity on the same day. Scoping an
+          incident as "just ransomware" and closing it after recovery is how the collection
+          half survives the response.
+        </p></div>
+        <div class="takeaway"><span class="n">2</span><p>
+          <strong>The collection requirement is published, so exposure is calculable.</strong>
+          Few actors tell you what they want in this much detail — down to autonomous
+          underwater vehicles, phased-array radar and uranium enrichment. An organisation can
+          check its own drawings and bills of materials against that list and get a real answer
+          rather than a guess.
+        </p></div>
+        <div class="takeaway"><span class="n">3</span><p>
+          <strong>The way in changed, and defences built for the old one will miss.</strong>
+          Phishing awareness was the right control for the group's earlier tradecraft. Since
+          about 2023 the primary route has been n-day exploitation of internet-facing web
+          servers, which is an exposure-management and patch-latency problem, not a
+          user-training one.
+        </p></div>
+        <div class="takeaway"><span class="n">4</span><p>
+          <strong>Reading a CVE list is not exploiting it.</strong> The advisory records the
+          group researching dozens of vulnerabilities in the National Vulnerability Database.
+          That is reconnaissance. Treating every CVE on that list as an attributed exploitation
+          would inflate the threat and misdirect patching priority away from the handful
+          actually named as used.
+        </p></div>
+        <div class="takeaway"><span class="n">5</span><p>
+          <strong>Healthcare is exposed for a different reason than everyone else here.</strong>
+          It is not on the collection list. It is on the funding list — which means the
+          controls that matter there are ransomware controls, while the controls that matter in
+          defence and nuclear are collection controls. One actor, two defensive problems.
+        </p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 5. RISK & IMPACT ===================== -->
+  <section class="alt">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Risk &amp; Impact</p>
+        <h2>Who this actor actually hits</h2>
+        <p>
+          Two different exposures sit in this table. Most sectors are ranked on whether they
+          hold the technical information the published collection requirements name. Healthcare
+          is ranked on something else entirely — it is the revenue source, not the target.
+        </p>
+      </div>
+
+      <div class="sectors">
+        <div class="sector critical">
+          <div class="name">Defence and aerospace</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Critical</div>
+          <div class="why">The stated collection requirement. The advisory names tanks, submarines, torpedoes, autonomous underwater vehicles, fighter aircraft, UAVs, missiles and satellites individually.</div>
+        </div>
+        <div class="sector critical">
+          <div class="name">Nuclear</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Critical</div>
+          <div class="why">Named as a collection priority in its own right: uranium processing and enrichment, waste and storage, power plants, and government nuclear research institutes.</div>
+        </div>
+        <div class="sector high">
+          <div class="name">Engineering and manufacturing</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">High</div>
+          <div class="why">Shipbuilding, marine engineering, robotics, additive manufacturing and machining are all named requirements, and 2024 activity reached South Korean manufacturers directly.</div>
+        </div>
+        <div class="sector high">
+          <div class="name">Healthcare</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">High</div>
+          <div class="why">Exposed as a ransomware revenue source rather than a collection target — a different threat from the same actor, and the reason espionage against other sectors is funded at all.</div>
+        </div>
+        <div class="sector high">
+          <div class="name">Energy</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">High</div>
+          <div class="why">Named by Microsoft among the industries of interest to North Korean intelligence that this group targets.</div>
+        </div>
+        <div class="sector moderate">
+          <div class="name">Education and research</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Moderate</div>
+          <div class="why">South Korean educational institutions were hit in 2024, and research institutes sit adjacent to the nuclear and engineering requirements.</div>
+        </div>
+        <div class="sector moderate">
+          <div class="name">Financial services</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Moderate</div>
+          <div class="why">Historically targeted — ATMs, banks and cryptocurrency exchanges — but this sits in the group's earlier profile rather than the current collection mandate.</div>
+        </div>
+        <div class="sector minimal">
+          <div class="name">Retail and hospitality</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Minimal</div>
+          <div class="why">No indication of interest. Holds neither the technical information the collection requirements name nor the ransomware payout profile of healthcare.</div>
+        </div>
+      </div>
+
+      <div class="risklegend">
+        <div class="item"><span class="sw" style="background:var(--risk-critical)"></span> Critical — actively targeted</div>
+        <div class="item"><span class="sw" style="background:var(--risk-high)"></span> High — fits the victim profile</div>
+        <div class="item"><span class="sw" style="background:var(--risk-moderate)"></span> Moderate — plausible, not observed</div>
+        <div class="item"><span class="sw" style="background:var(--risk-low)"></span> Low — outside the pattern</div>
+        <div class="item"><span class="sw" style="background:var(--risk-minimal)"></span> Minimal — no indication</div>
+      </div>
+
+      <div class="callout">
+        <p>
+          <strong>Bottom line.</strong> Work out which of the two exposures you have, because
+          they need different controls. If your drawings, bills of materials or engineering
+          documents touch anything on the published requirement list, you are a collection
+          target and the priority is detecting quiet, long-dwell access. If you are a
+          healthcare provider, you are a funding target and the priority is ransomware
+          resilience. A small number of organisations are both.
+        </p>
+        <p>
+          For <em>how</em> a compromise actually unfolds — the techniques, the tooling and the
+          order they run in — see the companion attack-flow report,
+          <code>andariel-G0138-attack-flow.html</code>.
+        </p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <h3>Part 1 sources</h3>
+    <ol class="sources">
+      <li id="s1">MITRE ATT&amp;CK — Groups: Andariel (G0138) — <a href="https://attack.mitre.org/groups/G0138/">https://attack.mitre.org/groups/G0138/</a></li>
+      <li id="s2">CISA / FBI / CNMF / DC3 / NSA / ROK NIS / ROK NPA / UK NCSC — AA24-207A, North Korea Cyber Group Conducts Global Espionage Campaign to Advance Regime's Military and Nuclear Programs, 25 July 2024 — <a href="https://www.cisa.gov/news-events/cybersecurity-advisories/aa24-207a">https://www.cisa.gov/news-events/cybersecurity-advisories/aa24-207a</a></li>
+      <li id="s3">Microsoft Threat Intelligence — Onyx Sleet uses array of malware to gather intelligence for North Korea, 25 July 2024 — <a href="https://www.microsoft.com/en-us/security/blog/2024/07/25/onyx-sleet-uses-array-of-malware-to-gather-intelligence-for-north-korea/">https://www.microsoft.com/en-us/security/blog/2024/07/25/onyx-sleet-uses-array-of-malware-to-gather-intelligence-for-north-korea/</a></li>
+      <li id="s4">CISA / FBI / Treasury — AA22-187A, North Korean State-Sponsored Cyber Actors Use Maui Ransomware to Target the Healthcare and Public Health Sector — <a href="https://www.cisa.gov/news-events/cybersecurity-advisories/aa22-187a">https://www.cisa.gov/news-events/cybersecurity-advisories/aa22-187a</a></li>
+    </ol>
+
+    <p class="note">
+      <strong>Confidence and sourcing.</strong> Attribution to the DPRK Reconnaissance General
+      Bureau's 3rd Bureau rests on a joint advisory carrying eight government agencies across
+      three countries, corroborated independently by Microsoft — an unusually strong basis, and
+      stated here as reported rather than assessed. The collection requirements, the
+      same-entity ransomware-and-espionage finding and the tooling names are taken from those
+      two sources directly. Two points of deliberate restraint: the advisory lists more than
+      forty CVEs the group <em>researched</em> in the National Vulnerability Database, and this
+      report does not present those as exploited, because the advisory does not; and the 2009
+      start date follows MITRE while Microsoft dates its own first observation to 2014, which
+      is a difference in tracking history rather than a contradiction. Sector risk levels are
+      analyst assessments, not measured values; they deliberately share a colour ramp with CVSS
+      severity but are rendered as meters rather than scores so the two are not confused.
+    </p>
+    <p class="note">
+      <strong>Pipeline.</strong> Step 1 of TI-Reporting. The companion ATT&amp;CK flow report is
+      built from the JSON handoff in <code>subjects/andariel/handoff/</code>, of which this
+      analysis produces <code>analysis.json</code>.
+    </p>
+  </div>
+</footer>
+
+<section class="partrule">
+  <div class="wrap">
+    <span class="pnum">Part 2</span>
+    <h2>ATT&amp;CK attack flow</h2>
+    <p>How a compromise unfolds, tactic by tactic and in order. Part 1 established who is at
+       risk and why; this part is how they get hit.</p>
+  </div>
+</section>
+
+<div class="flowpart">
+<header>
+  <div class="wrap hero">
+    <p class="eyebrow">Attack Flow <span class="idtag">G0138</span></p>
+    <h1>Andariel<span class="destruct">.</span></h1>
+    <p class="lede">
+      A collection operation that <strong>pays for itself</strong>. The path below is the
+      espionage programme; one phase in it exists only to fund the rest, by encrypting
+      hospitals. Read the last two cards together — the ransom is not the ending, it is the
+      budget.
+    </p>
+
+    <div class="aliases">
+      <span class="label">Also tracked as</span>
+      <span class="chip">Onyx Sleet</span>
+      <span class="chip">Silent Chollima</span>
+      <span class="chip">Stonefly</span>
+      <span class="chip">APT45</span>
+      <span class="chip">DarkSeoul</span>
+      <span class="chip">PLUTONIUM</span>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><p class="k">Attribution</p><p class="v">North Korea &middot; RGB 3rd Bureau</p></div>
+      <div class="fact"><p class="k">Active since</p><p class="v">2009</p></div>
+      <div class="fact"><p class="k">Objective</p><p class="v bad">Espionage</p></div>
+      <div class="fact"><p class="k">Funded by</p><p class="v bad">Ransomware</p></div>
+      <div class="fact"><p class="k">Collection targets</p><p class="v">Defence &middot; nuclear</p></div>
+      <div class="fact"><p class="k">Mapping</p><p class="v">Derived</p></div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">The Intrusion</p>
+        <h2>Nine phases, and the ransom is not the last one that matters</h2>
+        <p>
+          Ordered as the operation runs rather than as the matrix lists. One departure is
+          deliberate: the ransomware phase sits <em>before</em> the objective, because its
+          proceeds fund the collection that follows. Six tactics carry no techniques and are
+          named in the footer rather than filled in.
+        </p>
+      </div>
+
+      <div class="flow">
+
+        <div class="phase">
+          <div class="node">01</div>
+          <div class="card">
+            <div class="card-top">
+              <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.7 2.6 15.3 0 18M12 3c-2.6 2.7-2.6 15.3 0 18"/></svg></span>
+              <span class="tactic">Resource Development</span>
+            </div>
+            <h3>Build the toolkit and shop for the way in</h3>
+            <div class="ttps">
+              <div class="ttp">
+                <span class="tid">T1587.001</span>
+                <span class="desc">Develop Capabilities: Malware — builds and maintains its own RAT family rather than renting one: <span class="tool">TigerRAT</span>, <span class="tool">SmallTiger</span>, <span class="tool">Dora RAT</span>, <span class="tool">ValidAlpha</span>, <span class="tool">LightHand</span>, <span class="tool">DurianBeacon</span>, <span class="tool">NukeSped</span>, <span class="tool">Atharvan</span> and <span class="tool">Goat RAT</span>, across C++ and Go and revised over years.</span>
+              </div>
+              <div class="ttp">
+                <span class="tid">T1588.002</span>
+                <span class="desc">Obtain Capabilities: Tool — supplements the custom estate with off-the-shelf tooling: <span class="tool">Sliver</span>, <span class="tool">Ngrok</span>, <span class="tool">masscan</span>, <span class="tool">3Proxy</span>, <span class="tool">PuTTY</span> and <span class="tool">Mimikatz</span>.</span>
+              </div>
+              <div class="ttp">
+                <span class="tid">T1588.006</span>
+                <span class="desc">Obtain Capabilities: Vulnerabilities — monitors the NIST National Vulnerability Database for vulnerability information to use in targeting. The advisory records more than forty CVEs researched this way: read, not necessarily exploited.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="transition">
+          <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1v12M3 9l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          A shortlist of unpatched products is only useful once one of them is actually reachable from the internet.
+        </div>
+
+        <div class="phase">
+          <div class="node">02</div>
+          <div class="card">
+            <div class="card-top">
+              <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5l7.5 3.2v6c0 4.4-3.1 8.1-7.5 9.6-4.4-1.5-7.5-5.2-7.5-9.6v-6L12 2.5z"/><path d="M13.2 7.8l-2.9 4.7h3.4l-2.9 4.2"/></svg></span>
+              <span class="tactic">Initial Access</span>
+            </div>
+            <h3>Take the web server, or failing that the reader</h3>
+            <div class="ttps">
+              <div class="ttp">
+                <span class="tid">T1190</span>
+                <span class="desc">Exploit Public-Facing Application — exploits n-day vulnerabilities in internet-facing web servers using public and custom exploits. <span class="tool">Log4Shell</span> is the example the advisory names; Confluence, PaperCut, TeamCity and Apache ActiveMQ are the other products recorded. Primary route in from around 2023.</span>
+              </div>
+              <div class="ttp">
+                <span class="tid">T1189</span>
+                <span class="desc">Drive-by Compromise — early operations used watering-hole attacks carrying zero-day exploits against South Korean visitors.</span>
+              </div>
+              <div class="ttp">
+                <span class="tid">T1566.001</span>
+                <span class="desc">Phishing: Spearphishing Attachment — the group's earlier lead technique, retained rather than retired after the shift to exploitation.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="transition">
+          <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1v12M3 9l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          A reachable server or an opened attachment is only a foothold once something runs on it.
+        </div>
+
+        <div class="phase">
+          <div class="node">03</div>
+          <div class="card">
+            <div class="card-top">
+              <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.8" y="4.2" width="18.4" height="15.6" rx="2.2"/><path d="M7 9.5l3 2.9-3 2.9M13 15.3h4.2"/></svg></span>
+              <span class="tactic">Execution</span>
+            </div>
+            <h3>Get the first stage running</h3>
+            <div class="ttps">
+              <div class="ttp">
+                <span class="tid">T1203</span>
+                <span class="desc">Exploitation for Client Execution — exploited <span class="tool">ActiveX</span> to run code on visitors to compromised sites, the execution half of the watering-hole operations.</span>
+              </div>
+              <div class="ttp">
+                <span class="tid">T1204.002</span>
+                <span class="desc">User Execution: Malicious File — relies on the recipient opening the spear-phishing attachment to run the first stage.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="transition">
+          <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1v12M3 9l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Code that runs once is worthless to a collection programme without a channel back to the operator.
+        </div>
+
+        <div class="phase">
+          <div class="node">04</div>
+          <div class="card">
+            <div class="card-top">
+              <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2.2"/><path d="M7.9 7.9a5.8 5.8 0 0 0 0 8.2M16.1 16.1a5.8 5.8 0 0 0 0-8.2"/><path d="M5 5a9.9 9.9 0 0 0 0 14M19 19a9.9 9.9 0 0 0 0-14"/></svg></span>
+              <span class="tactic">Command and Control</span>
+            </div>
+            <h3>Four channels, three of them legitimate software</h3>
+            <div class="ttps">
+              <div class="ttp">
+                <span class="tid">T1071</span>
+                <span class="desc">Application Layer Protocol — runs <span class="tool">Sliver</span> implants against defence and aerospace targets. Reporting names the framework without specifying the protocol, so this stays at the parent technique.</span>
+              </div>
+              <div class="ttp">
+                <span class="tid">T1090</span>
+                <span class="desc">Proxy — relays operator traffic through <span class="tool">3Proxy</span> and other SOCKS proxies.</span>
+              </div>
+              <div class="ttp">
+                <span class="tid">T1219</span>
+                <span class="desc">Remote Access Tools — abuses legitimate remote monitoring and management software already trusted in the estate, so the operator channel is signed administrative tooling rather than a custom implant.</span>
+              </div>
+              <div class="ttp">
+                <span class="tid">T1572</span>
+                <span class="desc">Protocol Tunneling — uses <span class="tool">Ngrok</span> to tunnel out of networks that would not permit an inbound connection.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="transition">
+          <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1v12M3 9l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          A channel dies with the process that opened it, so the foothold has to outlive the exploit that created it.
+        </div>
+
+        <div class="phase">
+          <div class="node">05</div>
+          <div class="card">
+            <div class="card-top">
+              <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4.6" r="2.3"/><path d="M12 6.9v14.2M5 12v1.2a7 7 0 0 0 14 0V12"/><path d="M3.2 12h4.2M16.6 12h4.2"/></svg></span>
+              <span class="tactic">Persistence</span>
+            </div>
+            <h3>Hold the server independently of the exploit</h3>
+            <div class="ttps">
+              <div class="ttp">
+                <span class="tid">T1505.003</span>
+                <span class="desc">Server Software Component: Web Shell — plants web shells on the exploited web servers to hold the foothold and reach the applications and data behind it, so patching the original flaw does not evict them.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="transition">
+          <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1v12M3 9l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          A foothold meant to sit for months has to survive inspection, not just reboot.
+        </div>
+
+        <div class="phase heat">
+          <div class="node">06</div>
+          <div class="card">
+            <div class="card-top">
+              <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.2 12S5.8 5.8 12 5.8 21.8 12 21.8 12 18.2 18.2 12 18.2 2.2 12 2.2 12z"/><circle cx="12" cy="12" r="2.6"/><path d="M4.1 20.2L19.9 3.8"/></svg></span>
+              <span class="tactic">Stealth</span>
+            </div>
+            <h3>Make the tooling unreadable rather than the traffic invisible</h3>
+            <div class="ttps">
+              <div class="ttp">
+                <span class="tid">T1027.002</span>
+                <span class="desc">Obfuscated Files or Information: Software Packing — packs the custom RAT family with the commercial protectors <span class="tool">Themida</span> and <span class="tool">VMProtect</span> before delivery.</span>
+              </div>
+              <div class="ttp">
+                <span class="tid">T1027.003</span>
+                <span class="desc">Obfuscated Files or Information: Steganography — hid executable payload code inside <span class="tool">PNG</span> and <span class="tool">BMP</span> image files in early operations. ATT&amp;CK cites this group by name as a procedure example.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="transition">
+          <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1v12M3 9l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Hidden and durable, the operation can afford the noisier step of taking credentials.
+        </div>
+
+        <div class="phase heat">
+          <div class="node">07</div>
+          <div class="card">
+            <div class="card-top">
+              <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.8" cy="12" r="4.3"/><path d="M12.1 12h9.1M17.6 12v3.9M20.4 12v2.8"/></svg></span>
+              <span class="tactic">Credential Access</span>
+            </div>
+            <h3>Take the accounts that reach the document stores</h3>
+            <div class="ttps">
+              <div class="ttp">
+                <span class="tid">T1003</span>
+                <span class="desc">OS Credential Dumping — carries <span class="tool">Mimikatz</span>. Reporting names the tool without recording which credential store was read on any given intrusion, so this stays at the parent technique rather than asserting LSASS.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="transition">
+          <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1v12M3 9l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Those same credentials reach two different kinds of server: the ones holding drawings, and the ones a ransom can be charged for.
+        </div>
+
+        <div class="phase heat">
+          <div class="node">08</div>
+          <div class="card">
+            <div class="card-top">
+              <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5.6" rx="7.8" ry="2.9"/><path d="M19.8 5.6v12.8c0 1.6-3.5 2.9-7.8 2.9s-7.8-1.3-7.8-2.9V5.6"/><path d="M8.7 10.9l6.6 6.6M15.3 10.9l-6.6 6.6"/></svg></span>
+              <span class="tactic">Impact</span>
+            </div>
+            <h3>Encrypt hospitals to pay for the programme</h3>
+            <p>
+              This phase is the funding arm, not the objective. It is placed before the objective
+              deliberately: the proceeds pay for the collection that follows. The agencies record
+              ransomware and espionage run against the same entity, in some cases on the same day.
+            </p>
+            <div class="ttps">
+              <div class="ttp">
+                <span class="tid">T1486</span>
+                <span class="desc">Data Encrypted for Impact — deploys <span class="tool">Maui</span> ransomware against US healthcare, encrypting servers running diagnostics, electronic health records and imaging.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="transition">
+          <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1v12M3 9l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          The ransom pays for the programme. What follows is what the money is actually for.
+        </div>
+
+        <div class="phase impact">
+          <div class="node">09</div>
+          <div class="card">
+            <div class="card-top">
+              <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4.2 14.8v4a2.2 2.2 0 0 0 2.2 2.2h11.2a2.2 2.2 0 0 0 2.2-2.2v-4"/><path d="M12 2.9v12.2M7.9 7l4.1-4.1L16.1 7"/></svg></span>
+              <span class="tactic">Collection &mdash; the objective</span>
+            </div>
+            <h3>Take the designs the regime asked for</h3>
+            <p>
+              The objective phase carries the Exfiltration icon rather than the struck-through
+              database, because the goal here is theft rather than destruction. The requirement is
+              published in unusual detail: submarines, autonomous underwater vehicles, missiles,
+              phased-array radar, uranium enrichment, nuclear waste storage.
+            </p>
+            <div class="ttps">
+              <div class="ttp">
+                <span class="tid">T1005</span>
+                <span class="desc">Data from Local System — took <span class="tool">1.2 TB</span> from South Korean defence contractors in December 2023. Reporting records the volume rather than the stores it came from, so this is the outcome-level claim that data was taken off compromised systems.</span>
+              </div>
+              <div class="ttp">
+                <span class="tid">T1056.001</span>
+                <span class="desc">Input Capture: Keylogging — <span class="tool">TigerRAT</span> logs keystrokes. Placed under Collection rather than Credential Access because the reporting frames the capability as watching an operator work.</span>
+              </div>
+              <div class="ttp">
+                <span class="tid">T1113</span>
+                <span class="desc">Screen Capture — <span class="tool">TigerRAT</span> records the screen, which for a mandate built around drawings and design documents returns material a file grab would miss.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="legend">
+        <div class="item">
+          <span class="keys" aria-hidden="true">
+            <span class="ticon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="7.6"/><circle cx="12" cy="12" r="2.4"/></svg></span>
+            <span class="ticon heat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="7.6"/><circle cx="12" cy="12" r="2.4"/></svg></span>
+            <span class="ticon impact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="7.6"/><circle cx="12" cy="12" r="2.4"/></svg></span>
+          </span>
+          Tactic icon and label warm as the operation advances: foothold, then escalation, then the collection objective
+        </div>
+        <div class="item"><span class="spinekey" aria-hidden="true"></span> The spine tracks the same progression</div>
+        <div class="item"><span class="tid" style="min-width:0">T####</span> ATT&amp;CK technique ID</div>
+        <div class="item"><span class="tool">tool.exe</span> Observed tooling / IOC</div>
+      </div>
+    </div>
+  </section>
+
+  <section style="background:var(--surface); border-top:1px solid var(--hair); border-bottom:1px solid var(--hair);">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">The Arsenal</p>
+        <h2>Nine backdoors they wrote, and six tools anyone can download</h2>
+        <p>
+          The split is the tell. A group that maintains nine bespoke backdoors across C++ and Go,
+          revised over years, is resourced as a programme rather than a crew — and it still reaches
+          for Mimikatz and Ngrok when those will do.
+        </p>
+      </div>
+      <div class="arsenal">
+        <div class="weapon"><p class="wname">TigerRAT <span class="sid">&mdash;</span></p><p class="role">Custom backdoor providing keylogging and screen recording</p><span class="kind">Backdoor</span></div>
+        <div class="weapon"><p class="wname">SmallTiger <span class="sid">&mdash;</span></p><p class="role">C++ backdoor with layered obfuscation, used against South Korean defence</p><span class="kind">Backdoor</span></div>
+        <div class="weapon"><p class="wname">Dora RAT <span class="sid">&mdash;</span></p><p class="role">Go backdoor used against education, construction and manufacturing</p><span class="kind">Backdoor</span></div>
+        <div class="weapon"><p class="wname">ValidAlpha <span class="sid">&mdash;</span></p><p class="role">Go tool allowing file execution and arbitrary command shells</p><span class="kind">Backdoor</span></div>
+        <div class="weapon"><p class="wname">LightHand <span class="sid">&mdash;</span></p><p class="role">Lightweight backdoor for directory listing and file create/delete</p><span class="kind">Backdoor</span></div>
+        <div class="weapon"><p class="wname">DurianBeacon <span class="sid">&mdash;</span></p><p class="role">RAT used in the November 2023 campaign</p><span class="kind">Backdoor</span></div>
+        <div class="weapon"><p class="wname">NukeSped <span class="sid">&mdash;</span></p><p class="role">Backdoor family named in the joint advisory</p><span class="kind">Backdoor</span></div>
+        <div class="weapon"><p class="wname">Atharvan <span class="sid">&mdash;</span></p><p class="role">Backdoor named in the joint advisory</p><span class="kind">Backdoor</span></div>
+        <div class="weapon"><p class="wname">Goat RAT <span class="sid">&mdash;</span></p><p class="role">Backdoor named in the joint advisory</p><span class="kind">Backdoor</span></div>
+        <div class="weapon destruct"><p class="wname">Maui <span class="sid">&mdash;</span></p><p class="role">Ransomware run against healthcare to fund the espionage operations</p><span class="kind">Ransomware</span></div>
+        <div class="weapon"><p class="wname">Sliver <span class="sid">&mdash;</span></p><p class="role">Open-source C2 framework used for implants against defence and aerospace</p><span class="kind">C2</span></div>
+        <div class="weapon"><p class="wname">Mimikatz <span class="sid">S0002</span></p><p class="role">Credential dumping</p><span class="kind">Cred access</span></div>
+        <div class="weapon"><p class="wname">Ngrok <span class="sid">&mdash;</span></p><p class="role">Tunnelling utility for outbound operator channels</p><span class="kind">Tunnelling</span></div>
+        <div class="weapon"><p class="wname">3Proxy <span class="sid">&mdash;</span></p><p class="role">SOCKS proxy for relaying operator traffic</p><span class="kind">Tunnelling</span></div>
+        <div class="weapon"><p class="wname">masscan <span class="sid">&mdash;</span></p><p class="role">Mass port scanner held in the toolset</p><span class="kind">Discovery</span></div>
+        <div class="weapon"><p class="wname">PuTTY <span class="sid">&mdash;</span></p><p class="role">SSH client held in the toolset</p><span class="kind">Tunnelling</span></div>
+        <div class="weapon"><p class="wname">Themida <span class="sid">&mdash;</span></p><p class="role">Commercial protector used to pack the custom RAT family</p><span class="kind">Packer</span></div>
+        <div class="weapon"><p class="wname">VMProtect <span class="sid">&mdash;</span></p><p class="role">Commercial protector used to pack the custom RAT family</p><span class="kind">Packer</span></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>
+      Part 2 sources:
+      <a href="https://attack.mitre.org/groups/G0138/">MITRE ATT&amp;CK G0138</a>;
+      <a href="https://www.cisa.gov/news-events/cybersecurity-advisories/aa24-207a">CISA / FBI and partners, AA24-207A</a> (25 July 2024);
+      <a href="https://www.microsoft.com/en-us/security/blog/2024/07/25/onyx-sleet-uses-array-of-malware-to-gather-intelligence-for-north-korea/">Microsoft Threat Intelligence, Onyx Sleet</a>;
+      <a href="https://www.cisa.gov/news-events/cybersecurity-advisories/aa22-187a">CISA AA22-187A</a> (Maui ransomware).
+    </p>
+    <p class="note">
+      <strong>Coverage caveat &mdash; read before using this for gap analysis.</strong> Six
+      tactics carry no techniques: <strong>Reconnaissance</strong>,
+      <strong>Privilege Escalation</strong>, <strong>Defense Impairment</strong>,
+      <strong>Discovery</strong>, <strong>Lateral Movement</strong> and
+      <strong>Exfiltration</strong>. That absence reflects what the reviewed reporting
+      documents, not a claim that the group lacks those capabilities — an actor that takes
+      1.2 TB out of a defence contractor plainly exfiltrates, but no source reviewed here
+      records the route, so no technique is asserted for it.
+    </p>
+    <p class="note">
+      <strong>Provenance.</strong> This mapping is <em>derived</em> from the vendor and
+      government reporting behind the analysis, not copied from MITRE's published G0138 entry.
+      The two differ substantially: only six of these twenty techniques appear on the MITRE
+      group page, which is narrower because it reflects what MITRE has itself curated. Neither
+      is wrong; they rest on different evidence bases, and this page states which one it used.
+      One deliberate divergence is worth naming: the advisory cites <code class="path">T1596</code>
+      for the NVD vulnerability research, but that technique's documented scope is
+      infrastructure databases — DNS, WHOIS, certificates — so this mapping uses
+      <code class="path">T1588.006</code>, which names the National Vulnerability Database
+      explicitly. Built from the JSON handoff in <code class="path">subjects/andariel/handoff/</code>.
+    </p>
+  </div>
+</footer>
+</div>
+
+<!-- BULLETIN:DEFENCE -->
+  <section class="bdefence">
+    <div class="wrap">
+      <p class="bslede">
+        Ordered by the phases of Part 2, not by general best practice — each item names the mapped
+        technique it denies. This actor exploits no CVE central enough to carry a patch table, so
+        there is no remediation section in Part 2 and these priorities take its place.
+      </p>
+      <ol class="bsteps">
+        <li>
+          <span class="bwhat">Patch internet-facing applications on a cadence measured in days, and inventory what is actually exposed first.</span>
+          <span class="bwhy">Denies T1190, the primary route in since 2023. The group monitors the National Vulnerability Database for candidates (T1588.006), so the window between a fix shipping and yours landing is the window it works in.</span>
+        </li>
+        <li>
+          <span class="bwhat">Hunt for web shells on every internet-facing server, and do it separately from patching.</span>
+          <span class="bwhy">Denies T1505.003. The web shell survives the patch that closed the way in, so an estate that patched and did not hunt has closed the door behind the operator rather than in front of them.</span>
+        </li>
+        <li>
+          <span class="bwhat">Allowlist remote monitoring and management software, and alert on any instance outside that list.</span>
+          <span class="bwhy">Denies T1219. The operator channel here is signed, legitimate administrative tooling, so it will not trip malware detection — only an inventory of what is authorised will surface it.</span>
+        </li>
+        <li>
+          <span class="bwhat">Control egress and alert on tunnelling from servers that have no reason to originate outbound sessions.</span>
+          <span class="bwhy">Denies T1572 and T1090. Ngrok and SOCKS proxies exist to defeat the assumption that a server behind a firewall cannot be reached; a web server initiating outbound tunnels is the signal.</span>
+        </li>
+        <li>
+          <span class="bwhat">Tier administrative credentials and protect LSASS, so one compromised server does not yield the document stores.</span>
+          <span class="bwhy">Denies T1003. Credential access is the hinge in this flow: it is what turns a single exploited web server into reach across both the design repositories and the servers a ransom can be charged for.</span>
+        </li>
+        <li>
+          <span class="bwhat">Monitor access to design repositories, and treat bulk reads of drawings and bills of materials as an alertable event.</span>
+          <span class="bwhy">Denies T1005, T1113 and T1056.001 — the objective phase. 1.2 TB left a set of defence contractors in one recorded case, and screen capture returns material that file-level controls never see.</span>
+        </li>
+        <li>
+          <span class="bwhat">If you are a healthcare provider, hold offline or immutable backups outside domain trust.</span>
+          <span class="bwhy">Denies T1486. Your exposure to this actor is the funding operation rather than the collection one, so ransomware resilience is the control that matters and the collection guidance above largely does not apply to you.</span>
+        </li>
+      </ol>
+    </div>
+  </section><!-- /BULLETIN:DEFENCE -->

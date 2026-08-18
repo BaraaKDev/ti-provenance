@@ -63,9 +63,13 @@ which template step 3 picks — the sequence is identical.
 
 | The user gives you | `subject_type` | Examples |
 |---|---|---|
-| A tracked actor or group name | `actor` | *Andariel* · *Akira* · *Volt Typhoon* |
+| A tracked actor or group name | `actor` | *Andariel* · *Volt Typhoon* |
 | One or more CVEs, or a named flaw | `vulnerability` | *CVE-2021-44228* · *the ProxyShell chain* · *August 2026 Patch Tuesday* |
-| An actor named together with what they exploited, or a named operation | `campaign` | *Agrius exploiting FortiOS* · *Operation X* |
+| An actor named together with what they exploited, or a named operation | `campaign` | *Agrius exploiting FortiOS* · *Akira* · *Operation X* |
+
+**Akira is in the campaign row on purpose.** It reads as a pure ransomware crew, and was
+nearly written up as an actor — but every documented way in is a named, patchable CVE, and a
+report that omitted them would have dropped the only thing a defender can act on today.
 
 **The boundary that matters is actor vs campaign.** If the request names both an actor *and*
 the CVEs they used, it is a campaign — not an actor with a CVE mentioned in passing. A
@@ -234,9 +238,10 @@ Six subjects exist, at three levels of completeness:
 
 | Subject | What it carries | Why it is worth reading |
 |---|---|---|
-| `akira` | all five artefacts | **The only full pipeline run.** The reference for every step including the merge and the PDF |
-| `agrius` | `handoff/` pair + flow report | The validated `analysis.json` + `mapping.json` worked example both schema docs point at |
-| `andariel` · `proxyshell` · `log4j` · `windows-2026-08` | flow report only | Predate steps 1 and 2. Still the canonical examples for their report types |
+| `akira` | all five artefacts | `campaign`. The reference for a full pipeline run, and for three CVEs wired to techniques with `via_cve` |
+| `agrius` | all five artefacts | `campaign`. The validated `analysis.json` + `mapping.json` worked example both schema docs point at |
+| `andariel` | all five artefacts | `actor`. The only subject whose flow carries no Remediation, so its bulletin is the one that writes `BULLETIN:DEFENCE` by hand |
+| `proxyshell` · `log4j` · `windows-2026-08` | flow report only | Predate steps 1 and 2. Still the canonical examples for the vulnerability report modes |
 
 A subject with only a flow report is not broken — the validators skip what is absent, which is
 the standalone case working as designed.

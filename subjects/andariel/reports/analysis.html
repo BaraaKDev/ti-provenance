@@ -1,0 +1,640 @@
+<title>Andariel — Threat Analysis</title>
+
+<style>
+  /* ---- Tokens: shared across TI-Reporting - see CLAUDE.md ---- */
+  :root {
+    color-scheme: light;
+
+    /* Neutrals carry a faint cool bias to sit with the violet accent. */
+    --ground: #f5f4f7;
+    --surface: #ffffff;
+    --surface-2: #eceaf0;
+    --ink: #1b1e24;
+    --muted: #5c6470;
+    --hair: #dad7e0;
+    --hair-strong: #c3bfcc;
+
+    /* ACCENT - espionage objective: covert violet, NOT the ember red used for
+       destruction and extortion. The colour is an assertion about intent. */
+    --ember: #6d3fa3;
+    --ember-ink: #57318a;
+    --ember-wash: rgba(109, 63, 163, 0.10);
+    --steel: #2f6b78;
+    --steel-wash: rgba(47, 107, 120, 0.10);
+    --spine: #b4aec2;
+
+    /* SECTOR RISK - shares the CVSS ramp, separate tokens, different form. */
+    --risk-critical: #a4161a;  --risk-critical-wash: rgba(164, 22, 26, 0.10);
+    --risk-high:     #b3541e;  --risk-high-wash:     rgba(179, 84, 30, 0.10);
+    --risk-moderate: #8a6a00;  --risk-moderate-wash: rgba(138, 106, 0, 0.10);
+    --risk-low:      #4a6b2a;  --risk-low-wash:      rgba(74, 107, 42, 0.10);
+    --risk-minimal:  #5c6470;  --risk-minimal-wash:  rgba(92, 100, 112, 0.10);
+
+    --shadow: 0 1px 2px rgba(20,22,26,.06), 0 8px 24px rgba(20,22,26,.05);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.65; -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 940px; margin: 0 auto; padding: 0 24px; }
+
+  /* ================= 1. COVER ================= */
+  .cover {
+    position: relative; overflow: hidden;
+    border-bottom: 1px solid var(--hair);
+    background:
+      radial-gradient(120% 90% at 88% -5%, var(--ember-wash), transparent 62%),
+      var(--surface);
+  }
+  .cover .wrap { position: relative; z-index: 2; padding-top: 84px; padding-bottom: 76px; }
+
+  .covermotif {
+    position: absolute; top: -40px; right: -60px; width: 460px; height: 460px;
+    color: var(--ember); pointer-events: none; z-index: 1;
+  }
+  .covermotif .arcs   { opacity: .16; }
+  .covermotif .rail   { opacity: .30; }
+  .covermotif .dots   { opacity: .22; }
+
+  .tlp {
+    display: inline-block; font-family: ui-monospace, Consolas, monospace;
+    font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
+    padding: 4px 10px; border-radius: 4px; margin-bottom: 26px;
+    background: var(--surface-2); border: 1px solid var(--hair-strong); color: var(--muted);
+  }
+  .tlp.clear { color: var(--muted); }
+  .tlp.green { color: var(--risk-low);      border-color: color-mix(in srgb, var(--risk-low) 40%, transparent);      background: var(--risk-low-wash); }
+  .tlp.amber { color: var(--risk-high);     border-color: color-mix(in srgb, var(--risk-high) 40%, transparent);     background: var(--risk-high-wash); }
+  .tlp.red   { color: var(--risk-critical); border-color: color-mix(in srgb, var(--risk-critical) 40%, transparent); background: var(--risk-critical-wash); }
+
+  .eyebrow {
+    font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+    font-size: 12px; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--muted); margin: 0 0 18px; display: flex; align-items: center; gap: 12px;
+  }
+  .eyebrow::after { content: ""; flex: 1; height: 1px; background: var(--hair-strong); }
+  .idtag { color: var(--ember-ink); font-weight: 600; }
+
+  .cover h1 {
+    font-size: clamp(44px, 8vw, 78px); line-height: .96; letter-spacing: -.025em;
+    font-weight: 800; margin: 0 0 10px; text-wrap: balance; max-width: 16ch;
+  }
+  .cover h1 .accent { color: var(--ember); }
+  .cover .standfirst {
+    font-size: clamp(17px, 2.4vw, 21px); color: var(--muted);
+    max-width: 60ch; margin: 20px 0 0;
+  }
+  .covermeta {
+    margin-top: 42px; display: grid; gap: 1px;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    background: var(--hair); border: 1px solid var(--hair); border-radius: 12px; overflow: hidden;
+  }
+  .covermeta div { background: var(--surface); padding: 15px 18px; }
+  .covermeta .k { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0 0 5px; }
+  .covermeta .v { font-size: 15px; font-weight: 600; margin: 0; }
+
+  /* ================= Sections ================= */
+  section { padding: 62px 0; }
+  section.alt { background: var(--surface); border-top: 1px solid var(--hair); border-bottom: 1px solid var(--hair); }
+  .section-head { margin-bottom: 38px; }
+  .section-head .eyebrow { margin-bottom: 10px; }
+  .section-head h2 {
+    font-size: clamp(27px, 4vw, 35px); letter-spacing: -.015em;
+    font-weight: 800; margin: 0; text-wrap: balance;
+  }
+  .section-head p { color: var(--muted); max-width: 64ch; margin: 12px 0 0; font-size: 16px; }
+
+  .prose { max-width: 68ch; }
+  .prose p { margin: 0 0 18px; font-size: 16.5px; }
+  .prose p:last-child { margin-bottom: 0; }
+  .prose strong { font-weight: 700; }
+  .prose h3 {
+    font-size: 20px; font-weight: 700; letter-spacing: -.01em;
+    margin: 34px 0 12px; text-wrap: balance;
+  }
+
+  .src {
+    font-family: ui-monospace, Consolas, monospace; font-size: 11px; font-weight: 700;
+    color: var(--steel); background: var(--steel-wash);
+    border: 1px solid color-mix(in srgb, var(--steel) 24%, transparent);
+    padding: 0 5px; border-radius: 4px; vertical-align: 1px; margin-left: 3px;
+    text-decoration: none; white-space: nowrap;
+  }
+
+  /* ================= 2. CHRONOLOGY ================= */
+  .chrono { position: relative; padding-left: 116px; }
+  .chrono::before {
+    content: ""; position: absolute; left: 92px; top: 10px; bottom: 10px;
+    width: 3px; border-radius: 3px;
+    background: linear-gradient(to bottom, var(--spine) 0%, var(--spine) 45%, var(--ember) 100%);
+  }
+  .entry { position: relative; margin-bottom: 30px; }
+  .entry:last-child { margin-bottom: 0; }
+  .entry .when {
+    position: absolute; left: -116px; top: 1px; width: 76px; text-align: right;
+    font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; font-weight: 700;
+    color: var(--ember-ink); letter-spacing: .02em;
+  }
+  .entry::after {
+    content: ""; position: absolute; left: -27px; top: 7px;
+    width: 11px; height: 11px; border-radius: 50%;
+    background: var(--surface); border: 3px solid var(--spine); z-index: 2;
+  }
+  .entry.key::after { border-color: var(--ember); background: var(--ember); }
+  .entry h3 { margin: 0 0 8px; font-size: 18.5px; font-weight: 700; letter-spacing: -.01em; }
+  .entry p { margin: 0 0 12px; font-size: 16px; max-width: 62ch; }
+  .entry p:last-child { margin-bottom: 0; }
+
+  /* ================= 4. CONCLUSION ================= */
+  .callout {
+    margin-top: 28px; padding: 20px 22px;
+    background: var(--surface); border: 1px solid var(--ember);
+    border-left: 4px solid var(--ember); border-radius: 12px; font-size: 16.5px;
+  }
+  section.alt .callout { background: var(--ground); }
+  .callout strong { color: var(--ember-ink); }
+  .callout p { margin: 0 0 14px; }
+  .callout p:last-child { margin: 0; }
+
+  .takeaways { display: grid; gap: 12px; margin-top: 26px; }
+  .takeaway {
+    display: grid; grid-template-columns: 30px 1fr; gap: 0 14px; align-items: start;
+    background: var(--surface); border: 1px solid var(--hair);
+    border-radius: 12px; padding: 16px 18px; box-shadow: var(--shadow);
+  }
+  section.alt .takeaway { background: var(--ground); }
+  .takeaway .n {
+    display: flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--ember-wash); color: var(--ember-ink);
+    border: 1px solid color-mix(in srgb, var(--ember) 28%, transparent);
+    font-family: ui-monospace, Consolas, monospace; font-size: 12px; font-weight: 700;
+  }
+  .takeaway p { margin: 0; font-size: 15.5px; }
+
+  /* ================= 5. RISK & IMPACT ================= */
+  .sectors {
+    border: 1px solid var(--hair); border-radius: 14px; overflow: hidden;
+    background: var(--surface); box-shadow: var(--shadow);
+  }
+  section.alt .sectors { background: var(--ground); }
+  .sector {
+    display: grid; grid-template-columns: minmax(150px, 1.1fr) 104px 92px 2fr;
+    gap: 16px; align-items: center;
+    padding: 15px 20px; border-bottom: 1px solid var(--hair);
+  }
+  .sector:last-child { border-bottom: none; }
+  .sector .name { font-weight: 700; font-size: 15.5px; }
+  .sector .why { font-size: 14px; color: var(--muted); }
+
+  .meter { display: flex; gap: 3px; }
+  .meter i {
+    display: block; height: 9px; flex: 1; border-radius: 2px;
+    background: var(--hair-strong); opacity: .5;
+  }
+  .level {
+    font-family: ui-monospace, Consolas, monospace; font-size: 10.5px; font-weight: 700;
+    letter-spacing: .1em; text-transform: uppercase; text-align: center;
+    padding: 3px 8px; border-radius: 100px; white-space: nowrap;
+  }
+
+  .sector.critical .meter i:nth-child(-n+5) { background: var(--risk-critical); opacity: 1; }
+  .sector.high     .meter i:nth-child(-n+4) { background: var(--risk-high);     opacity: 1; }
+  .sector.moderate .meter i:nth-child(-n+3) { background: var(--risk-moderate); opacity: 1; }
+  .sector.low      .meter i:nth-child(-n+2) { background: var(--risk-low);      opacity: 1; }
+  .sector.minimal  .meter i:nth-child(-n+1) { background: var(--risk-minimal);  opacity: 1; }
+
+  .sector.critical .level { color: #fff; background: var(--risk-critical); }
+  .sector.high     .level { color: var(--risk-high);     background: var(--risk-high-wash);     border: 1px solid color-mix(in srgb, var(--risk-high) 32%, transparent); }
+  .sector.moderate .level { color: var(--risk-moderate); background: var(--risk-moderate-wash); border: 1px solid color-mix(in srgb, var(--risk-moderate) 32%, transparent); }
+  .sector.low      .level { color: var(--risk-low);      background: var(--risk-low-wash);      border: 1px solid color-mix(in srgb, var(--risk-low) 32%, transparent); }
+  .sector.minimal  .level { color: var(--risk-minimal);  background: var(--risk-minimal-wash);  border: 1px solid var(--hair-strong); }
+
+  .risklegend {
+    display: flex; flex-wrap: wrap; gap: 18px; margin-top: 20px;
+    padding: 14px 18px; background: var(--surface-2);
+    border: 1px solid var(--hair); border-radius: 12px;
+    font-size: 13px; color: var(--muted);
+  }
+  .risklegend .item { display: flex; align-items: center; gap: 8px; }
+  .risklegend .sw { width: 22px; height: 8px; border-radius: 2px; }
+
+  /* ================= Footer ================= */
+  footer { border-top: 1px solid var(--hair); padding: 40px 0 64px; color: var(--muted); font-size: 14px; }
+  footer h3 { font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin: 0 0 14px; }
+  footer a { color: var(--ember-ink); }
+  .sources { counter-reset: s; display: grid; gap: 8px; margin: 0 0 26px; padding: 0; list-style: none; }
+  /* Counter absolutely positioned, not a grid column: a list item holding a text node AND
+     an anchor produces three grid items, so the anchor wrapped into the 30px counter column
+     and the URL rendered about four characters wide. */
+  .sources li {
+    counter-increment: s; position: relative; padding-left: 40px;
+    font-size: 13.5px; overflow-wrap: anywhere;
+  }
+  .sources li::before {
+    content: counter(s); position: absolute; left: 0; top: 2px;
+    font-family: ui-monospace, Consolas, monospace; font-size: 11px;
+    font-weight: 700; color: var(--steel); background: var(--steel-wash);
+    border: 1px solid color-mix(in srgb, var(--steel) 24%, transparent);
+    border-radius: 4px; text-align: center; width: 30px; height: 20px; line-height: 18px;
+  }
+  .note {
+    margin-top: 12px; padding: 14px 16px; background: var(--surface-2);
+    border: 1px dashed var(--hair-strong); border-radius: 10px; color: var(--muted);
+    font-size: 13.5px;
+  }
+  code { font-family: ui-monospace, Consolas, monospace; font-size: .9em; background: var(--surface-2); padding: 1px 5px; border-radius: 3px; }
+</style>
+
+<!-- ===================== 1. COVER ===================== -->
+<header class="cover">
+  <svg class="covermotif" viewBox="0 0 400 400" fill="none" aria-hidden="true">
+    <g class="arcs" stroke="currentColor" stroke-width="1.1">
+      <circle cx="286" cy="132" r="46"/>
+      <circle cx="286" cy="132" r="86"/>
+      <circle cx="286" cy="132" r="126"/>
+      <circle cx="286" cy="132" r="166"/>
+    </g>
+    <g class="rail" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+      <path d="M286 46 V318"/>
+    </g>
+    <g class="dots" fill="currentColor">
+      <circle cx="286" cy="86"  r="7"/>
+      <circle cx="286" cy="150" r="7"/>
+      <circle cx="286" cy="214" r="7"/>
+      <circle cx="286" cy="278" r="7"/>
+      <circle cx="196" cy="188" r="4"/>
+      <circle cx="352" cy="242" r="4"/>
+      <circle cx="230" cy="300" r="4"/>
+    </g>
+  </svg>
+
+  <div class="wrap">
+    <span class="tlp clear">TLP:CLEAR</span>
+
+    <p class="eyebrow">Threat Actor Analysis <span class="idtag">G0138</span></p>
+    <h1>Andariel<span class="accent">.</span></h1>
+    <p class="standfirst">
+      A state intelligence operation that pays for itself — ransoming hospitals to fund the
+      theft of submarine, missile and uranium-processing designs, sometimes against the same
+      victim on the same day.
+    </p>
+
+    <div class="covermeta">
+      <div><p class="k">Subject type</p><p class="v">Threat actor &middot; state</p></div>
+      <div><p class="k">Attribution</p><p class="v">North Korea &middot; RGB 3rd Bureau</p></div>
+      <div><p class="k">First observed</p><p class="v">2009</p></div>
+      <div><p class="k">Assessed risk</p><p class="v">Critical</p></div>
+      <div><p class="k">Report date</p><p class="v">17 August 2026</p></div>
+      <div><p class="k">Analyst</p><p class="v">Threat Intelligence</p></div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ===================== 2. OVERVIEW ===================== -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Overview</p>
+        <h2>Espionage that funds itself</h2>
+      </div>
+
+      <div class="prose">
+        <p>
+          Andariel is a North Korean state-sponsored group attributed to the Reconnaissance
+          General Bureau's <strong>3rd Bureau</strong>, based in Pyongyang and Sinuiju, and
+          assessed to be a subset of the Lazarus Group. Vendors track the same actor as Onyx
+          Sleet, Silent Chollima, Stonefly, APT45, DarkSeoul and
+          PLUTONIUM.<a class="src" href="#s1">1</a><a class="src" href="#s2">2</a> MITRE dates
+          the group to at least 2009; Microsoft dates its own first observation to 2014. The
+          gap reflects when each organisation began tracking rather than a disagreement about
+          the group.<a class="src" href="#s1">1</a><a class="src" href="#s3">3</a>
+        </p>
+        <p>
+          The defining characteristic is that <strong>the espionage pays for itself</strong>.
+          The group runs ransomware against healthcare entities and uses the proceeds to fund
+          intelligence collection, and the authoring agencies record cases where ransomware and
+          espionage were run against the same entity — in some instances on the same
+          day.<a class="src" href="#s2">2</a> Most state-sponsored collection is a cost centre;
+          this one is not. That is why a single victim can be hit by two operations that look
+          like completely different actors, and why an incident that opens as a ransomware
+          event may not close as one.
+        </p>
+        <p>
+          What they are collecting is stated unusually plainly. The advisory lists the
+          requirements: tanks and self-propelled howitzers, littoral combat ships, submarines,
+          torpedoes and autonomous underwater vehicles, fighter aircraft and UAVs, missiles and
+          missile defence, satellites and nano-satellite technology, phased-array radar,
+          uranium processing and enrichment, nuclear waste storage, nuclear power plants,
+          shipbuilding and marine engineering, robotics, additive manufacturing and machining.
+          The material sought is contract specifications, bills of materials, design drawings
+          and engineering documents.<a class="src" href="#s2">2</a>
+        </p>
+        <p>
+          Tradecraft has shifted. Historically the group led with spear-phishing; Microsoft
+          records a move to exploiting <strong>n-day vulnerabilities in public-facing web
+          servers</strong> as the primary route in from around 2023, using both public and
+          custom exploits, followed by web shells. Post-access tooling is a large custom RAT
+          family — TigerRAT, SmallTiger, Dora RAT, ValidAlpha, LightHand, DurianBeacon,
+          NukeSped, Atharvan and Goat RAT — packed with Themida and VMProtect, alongside
+          commodity tooling including the Sliver C2 framework, Ngrok, masscan, 3Proxy, PuTTY
+          and Mimikatz, and abuse of legitimate remote monitoring and management
+          software.<a class="src" href="#s2">2</a><a class="src" href="#s3">3</a>
+        </p>
+      </div>
+
+      <h3 style="font-size:20px;font-weight:700;margin:38px 0 22px;">Activity, oldest first</h3>
+
+      <div class="chrono">
+        <div class="entry key">
+          <div class="when">2009</div>
+          <h3>Earliest tracked activity against South Korean targets</h3>
+          <p>
+            MITRE dates the group to at least 2009, operating against South Korean government
+            agencies, military organisations and domestic companies, and against financial
+            institutions including ATMs, banks and cryptocurrency exchanges. Early operations
+            used watering-hole attacks carrying zero-day exploits, spear-phishing attachments,
+            drive-by compromise and ActiveX exploitation, and hid payload code inside PNG and
+            BMP images using steganography.<a class="src" href="#s1">1</a>
+          </p>
+        </div>
+
+        <div class="entry">
+          <div class="when">2020</div>
+          <h3>TigerRAT enters the toolset</h3>
+          <p>
+            The custom TigerRAT backdoor came into use, providing keylogging and screen
+            recording against compromised hosts — capabilities aimed at watching an operator
+            work rather than at moving files in bulk.<a class="src" href="#s3">3</a>
+          </p>
+        </div>
+
+        <div class="entry key">
+          <div class="when">2021-05</div>
+          <h3>Maui ransomware deployed against healthcare</h3>
+          <p>
+            Maui ransomware was used against US healthcare and public health organisations,
+            encrypting servers responsible for diagnostics, electronic health records and
+            imaging. The proceeds funded intelligence collection, making these victims a
+            <em>revenue source</em> rather than a collection target.<a class="src" href="#s4">4</a>
+          </p>
+        </div>
+
+        <div class="entry key">
+          <div class="when">2021-12</div>
+          <h3>Log4Shell exploitation of public-facing web servers</h3>
+          <p>
+            The group began widespread exploitation of internet-facing web servers through
+            known vulnerabilities, with <strong>CVE-2021-44228</strong> in Apache Log4j named
+            as the example, deploying web shells to hold the foothold and reach applications
+            and data behind it.<a class="src" href="#s2">2</a><a class="src" href="#s3">3</a>
+          </p>
+        </div>
+
+        <div class="entry key">
+          <div class="when">2023</div>
+          <h3>N-day exploitation replaces phishing as the primary way in</h3>
+          <p>
+            Microsoft records the group mostly exploiting n-day vulnerabilities from around
+            this point, using publicly available and custom exploits rather than leading with
+            spear-phishing. Named targets include Confluence, PaperCut, TeamCity and Apache
+            ActiveMQ. The group is separately recorded <em>researching</em> vulnerabilities in
+            the NIST National Vulnerability Database — reconnaissance, and not evidence that it
+            exploited every CVE it read.<a class="src" href="#s2">2</a><a class="src" href="#s3">3</a>
+          </p>
+        </div>
+
+        <div class="entry key">
+          <div class="when">2023-12</div>
+          <h3>1.2 TB taken from South Korean defence contractors</h3>
+          <p>
+            Microsoft records the theft of 1.2 terabytes of data from South Korean defence
+            contractors, the largest single collection volume attributed to the group in
+            reviewed reporting.<a class="src" href="#s3">3</a>
+          </p>
+        </div>
+
+        <div class="entry">
+          <div class="when">2024-02</div>
+          <h3>SmallTiger backdoor identified</h3>
+          <p>
+            A C++ backdoor tracked as SmallTiger was identified, carrying layered obfuscation,
+            and was subsequently used against South Korean defence organisations. It sits
+            alongside TigerRAT rather than replacing it.<a class="src" href="#s3">3</a>
+          </p>
+        </div>
+
+        <div class="entry">
+          <div class="when">2024-05</div>
+          <h3>Dora RAT deployed against South Korean organisations</h3>
+          <p>
+            Dora RAT, written in Go, was deployed against South Korean educational
+            institutions, construction companies and manufacturing organisations — a widening
+            of targeting beyond the defence and nuclear core.<a class="src" href="#s3">3</a>
+          </p>
+        </div>
+
+        <div class="entry key">
+          <div class="when">2024-07-25</div>
+          <h3>Eight-agency joint advisory published</h3>
+          <p>
+            The FBI, CNMF, CISA, DC3, NSA, the Republic of Korea's National Intelligence
+            Service and National Police Agency, and the UK's NCSC published AA24-207A. It sets
+            out the collection requirements in detail and records the group launching
+            ransomware and conducting espionage against the same entity, in some cases on the
+            same day.<a class="src" href="#s2">2</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- History section deliberately omitted: the chronology opens at the earliest tracked
+       activity, so the origin story is already the first entry. -->
+
+  <!-- ===================== 4. CONCLUSION ===================== -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Conclusion</p>
+        <h2>Two operations, one actor, sometimes one day</h2>
+      </div>
+
+      <div class="prose">
+        <p>
+          Andariel breaks the assumption most triage rests on: that a ransomware incident and a
+          state espionage incident are different problems belonging to different actors with
+          different responses. Here they are the same organisation, funded by the first to
+          perform the second, and the agencies have watched both run against a single victim
+          within a single day. A hospital that pays a ransom may be underwriting the theft of
+          reactor designs from a company it has never heard of, and a defence manufacturer
+          that treats a ransomware alert as a commodity nuisance may be watching the funding
+          arm of the operation that is already inside it.
+        </p>
+      </div>
+
+      <div class="takeaways">
+        <div class="takeaway"><span class="n">1</span><p>
+          <strong>A ransomware event from this actor is not evidence that espionage is absent.</strong>
+          The agencies observed both against the same entity on the same day. Scoping an
+          incident as "just ransomware" and closing it after recovery is how the collection
+          half survives the response.
+        </p></div>
+        <div class="takeaway"><span class="n">2</span><p>
+          <strong>The collection requirement is published, so exposure is calculable.</strong>
+          Few actors tell you what they want in this much detail — down to autonomous
+          underwater vehicles, phased-array radar and uranium enrichment. An organisation can
+          check its own drawings and bills of materials against that list and get a real answer
+          rather than a guess.
+        </p></div>
+        <div class="takeaway"><span class="n">3</span><p>
+          <strong>The way in changed, and defences built for the old one will miss.</strong>
+          Phishing awareness was the right control for the group's earlier tradecraft. Since
+          about 2023 the primary route has been n-day exploitation of internet-facing web
+          servers, which is an exposure-management and patch-latency problem, not a
+          user-training one.
+        </p></div>
+        <div class="takeaway"><span class="n">4</span><p>
+          <strong>Reading a CVE list is not exploiting it.</strong> The advisory records the
+          group researching dozens of vulnerabilities in the National Vulnerability Database.
+          That is reconnaissance. Treating every CVE on that list as an attributed exploitation
+          would inflate the threat and misdirect patching priority away from the handful
+          actually named as used.
+        </p></div>
+        <div class="takeaway"><span class="n">5</span><p>
+          <strong>Healthcare is exposed for a different reason than everyone else here.</strong>
+          It is not on the collection list. It is on the funding list — which means the
+          controls that matter there are ransomware controls, while the controls that matter in
+          defence and nuclear are collection controls. One actor, two defensive problems.
+        </p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 5. RISK & IMPACT ===================== -->
+  <section class="alt">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Risk &amp; Impact</p>
+        <h2>Who this actor actually hits</h2>
+        <p>
+          Two different exposures sit in this table. Most sectors are ranked on whether they
+          hold the technical information the published collection requirements name. Healthcare
+          is ranked on something else entirely — it is the revenue source, not the target.
+        </p>
+      </div>
+
+      <div class="sectors">
+        <div class="sector critical">
+          <div class="name">Defence and aerospace</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Critical</div>
+          <div class="why">The stated collection requirement. The advisory names tanks, submarines, torpedoes, autonomous underwater vehicles, fighter aircraft, UAVs, missiles and satellites individually.</div>
+        </div>
+        <div class="sector critical">
+          <div class="name">Nuclear</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Critical</div>
+          <div class="why">Named as a collection priority in its own right: uranium processing and enrichment, waste and storage, power plants, and government nuclear research institutes.</div>
+        </div>
+        <div class="sector high">
+          <div class="name">Engineering and manufacturing</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">High</div>
+          <div class="why">Shipbuilding, marine engineering, robotics, additive manufacturing and machining are all named requirements, and 2024 activity reached South Korean manufacturers directly.</div>
+        </div>
+        <div class="sector high">
+          <div class="name">Healthcare</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">High</div>
+          <div class="why">Exposed as a ransomware revenue source rather than a collection target — a different threat from the same actor, and the reason espionage against other sectors is funded at all.</div>
+        </div>
+        <div class="sector high">
+          <div class="name">Energy</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">High</div>
+          <div class="why">Named by Microsoft among the industries of interest to North Korean intelligence that this group targets.</div>
+        </div>
+        <div class="sector moderate">
+          <div class="name">Education and research</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Moderate</div>
+          <div class="why">South Korean educational institutions were hit in 2024, and research institutes sit adjacent to the nuclear and engineering requirements.</div>
+        </div>
+        <div class="sector moderate">
+          <div class="name">Financial services</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Moderate</div>
+          <div class="why">Historically targeted — ATMs, banks and cryptocurrency exchanges — but this sits in the group's earlier profile rather than the current collection mandate.</div>
+        </div>
+        <div class="sector minimal">
+          <div class="name">Retail and hospitality</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Minimal</div>
+          <div class="why">No indication of interest. Holds neither the technical information the collection requirements name nor the ransomware payout profile of healthcare.</div>
+        </div>
+      </div>
+
+      <div class="risklegend">
+        <div class="item"><span class="sw" style="background:var(--risk-critical)"></span> Critical — actively targeted</div>
+        <div class="item"><span class="sw" style="background:var(--risk-high)"></span> High — fits the victim profile</div>
+        <div class="item"><span class="sw" style="background:var(--risk-moderate)"></span> Moderate — plausible, not observed</div>
+        <div class="item"><span class="sw" style="background:var(--risk-low)"></span> Low — outside the pattern</div>
+        <div class="item"><span class="sw" style="background:var(--risk-minimal)"></span> Minimal — no indication</div>
+      </div>
+
+      <div class="callout">
+        <p>
+          <strong>Bottom line.</strong> Work out which of the two exposures you have, because
+          they need different controls. If your drawings, bills of materials or engineering
+          documents touch anything on the published requirement list, you are a collection
+          target and the priority is detecting quiet, long-dwell access. If you are a
+          healthcare provider, you are a funding target and the priority is ransomware
+          resilience. A small number of organisations are both.
+        </p>
+        <p>
+          For <em>how</em> a compromise actually unfolds — the techniques, the tooling and the
+          order they run in — see the companion attack-flow report,
+          <code>andariel-G0138-attack-flow.html</code>.
+        </p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <h3>Sources</h3>
+    <ol class="sources">
+      <li id="s1">MITRE ATT&amp;CK — Groups: Andariel (G0138) — <a href="https://attack.mitre.org/groups/G0138/">https://attack.mitre.org/groups/G0138/</a></li>
+      <li id="s2">CISA / FBI / CNMF / DC3 / NSA / ROK NIS / ROK NPA / UK NCSC — AA24-207A, North Korea Cyber Group Conducts Global Espionage Campaign to Advance Regime's Military and Nuclear Programs, 25 July 2024 — <a href="https://www.cisa.gov/news-events/cybersecurity-advisories/aa24-207a">https://www.cisa.gov/news-events/cybersecurity-advisories/aa24-207a</a></li>
+      <li id="s3">Microsoft Threat Intelligence — Onyx Sleet uses array of malware to gather intelligence for North Korea, 25 July 2024 — <a href="https://www.microsoft.com/en-us/security/blog/2024/07/25/onyx-sleet-uses-array-of-malware-to-gather-intelligence-for-north-korea/">https://www.microsoft.com/en-us/security/blog/2024/07/25/onyx-sleet-uses-array-of-malware-to-gather-intelligence-for-north-korea/</a></li>
+      <li id="s4">CISA / FBI / Treasury — AA22-187A, North Korean State-Sponsored Cyber Actors Use Maui Ransomware to Target the Healthcare and Public Health Sector — <a href="https://www.cisa.gov/news-events/cybersecurity-advisories/aa22-187a">https://www.cisa.gov/news-events/cybersecurity-advisories/aa22-187a</a></li>
+    </ol>
+
+    <p class="note">
+      <strong>Confidence and sourcing.</strong> Attribution to the DPRK Reconnaissance General
+      Bureau's 3rd Bureau rests on a joint advisory carrying eight government agencies across
+      three countries, corroborated independently by Microsoft — an unusually strong basis, and
+      stated here as reported rather than assessed. The collection requirements, the
+      same-entity ransomware-and-espionage finding and the tooling names are taken from those
+      two sources directly. Two points of deliberate restraint: the advisory lists more than
+      forty CVEs the group <em>researched</em> in the National Vulnerability Database, and this
+      report does not present those as exploited, because the advisory does not; and the 2009
+      start date follows MITRE while Microsoft dates its own first observation to 2014, which
+      is a difference in tracking history rather than a contradiction. Sector risk levels are
+      analyst assessments, not measured values; they deliberately share a colour ramp with CVSS
+      severity but are rendered as meters rather than scores so the two are not confused.
+    </p>
+    <p class="note">
+      <strong>Pipeline.</strong> Step 1 of TI-Reporting. The companion ATT&amp;CK flow report is
+      built from the JSON handoff in <code>subjects/andariel/handoff/</code>, of which this
+      analysis produces <code>analysis.json</code>.
+    </p>
+  </div>
+</footer>

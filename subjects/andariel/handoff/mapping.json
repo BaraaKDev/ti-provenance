@@ -1,0 +1,193 @@
+{
+  "schema": "mapping/1.0",
+  "subject": "Andariel",
+  "slug": "andariel",
+  "matrix": "enterprise",
+  "tactics": [
+    {
+      "tactic": "Resource Development",
+      "techniques": [
+        {
+          "id": "T1588.006",
+          "name": "Obtain Capabilities: Vulnerabilities",
+          "usage": "Monitors the NIST National Vulnerability Database for vulnerability information to use in targeting. The joint advisory records more than forty CVEs researched this way - reading them, not necessarily exploiting them.",
+          "tooling": []
+        },
+        {
+          "id": "T1587.001",
+          "name": "Develop Capabilities: Malware",
+          "usage": "Builds and maintains its own RAT family rather than renting one: TigerRAT, SmallTiger, Dora RAT, ValidAlpha, LightHand, DurianBeacon, NukeSped, Atharvan and Goat RAT, written across C++ and Go and revised over years.",
+          "tooling": ["TigerRAT", "SmallTiger", "Dora RAT", "ValidAlpha", "LightHand", "DurianBeacon", "NukeSped", "Atharvan", "Goat RAT"]
+        },
+        {
+          "id": "T1588.002",
+          "name": "Obtain Capabilities: Tool",
+          "usage": "Supplements the custom estate with off-the-shelf tooling: the Sliver C2 framework, Ngrok, masscan, 3Proxy, PuTTY and Mimikatz.",
+          "tooling": ["Sliver", "Ngrok", "masscan", "3Proxy", "PuTTY", "Mimikatz"]
+        }
+      ]
+    },
+    {
+      "tactic": "Initial Access",
+      "techniques": [
+        {
+          "id": "T1190",
+          "name": "Exploit Public-Facing Application",
+          "usage": "Exploits n-day vulnerabilities in internet-facing web servers, using public and custom exploits. Log4Shell is the example the advisory names; Confluence, PaperCut, TeamCity and Apache ActiveMQ are the other products recorded. This became the primary route in from around 2023.",
+          "tooling": []
+        },
+        {
+          "id": "T1566.001",
+          "name": "Phishing: Spearphishing Attachment",
+          "usage": "The group's earlier lead technique, sending malicious attachments before the shift to exploitation. Retained rather than retired.",
+          "tooling": []
+        },
+        {
+          "id": "T1189",
+          "name": "Drive-by Compromise",
+          "usage": "Early operations used watering-hole attacks carrying zero-day exploits against South Korean visitors.",
+          "tooling": []
+        }
+      ]
+    },
+    {
+      "tactic": "Execution",
+      "techniques": [
+        {
+          "id": "T1203",
+          "name": "Exploitation for Client Execution",
+          "usage": "Exploited ActiveX to run code on visitors to compromised sites - the execution half of the watering-hole operations.",
+          "tooling": []
+        },
+        {
+          "id": "T1204.002",
+          "name": "User Execution: Malicious File",
+          "usage": "Relies on the recipient opening the spear-phishing attachment to run the first stage.",
+          "tooling": []
+        }
+      ]
+    },
+    {
+      "tactic": "Persistence",
+      "techniques": [
+        {
+          "id": "T1505.003",
+          "name": "Server Software Component: Web Shell",
+          "usage": "Plants web shells on the exploited web servers to hold the foothold and reach the applications and data behind it, independently of the exploit that got them there.",
+          "tooling": []
+        }
+      ]
+    },
+    {
+      "tactic": "Stealth",
+      "techniques": [
+        {
+          "id": "T1027.002",
+          "name": "Obfuscated Files or Information: Software Packing",
+          "usage": "Packs the custom RAT family with the commercial protectors Themida and VMProtect before delivery.",
+          "tooling": ["Themida", "VMProtect"]
+        },
+        {
+          "id": "T1027.003",
+          "name": "Obfuscated Files or Information: Steganography",
+          "usage": "Hid executable payload code inside PNG and BMP image files in early operations. ATT&CK cites this group by name as a procedure example for the technique.",
+          "tooling": []
+        }
+      ]
+    },
+    {
+      "tactic": "Credential Access",
+      "techniques": [
+        {
+          "id": "T1003",
+          "name": "OS Credential Dumping",
+          "usage": "Carries Mimikatz. Reporting names the tool without recording which credential store was read on any given intrusion, so this stays at the parent technique rather than asserting LSASS.",
+          "tooling": ["Mimikatz"]
+        }
+      ]
+    },
+    {
+      "tactic": "Collection",
+      "techniques": [
+        {
+          "id": "T1005",
+          "name": "Data from Local System",
+          "usage": "Took 1.2 TB from South Korean defence contractors in December 2023. Reporting records the volume rather than the stores it came from, so this is the outcome-level claim that data was taken off compromised systems.",
+          "tooling": []
+        },
+        {
+          "id": "T1056.001",
+          "name": "Input Capture: Keylogging",
+          "usage": "TigerRAT logs keystrokes. Placed under Collection rather than Credential Access because the reporting frames the capability as watching an operator work rather than as harvesting logons.",
+          "tooling": ["TigerRAT"]
+        },
+        {
+          "id": "T1113",
+          "name": "Screen Capture",
+          "usage": "TigerRAT records the screen, which for a collection mandate built around drawings and design documents returns material a file grab would miss.",
+          "tooling": ["TigerRAT"]
+        }
+      ]
+    },
+    {
+      "tactic": "Command and Control",
+      "techniques": [
+        {
+          "id": "T1071",
+          "name": "Application Layer Protocol",
+          "usage": "Runs Sliver implants against defence and aerospace targets. Reporting names the framework without specifying the protocol chosen, so this stays at the parent technique.",
+          "tooling": ["Sliver"]
+        },
+        {
+          "id": "T1090",
+          "name": "Proxy",
+          "usage": "Uses 3Proxy and other SOCKS proxies to relay operator traffic.",
+          "tooling": ["3Proxy"]
+        },
+        {
+          "id": "T1219",
+          "name": "Remote Access Tools",
+          "usage": "Abuses legitimate remote monitoring and management software already trusted in the estate, so the operator channel is signed administrative tooling rather than a custom implant.",
+          "tooling": []
+        },
+        {
+          "id": "T1572",
+          "name": "Protocol Tunneling",
+          "usage": "Uses Ngrok to tunnel out of networks that would otherwise not permit an inbound connection.",
+          "tooling": ["Ngrok"]
+        }
+      ]
+    },
+    {
+      "tactic": "Impact",
+      "techniques": [
+        {
+          "id": "T1486",
+          "name": "Data Encrypted for Impact",
+          "usage": "Deploys Maui ransomware against US healthcare, encrypting servers running diagnostics, electronic health records and imaging. This is the funding arm rather than the objective - the proceeds pay for the collection operations against everyone else.",
+          "tooling": ["Maui"]
+        }
+      ]
+    }
+  ],
+  "arsenal": [
+    { "name": "TigerRAT", "role": "Custom backdoor providing keylogging and screen recording", "kind": "Backdoor" },
+    { "name": "SmallTiger", "role": "C++ backdoor with layered obfuscation, used against South Korean defence", "kind": "Backdoor" },
+    { "name": "Dora RAT", "role": "Go backdoor used against education, construction and manufacturing", "kind": "Backdoor" },
+    { "name": "ValidAlpha", "role": "Go tool allowing file execution and arbitrary command shells", "kind": "Backdoor" },
+    { "name": "LightHand", "role": "Lightweight backdoor for directory listing and file create/delete", "kind": "Backdoor" },
+    { "name": "DurianBeacon", "role": "RAT used in the November 2023 campaign", "kind": "Backdoor" },
+    { "name": "NukeSped", "role": "Backdoor family named in the joint advisory", "kind": "Backdoor" },
+    { "name": "Atharvan", "role": "Backdoor named in the joint advisory", "kind": "Backdoor" },
+    { "name": "Goat RAT", "role": "Backdoor named in the joint advisory", "kind": "Backdoor" },
+    { "name": "Maui", "role": "Ransomware run against healthcare to fund the espionage operations", "kind": "Ransomware" },
+    { "name": "Sliver", "role": "Open-source C2 framework used for implants against defence and aerospace", "kind": "C2" },
+    { "name": "Mimikatz", "sid": "S0002", "role": "Credential dumping", "kind": "Cred access" },
+    { "name": "Ngrok", "role": "Tunnelling utility for outbound operator channels", "kind": "Tunnelling" },
+    { "name": "3Proxy", "role": "SOCKS proxy for relaying operator traffic", "kind": "Tunnelling" },
+    { "name": "masscan", "role": "Mass port scanner held in the toolset", "kind": "Discovery" },
+    { "name": "PuTTY", "role": "SSH client held in the toolset", "kind": "Tunnelling" },
+    { "name": "Themida", "role": "Commercial protector used to pack the custom RAT family", "kind": "Packer" },
+    { "name": "VMProtect", "role": "Commercial protector used to pack the custom RAT family", "kind": "Packer" }
+  ]
+}

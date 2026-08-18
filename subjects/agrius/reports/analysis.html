@@ -1,0 +1,571 @@
+<title>Agrius — Threat Analysis</title>
+
+<style>
+  /* ---- Tokens: shared across TI-Reporting - see CLAUDE.md ---- */
+  :root {
+    color-scheme: light;
+
+    --ground: #f6f4f2;
+    --surface: #ffffff;
+    --surface-2: #efece7;
+    --ink: #1b1e24;
+    --muted: #5c6470;
+    --hair: #ddd8d1;
+    --hair-strong: #c8c2b8;
+
+    /* ACCENT - destruction objective: ember red, same values the flow report uses. */
+    --ember: #cf4a1f;
+    --ember-ink: #a8380f;
+    --ember-wash: rgba(207, 74, 31, 0.10);
+    --steel: #346b8f;
+    --steel-wash: rgba(52, 107, 143, 0.10);
+    --spine: #b9b2a8;
+
+    /* SECTOR RISK - shares the CVSS ramp, separate tokens, different form. */
+    --risk-critical: #a4161a;  --risk-critical-wash: rgba(164, 22, 26, 0.10);
+    --risk-high:     #b3541e;  --risk-high-wash:     rgba(179, 84, 30, 0.10);
+    --risk-moderate: #8a6a00;  --risk-moderate-wash: rgba(138, 106, 0, 0.10);
+    --risk-low:      #4a6b2a;  --risk-low-wash:      rgba(74, 107, 42, 0.10);
+    --risk-minimal:  #5c6470;  --risk-minimal-wash:  rgba(92, 100, 112, 0.10);
+
+    --shadow: 0 1px 2px rgba(20,22,26,.06), 0 8px 24px rgba(20,22,26,.05);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.65; -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 940px; margin: 0 auto; padding: 0 24px; }
+
+  /* ================= 1. COVER ================= */
+  .cover {
+    position: relative; overflow: hidden;
+    border-bottom: 1px solid var(--hair);
+    background:
+      radial-gradient(120% 90% at 88% -5%, var(--ember-wash), transparent 62%),
+      var(--surface);
+  }
+  .cover .wrap { position: relative; z-index: 2; padding-top: 84px; padding-bottom: 76px; }
+
+  .covermotif {
+    position: absolute; top: -40px; right: -60px; width: 460px; height: 460px;
+    color: var(--ember); pointer-events: none; z-index: 1;
+  }
+  .covermotif .arcs   { opacity: .16; }
+  .covermotif .rail   { opacity: .30; }
+  .covermotif .dots   { opacity: .22; }
+
+  .tlp {
+    display: inline-block; font-family: ui-monospace, Consolas, monospace;
+    font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
+    padding: 4px 10px; border-radius: 4px; margin-bottom: 26px;
+    background: var(--surface-2); border: 1px solid var(--hair-strong); color: var(--muted);
+  }
+  .tlp.clear { color: var(--muted); }
+  .tlp.green { color: var(--risk-low);      border-color: color-mix(in srgb, var(--risk-low) 40%, transparent);      background: var(--risk-low-wash); }
+  .tlp.amber { color: var(--risk-high);     border-color: color-mix(in srgb, var(--risk-high) 40%, transparent);     background: var(--risk-high-wash); }
+  .tlp.red   { color: var(--risk-critical); border-color: color-mix(in srgb, var(--risk-critical) 40%, transparent); background: var(--risk-critical-wash); }
+
+  .eyebrow {
+    font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+    font-size: 12px; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--muted); margin: 0 0 18px; display: flex; align-items: center; gap: 12px;
+  }
+  .eyebrow::after { content: ""; flex: 1; height: 1px; background: var(--hair-strong); }
+  .idtag { color: var(--ember-ink); font-weight: 600; }
+
+  .cover h1 {
+    font-size: clamp(44px, 8vw, 78px); line-height: .96; letter-spacing: -.025em;
+    font-weight: 800; margin: 0 0 10px; text-wrap: balance; max-width: 16ch;
+  }
+  .cover h1 .accent { color: var(--ember); }
+  .cover .standfirst {
+    font-size: clamp(17px, 2.4vw, 21px); color: var(--muted);
+    max-width: 60ch; margin: 20px 0 0;
+  }
+  .covermeta {
+    margin-top: 42px; display: grid; gap: 1px;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    background: var(--hair); border: 1px solid var(--hair); border-radius: 12px; overflow: hidden;
+  }
+  .covermeta div { background: var(--surface); padding: 15px 18px; }
+  .covermeta .k { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0 0 5px; }
+  .covermeta .v { font-size: 15px; font-weight: 600; margin: 0; }
+
+  /* ================= Sections ================= */
+  section { padding: 62px 0; }
+  section.alt { background: var(--surface); border-top: 1px solid var(--hair); border-bottom: 1px solid var(--hair); }
+  .section-head { margin-bottom: 38px; }
+  .section-head .eyebrow { margin-bottom: 10px; }
+  .section-head h2 {
+    font-size: clamp(27px, 4vw, 35px); letter-spacing: -.015em;
+    font-weight: 800; margin: 0; text-wrap: balance;
+  }
+  .section-head p { color: var(--muted); max-width: 64ch; margin: 12px 0 0; font-size: 16px; }
+
+  .prose { max-width: 68ch; }
+  .prose p { margin: 0 0 18px; font-size: 16.5px; }
+  .prose p:last-child { margin-bottom: 0; }
+  .prose strong { font-weight: 700; }
+  .prose h3 {
+    font-size: 20px; font-weight: 700; letter-spacing: -.01em;
+    margin: 34px 0 12px; text-wrap: balance;
+  }
+
+  .src {
+    font-family: ui-monospace, Consolas, monospace; font-size: 11px; font-weight: 700;
+    color: var(--steel); background: var(--steel-wash);
+    border: 1px solid color-mix(in srgb, var(--steel) 24%, transparent);
+    padding: 0 5px; border-radius: 4px; vertical-align: 1px; margin-left: 3px;
+    text-decoration: none; white-space: nowrap;
+  }
+
+  /* ================= 2. CHRONOLOGY ================= */
+  .chrono { position: relative; padding-left: 116px; }
+  .chrono::before {
+    content: ""; position: absolute; left: 92px; top: 10px; bottom: 10px;
+    width: 3px; border-radius: 3px;
+    background: linear-gradient(to bottom, var(--spine) 0%, var(--spine) 45%, var(--ember) 100%);
+  }
+  .entry { position: relative; margin-bottom: 30px; }
+  .entry:last-child { margin-bottom: 0; }
+  .entry .when {
+    position: absolute; left: -116px; top: 1px; width: 76px; text-align: right;
+    font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; font-weight: 700;
+    color: var(--ember-ink); letter-spacing: .02em;
+  }
+  .entry::after {
+    content: ""; position: absolute; left: -27px; top: 7px;
+    width: 11px; height: 11px; border-radius: 50%;
+    background: var(--surface); border: 3px solid var(--spine); z-index: 2;
+  }
+  .entry.key::after { border-color: var(--ember); background: var(--ember); }
+  .entry h3 { margin: 0 0 8px; font-size: 18.5px; font-weight: 700; letter-spacing: -.01em; }
+  .entry p { margin: 0 0 12px; font-size: 16px; max-width: 62ch; }
+  .entry p:last-child { margin-bottom: 0; }
+
+  /* ================= 4. CONCLUSION ================= */
+  .callout {
+    margin-top: 28px; padding: 20px 22px;
+    background: var(--surface); border: 1px solid var(--ember);
+    border-left: 4px solid var(--ember); border-radius: 12px; font-size: 16.5px;
+  }
+  section.alt .callout { background: var(--ground); }
+  .callout strong { color: var(--ember-ink); }
+  .callout p { margin: 0 0 14px; }
+  .callout p:last-child { margin: 0; }
+
+  .takeaways { display: grid; gap: 12px; margin-top: 26px; }
+  .takeaway {
+    display: grid; grid-template-columns: 30px 1fr; gap: 0 14px; align-items: start;
+    background: var(--surface); border: 1px solid var(--hair);
+    border-radius: 12px; padding: 16px 18px; box-shadow: var(--shadow);
+  }
+  section.alt .takeaway { background: var(--ground); }
+  .takeaway .n {
+    display: flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--ember-wash); color: var(--ember-ink);
+    border: 1px solid color-mix(in srgb, var(--ember) 28%, transparent);
+    font-family: ui-monospace, Consolas, monospace; font-size: 12px; font-weight: 700;
+  }
+  .takeaway p { margin: 0; font-size: 15.5px; }
+
+  /* ================= 5. RISK & IMPACT ================= */
+  .sectors {
+    border: 1px solid var(--hair); border-radius: 14px; overflow: hidden;
+    background: var(--surface); box-shadow: var(--shadow);
+  }
+  section.alt .sectors { background: var(--ground); }
+  .sector {
+    display: grid; grid-template-columns: minmax(150px, 1.1fr) 104px 92px 2fr;
+    gap: 16px; align-items: center;
+    padding: 15px 20px; border-bottom: 1px solid var(--hair);
+  }
+  .sector:last-child { border-bottom: none; }
+  .sector .name { font-weight: 700; font-size: 15.5px; }
+  .sector .why { font-size: 14px; color: var(--muted); }
+
+  .meter { display: flex; gap: 3px; }
+  .meter i {
+    display: block; height: 9px; flex: 1; border-radius: 2px;
+    background: var(--hair-strong); opacity: .5;
+  }
+  .level {
+    font-family: ui-monospace, Consolas, monospace; font-size: 10.5px; font-weight: 700;
+    letter-spacing: .1em; text-transform: uppercase; text-align: center;
+    padding: 3px 8px; border-radius: 100px; white-space: nowrap;
+  }
+
+  .sector.critical .meter i:nth-child(-n+5) { background: var(--risk-critical); opacity: 1; }
+  .sector.high     .meter i:nth-child(-n+4) { background: var(--risk-high);     opacity: 1; }
+  .sector.moderate .meter i:nth-child(-n+3) { background: var(--risk-moderate); opacity: 1; }
+  .sector.low      .meter i:nth-child(-n+2) { background: var(--risk-low);      opacity: 1; }
+  .sector.minimal  .meter i:nth-child(-n+1) { background: var(--risk-minimal);  opacity: 1; }
+
+  .sector.critical .level { color: #fff; background: var(--risk-critical); }
+  .sector.high     .level { color: var(--risk-high);     background: var(--risk-high-wash);     border: 1px solid color-mix(in srgb, var(--risk-high) 32%, transparent); }
+  .sector.moderate .level { color: var(--risk-moderate); background: var(--risk-moderate-wash); border: 1px solid color-mix(in srgb, var(--risk-moderate) 32%, transparent); }
+  .sector.low      .level { color: var(--risk-low);      background: var(--risk-low-wash);      border: 1px solid color-mix(in srgb, var(--risk-low) 32%, transparent); }
+  .sector.minimal  .level { color: var(--risk-minimal);  background: var(--risk-minimal-wash);  border: 1px solid var(--hair-strong); }
+
+  .risklegend {
+    display: flex; flex-wrap: wrap; gap: 18px; margin-top: 20px;
+    padding: 14px 18px; background: var(--surface-2);
+    border: 1px solid var(--hair); border-radius: 12px;
+    font-size: 13px; color: var(--muted);
+  }
+  .risklegend .item { display: flex; align-items: center; gap: 8px; }
+  .risklegend .sw { width: 22px; height: 8px; border-radius: 2px; }
+
+  /* ================= Footer ================= */
+  footer { border-top: 1px solid var(--hair); padding: 40px 0 64px; color: var(--muted); font-size: 14px; }
+  footer h3 { font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin: 0 0 14px; }
+  footer a { color: var(--ember-ink); }
+  .sources { counter-reset: s; display: grid; gap: 8px; margin: 0 0 26px; padding: 0; list-style: none; }
+  /* Counter absolutely positioned, not a grid column: an <li> holding a text node AND an
+     <a> produces three grid items, so the anchor wrapped into the 30px counter column and
+     the URL rendered about four characters wide. */
+  .sources li {
+    counter-increment: s; position: relative; padding-left: 40px;
+    font-size: 13.5px; overflow-wrap: anywhere;
+  }
+  .sources li::before {
+    content: counter(s); position: absolute; left: 0; top: 2px;
+    font-family: ui-monospace, Consolas, monospace; font-size: 11px;
+    font-weight: 700; color: var(--steel); background: var(--steel-wash);
+    border: 1px solid color-mix(in srgb, var(--steel) 24%, transparent);
+    border-radius: 4px; text-align: center; width: 30px; height: 20px; line-height: 18px;
+  }
+  .note {
+    margin-top: 12px; padding: 14px 16px; background: var(--surface-2);
+    border: 1px dashed var(--hair-strong); border-radius: 10px; color: var(--muted);
+    font-size: 13.5px;
+  }
+  code { font-family: ui-monospace, Consolas, monospace; font-size: .9em; background: var(--surface-2); padding: 1px 5px; border-radius: 3px; }
+</style>
+
+<!-- ===================== 1. COVER ===================== -->
+<header class="cover">
+  <svg class="covermotif" viewBox="0 0 400 400" fill="none" aria-hidden="true">
+    <g class="arcs" stroke="currentColor" stroke-width="1.1">
+      <circle cx="286" cy="132" r="46"/>
+      <circle cx="286" cy="132" r="86"/>
+      <circle cx="286" cy="132" r="126"/>
+      <circle cx="286" cy="132" r="166"/>
+    </g>
+    <g class="rail" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+      <path d="M286 46 V318"/>
+    </g>
+    <g class="dots" fill="currentColor">
+      <circle cx="286" cy="86"  r="7"/>
+      <circle cx="286" cy="150" r="7"/>
+      <circle cx="286" cy="214" r="7"/>
+      <circle cx="286" cy="278" r="7"/>
+      <circle cx="196" cy="188" r="4"/>
+      <circle cx="352" cy="242" r="4"/>
+      <circle cx="230" cy="300" r="4"/>
+    </g>
+  </svg>
+
+  <div class="wrap">
+    <span class="tlp clear">TLP:CLEAR</span>
+
+    <p class="eyebrow">Campaign Analysis <span class="idtag">G1030</span></p>
+    <h1>Agrius<span class="accent">.</span></h1>
+    <p class="standfirst">
+      A destruction crew that sends a ransom note it has no intention of honouring — by the
+      time the demand arrives the data is already unrecoverable, and paying buys nothing.
+    </p>
+
+    <div class="covermeta">
+      <div><p class="k">Subject type</p><p class="v">Campaign &middot; actor + CVE</p></div>
+      <div><p class="k">Attribution</p><p class="v">Iran &middot; MOIS-linked</p></div>
+      <div><p class="k">First observed</p><p class="v">2020</p></div>
+      <div><p class="k">Assessed risk</p><p class="v">Critical</p></div>
+      <div><p class="k">Report date</p><p class="v">17 August 2026</p></div>
+      <div><p class="k">Analyst</p><p class="v">Threat Intelligence</p></div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ===================== 2. OVERVIEW ===================== -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Overview</p>
+        <h2>The ransom note is the disguise</h2>
+      </div>
+
+      <div class="prose">
+        <p>
+          Agrius is an Iranian threat actor active since <strong>2020</strong>, known for
+          ransomware and wiper operations across the Middle East with a heavy emphasis on
+          Israeli targets. Public reporting links the group to Iran's Ministry of Intelligence
+          and Security.<a class="src" href="#s1">1</a><a class="src" href="#s3">3</a>
+        </p>
+        <p>
+          The defining characteristic is that <strong>the ransomware is cover</strong>. Victims
+          receive a ransom note, but the data has already been destroyed — payment recovers
+          nothing. Treating an Agrius incident as an extortion event rather than a destructive
+          one leads defenders to the wrong response: negotiating for a key that was never
+          generated, instead of moving immediately to
+          recovery.<a class="src" href="#s3">3</a>
+        </p>
+        <p>
+          Across its campaigns the group's documented tradecraft is consistent: entry through
+          internet-facing applications, ASPXSpy web shells relaying commands to
+          <code>cmd.exe</code>, the IPsec Helper backdoor registered as a Windows service,
+          Plink renamed to <code>systems.exe</code> for tunnelling, the vulnerable
+          <code>GMER64.sys</code> driver loaded to terminate EDR from kernel mode, Mimikatz
+          against LSASS and the SAM hive, WinEggDrop and NBTscan for internal discovery, RDP
+          tunnelled through web shells for lateral movement, 7zip archives staged in
+          <code>C:\windows\temp\s\</code>, and exfiltration over PuTTY and WinSCP before the
+          wipers run.<a class="src" href="#s1">1</a><a class="src" href="#s3">3</a>
+        </p>
+      </div>
+
+      <h3 style="font-size:20px;font-weight:700;margin:38px 0 22px;">Activity, oldest first</h3>
+
+      <div class="chrono">
+        <div class="entry key">
+          <div class="when">2020</div>
+          <h3>First observed operating against Israeli targets</h3>
+          <p>
+            Researchers began tracking the group as a distinct cluster operating in Israel.
+            Initial access was achieved by exploiting internet-facing applications, including
+            <strong>CVE-2018-13379</strong> in FortiOS SSL VPN and SQL injection against web
+            applications, with operator traffic routed through commercial VPN services to
+            obscure origin.<a class="src" href="#s1">1</a><a class="src" href="#s2">2</a><a class="src" href="#s3">3</a>
+          </p>
+        </div>
+
+        <div class="entry key">
+          <div class="when">2020-11</div>
+          <h3>Apostle wiper developed</h3>
+          <p>
+            The Apostle wiper was built around November 2020. Early builds frequently failed to
+            destroy files, so the group fell back to the DEADWOOD wiper to complete intrusions
+            — an operational tell that destruction, not encryption, was the objective from the
+            outset.<a class="src" href="#s3">3</a>
+          </p>
+        </div>
+
+        <div class="entry">
+          <div class="when">2020-12</div>
+          <h3>Shirbit insurance targeted</h3>
+          <p>
+            The Israeli insurance company Shirbit was struck in a destructive operation
+            presented publicly as a ransomware incident, following the group's pattern of data
+            theft ahead of destruction.<a class="src" href="#s3">3</a>
+          </p>
+        </div>
+
+        <div class="entry">
+          <div class="when">2021</div>
+          <h3>Bar-Ilan University and the IPsec Helper backdoor</h3>
+          <p>
+            Agrius targeted Bar-Ilan University, deploying the Apostle wiper alongside a custom
+            .NET backdoor tracked as IPsec Helper, which was registered as a Windows service
+            for persistence. Apostle was progressively reworked from a failing wiper into
+            functional ransomware.<a class="src" href="#s1">1</a><a class="src" href="#s3">3</a>
+          </p>
+        </div>
+
+        <div class="entry key">
+          <div class="when">2022-12</div>
+          <h3>Diamond industry intrusions</h3>
+          <p>
+            The group was attributed to attempted disruptive intrusions against diamond
+            industry organisations in <strong>South Africa, Israel and Hong Kong</strong>,
+            marking the first widely reported expansion of targeting beyond
+            Israel.<a class="src" href="#s4">4</a><a class="src" href="#s5">5</a>
+          </p>
+        </div>
+
+        <div class="entry key">
+          <div class="when">2023-05</div>
+          <h3>Moneybird ransomware deployed</h3>
+          <p>
+            A new ransomware strain written in C++ and tracked as Moneybird was deployed
+            against Israeli organisations. Unlike the .NET-based Apostle, Moneybird represented
+            a deliberate rewrite, indicating sustained tooling investment rather than
+            opportunistic reuse.<a class="src" href="#s4">4</a><a class="src" href="#s5">5</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- History section deliberately omitted: the chronology opens at first observation, so
+       the origin story is already the first entry. A History section here would restate the
+       Overview rather than add to it. -->
+
+  <!-- ===================== 4. CONCLUSION ===================== -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Conclusion</p>
+        <h2>A destructive operation wearing a criminal costume</h2>
+      </div>
+
+      <div class="prose">
+        <p>
+          Three years of reporting describe an operation that looks like eCrime and behaves
+          like sabotage. The ransom notes, the leak-site conventions and the ransomware
+          branding all point at a financially motivated crew; the wiper development history,
+          the state attribution and the choice of victims point somewhere else entirely. The
+          gap between those two readings is the single most consequential thing about this
+          actor, because it determines whether an incident response team spends its first
+          hours negotiating or restoring.
+        </p>
+      </div>
+
+      <div class="takeaways">
+        <div class="takeaway"><span class="n">1</span><p>
+          <strong>A ransom note from Agrius is misdirection.</strong> The data is already gone
+          when the demand arrives. Any playbook that routes this to negotiation, or waits on a
+          decryptor, is spending the most valuable hours of the response on an outcome that
+          cannot happen.
+        </p></div>
+        <div class="takeaway"><span class="n">2</span><p>
+          <strong>Recovery capability is the control that matters, not decryption.</strong>
+          There is no key to buy. Tested, offline restores are the difference between an outage
+          and a permanent loss — and the group steals data before destroying it, so restoring
+          does not end the incident either.
+        </p></div>
+        <div class="takeaway"><span class="n">3</span><p>
+          <strong>The documented way in is a flaw patched years before it was used.</strong>
+          CVE-2018-13379 was disclosed and fixed long before these campaigns. This is an
+          exposure-management failure rather than a zero-day problem, which makes it one of the
+          few things on this page a defender can close outright.
+        </p></div>
+        <div class="takeaway"><span class="n">4</span><p>
+          <strong>Wiper failure drove tool investment, not retreat.</strong> Apostle's early
+          builds could not destroy files, so DEADWOOD covered the gap and Apostle was reworked;
+          Moneybird was later a deliberate C++ rewrite. A group that re-engineers after failure
+          is not opportunistic and will not be deterred by one closed door.
+        </p></div>
+        <div class="takeaway"><span class="n">5</span><p>
+          <strong>Geography stopped being a reliable filter in December 2022.</strong> The
+          diamond-industry intrusions reached South Africa and Hong Kong. Organisations that
+          previously judged their exposure by not being in Israel need a different test.
+        </p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 5. RISK & IMPACT ===================== -->
+  <section class="alt">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Risk &amp; Impact</p>
+        <h2>Who this actor actually hits</h2>
+        <p>
+          Agrius selects on geopolitical value rather than on what a victim can pay. The levels
+          below track where victims have actually been observed, which is why sectors that
+          would rank high against a financially motivated crew rank low here.
+        </p>
+      </div>
+
+      <div class="sectors">
+        <div class="sector critical">
+          <div class="name">Government</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Critical</div>
+          <div class="why">Israeli government bodies are the stated focus of repeated destructive operations.</div>
+        </div>
+        <div class="sector critical">
+          <div class="name">Energy and utilities</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Critical</div>
+          <div class="why">Targeted in destructive operations where the objective was disruption rather than revenue.</div>
+        </div>
+        <div class="sector high">
+          <div class="name">Manufacturing and logistics</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">High</div>
+          <div class="why">The December 2022 diamond-industry intrusions show targeting extends to high-value commercial supply chains.</div>
+        </div>
+        <div class="sector high">
+          <div class="name">Financial services</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">High</div>
+          <div class="why">The Shirbit insurance incident places financial services inside the observed victim set.</div>
+        </div>
+        <div class="sector low">
+          <div class="name">Healthcare</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Low</div>
+          <div class="why">Outside the documented targeting; no reporting places Agrius in this sector.</div>
+        </div>
+        <div class="sector minimal">
+          <div class="name">Retail and hospitality</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Minimal</div>
+          <div class="why">No indication of interest. Low geopolitical value to a state-aligned destructive actor.</div>
+        </div>
+      </div>
+
+      <div class="risklegend">
+        <div class="item"><span class="sw" style="background:var(--risk-critical)"></span> Critical — actively targeted</div>
+        <div class="item"><span class="sw" style="background:var(--risk-high)"></span> High — fits the victim profile</div>
+        <div class="item"><span class="sw" style="background:var(--risk-moderate)"></span> Moderate — plausible, not observed</div>
+        <div class="item"><span class="sw" style="background:var(--risk-low)"></span> Low — outside the pattern</div>
+        <div class="item"><span class="sw" style="background:var(--risk-minimal)"></span> Minimal — no indication</div>
+      </div>
+
+      <div class="callout">
+        <p>
+          <strong>Bottom line.</strong> Exposure to Agrius is decided by geopolitical alignment
+          and by what you expose to the internet — not by how much you could afford to pay.
+          That inverts the usual ransomware calculation: a well-funded retailer is a poor target
+          here, while a modestly resourced utility with an unpatched edge appliance is a good
+          one. Healthcare sits low on this table for the same reason it would sit high against
+          a criminal crew.
+        </p>
+        <p>
+          For <em>how</em> a compromise actually unfolds — the techniques, the tooling and the
+          order they run in — see the companion attack-flow report,
+          <code>agrius-fortios-campaign-flow.html</code>.
+        </p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <h3>Sources</h3>
+    <ol class="sources">
+      <li id="s1">MITRE ATT&amp;CK — Groups: Agrius (G1030) — <a href="https://attack.mitre.org/groups/G1030/">https://attack.mitre.org/groups/G1030/</a></li>
+      <li id="s2">NVD — CVE-2018-13379 (Fortinet FortiOS SSL VPN path traversal) — <a href="https://nvd.nist.gov/vuln/detail/CVE-2018-13379">https://nvd.nist.gov/vuln/detail/CVE-2018-13379</a></li>
+      <li id="s3">SentinelOne SentinelLabs — From Wiper to Ransomware: The Evolution of Agrius — <a href="https://www.sentinelone.com/labs/from-wiper-to-ransomware-the-evolution-of-agrius/">https://www.sentinelone.com/labs/from-wiper-to-ransomware-the-evolution-of-agrius/</a></li>
+      <li id="s4">Check Point Research — Agrius Deploys Moneybird in Targeted Attacks Against Israeli Organizations — <a href="https://research.checkpoint.com/2023/agrius-deploys-moneybird-in-targeted-attacks-against-israeli-organizations/">https://research.checkpoint.com/2023/agrius-deploys-moneybird-in-targeted-attacks-against-israeli-organizations/</a></li>
+      <li id="s5">The Hacker News — Iranian Agrius Hackers Targeting Israeli Organizations — <a href="https://thehackernews.com/2023/05/iranian-agrius-hackers-targeting.html">https://thehackernews.com/2023/05/iranian-agrius-hackers-targeting.html</a></li>
+    </ol>
+
+    <p class="note">
+      <strong>Confidence and sourcing.</strong> The chronology, tooling and victimology are
+      drawn from vendor and government reporting and are stated as reported. Attribution to
+      Iran's Ministry of Intelligence and Security rests on published vendor assessment and is
+      an <em>assessed</em> link rather than an established fact; the wording throughout keeps
+      that distinction. Source 5 is a corroborating news outlet reporting the vendor research
+      at source 4, and carries timeline and reach only — it is not an independent basis for the
+      attribution claim. Sector risk levels are analyst assessments, not measured values; they
+      deliberately share a colour ramp with CVSS severity but are rendered as meters rather
+      than scores so the two are not confused.
+    </p>
+    <p class="note">
+      <strong>Pipeline.</strong> Step 1 of TI-Reporting. This report was rendered from the
+      existing <code>analysis.json</code> rather than from fresh research, because the
+      companion ATT&amp;CK mapping was derived from that same evidence and new sourcing would
+      risk the two halves disagreeing. The JSON handoff lives in
+      <code>subjects/agrius/handoff/</code>.
+    </p>
+  </div>
+</footer>

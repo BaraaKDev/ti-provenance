@@ -1,0 +1,1405 @@
+<title>Agrius - Threat Bulletin</title>
+<style>
+/* ============================================================================
+   BULLETIN - Agrius
+   Merged by scripts/Merge-Bulletin.ps1. Do not hand-edit the CSS: regenerate.
+   Part 1 CSS is verbatim from analysis.html.
+   Part 2 CSS is rewritten to sit under .flowpart, because the two halves share
+   class names ('high' and 'low' mean different things in each).
+   ============================================================================ */
+
+/* ---------- part 1: analysis (unscoped) ---------- */
+
+  /* ---- Tokens: shared across TI-Reporting - see CLAUDE.md ---- */
+  :root {
+    color-scheme: light;
+
+    --ground: #f6f4f2;
+    --surface: #ffffff;
+    --surface-2: #efece7;
+    --ink: #1b1e24;
+    --muted: #5c6470;
+    --hair: #ddd8d1;
+    --hair-strong: #c8c2b8;
+
+    /* ACCENT - destruction objective: ember red, same values the flow report uses. */
+    --ember: #cf4a1f;
+    --ember-ink: #a8380f;
+    --ember-wash: rgba(207, 74, 31, 0.10);
+    --steel: #346b8f;
+    --steel-wash: rgba(52, 107, 143, 0.10);
+    --spine: #b9b2a8;
+
+    /* SECTOR RISK - shares the CVSS ramp, separate tokens, different form. */
+    --risk-critical: #a4161a;  --risk-critical-wash: rgba(164, 22, 26, 0.10);
+    --risk-high:     #b3541e;  --risk-high-wash:     rgba(179, 84, 30, 0.10);
+    --risk-moderate: #8a6a00;  --risk-moderate-wash: rgba(138, 106, 0, 0.10);
+    --risk-low:      #4a6b2a;  --risk-low-wash:      rgba(74, 107, 42, 0.10);
+    --risk-minimal:  #5c6470;  --risk-minimal-wash:  rgba(92, 100, 112, 0.10);
+
+    --shadow: 0 1px 2px rgba(20,22,26,.06), 0 8px 24px rgba(20,22,26,.05);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.65; -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 940px; margin: 0 auto; padding: 0 24px; }
+
+  /* ================= 1. COVER ================= */
+  .cover {
+    position: relative; overflow: hidden;
+    border-bottom: 1px solid var(--hair);
+    background:
+      radial-gradient(120% 90% at 88% -5%, var(--ember-wash), transparent 62%),
+      var(--surface);
+  }
+  .cover .wrap { position: relative; z-index: 2; padding-top: 84px; padding-bottom: 76px; }
+
+  .covermotif {
+    position: absolute; top: -40px; right: -60px; width: 460px; height: 460px;
+    color: var(--ember); pointer-events: none; z-index: 1;
+  }
+  .covermotif .arcs   { opacity: .16; }
+  .covermotif .rail   { opacity: .30; }
+  .covermotif .dots   { opacity: .22; }
+
+  .tlp {
+    display: inline-block; font-family: ui-monospace, Consolas, monospace;
+    font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
+    padding: 4px 10px; border-radius: 4px; margin-bottom: 26px;
+    background: var(--surface-2); border: 1px solid var(--hair-strong); color: var(--muted);
+  }
+  .tlp.clear { color: var(--muted); }
+  .tlp.green { color: var(--risk-low);      border-color: color-mix(in srgb, var(--risk-low) 40%, transparent);      background: var(--risk-low-wash); }
+  .tlp.amber { color: var(--risk-high);     border-color: color-mix(in srgb, var(--risk-high) 40%, transparent);     background: var(--risk-high-wash); }
+  .tlp.red   { color: var(--risk-critical); border-color: color-mix(in srgb, var(--risk-critical) 40%, transparent); background: var(--risk-critical-wash); }
+
+  .eyebrow {
+    font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+    font-size: 12px; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--muted); margin: 0 0 18px; display: flex; align-items: center; gap: 12px;
+  }
+  .eyebrow::after { content: ""; flex: 1; height: 1px; background: var(--hair-strong); }
+  .idtag { color: var(--ember-ink); font-weight: 600; }
+
+  .cover h1 {
+    font-size: clamp(44px, 8vw, 78px); line-height: .96; letter-spacing: -.025em;
+    font-weight: 800; margin: 0 0 10px; text-wrap: balance; max-width: 16ch;
+  }
+  .cover h1 .accent { color: var(--ember); }
+  .cover .standfirst {
+    font-size: clamp(17px, 2.4vw, 21px); color: var(--muted);
+    max-width: 60ch; margin: 20px 0 0;
+  }
+  .covermeta {
+    margin-top: 42px; display: grid; gap: 1px;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    background: var(--hair); border: 1px solid var(--hair); border-radius: 12px; overflow: hidden;
+  }
+  .covermeta div { background: var(--surface); padding: 15px 18px; }
+  .covermeta .k { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0 0 5px; }
+  .covermeta .v { font-size: 15px; font-weight: 600; margin: 0; }
+
+  /* ================= Sections ================= */
+  section { padding: 62px 0; }
+  section.alt { background: var(--surface); border-top: 1px solid var(--hair); border-bottom: 1px solid var(--hair); }
+  .section-head { margin-bottom: 38px; }
+  .section-head .eyebrow { margin-bottom: 10px; }
+  .section-head h2 {
+    font-size: clamp(27px, 4vw, 35px); letter-spacing: -.015em;
+    font-weight: 800; margin: 0; text-wrap: balance;
+  }
+  .section-head p { color: var(--muted); max-width: 64ch; margin: 12px 0 0; font-size: 16px; }
+
+  .prose { max-width: 68ch; }
+  .prose p { margin: 0 0 18px; font-size: 16.5px; }
+  .prose p:last-child { margin-bottom: 0; }
+  .prose strong { font-weight: 700; }
+  .prose h3 {
+    font-size: 20px; font-weight: 700; letter-spacing: -.01em;
+    margin: 34px 0 12px; text-wrap: balance;
+  }
+
+  .src {
+    font-family: ui-monospace, Consolas, monospace; font-size: 11px; font-weight: 700;
+    color: var(--steel); background: var(--steel-wash);
+    border: 1px solid color-mix(in srgb, var(--steel) 24%, transparent);
+    padding: 0 5px; border-radius: 4px; vertical-align: 1px; margin-left: 3px;
+    text-decoration: none; white-space: nowrap;
+  }
+
+  /* ================= 2. CHRONOLOGY ================= */
+  .chrono { position: relative; padding-left: 116px; }
+  .chrono::before {
+    content: ""; position: absolute; left: 92px; top: 10px; bottom: 10px;
+    width: 3px; border-radius: 3px;
+    background: linear-gradient(to bottom, var(--spine) 0%, var(--spine) 45%, var(--ember) 100%);
+  }
+  .entry { position: relative; margin-bottom: 30px; }
+  .entry:last-child { margin-bottom: 0; }
+  .entry .when {
+    position: absolute; left: -116px; top: 1px; width: 76px; text-align: right;
+    font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; font-weight: 700;
+    color: var(--ember-ink); letter-spacing: .02em;
+  }
+  .entry::after {
+    content: ""; position: absolute; left: -27px; top: 7px;
+    width: 11px; height: 11px; border-radius: 50%;
+    background: var(--surface); border: 3px solid var(--spine); z-index: 2;
+  }
+  .entry.key::after { border-color: var(--ember); background: var(--ember); }
+  .entry h3 { margin: 0 0 8px; font-size: 18.5px; font-weight: 700; letter-spacing: -.01em; }
+  .entry p { margin: 0 0 12px; font-size: 16px; max-width: 62ch; }
+  .entry p:last-child { margin-bottom: 0; }
+
+  /* ================= 4. CONCLUSION ================= */
+  .callout {
+    margin-top: 28px; padding: 20px 22px;
+    background: var(--surface); border: 1px solid var(--ember);
+    border-left: 4px solid var(--ember); border-radius: 12px; font-size: 16.5px;
+  }
+  section.alt .callout { background: var(--ground); }
+  .callout strong { color: var(--ember-ink); }
+  .callout p { margin: 0 0 14px; }
+  .callout p:last-child { margin: 0; }
+
+  .takeaways { display: grid; gap: 12px; margin-top: 26px; }
+  .takeaway {
+    display: grid; grid-template-columns: 30px 1fr; gap: 0 14px; align-items: start;
+    background: var(--surface); border: 1px solid var(--hair);
+    border-radius: 12px; padding: 16px 18px; box-shadow: var(--shadow);
+  }
+  section.alt .takeaway { background: var(--ground); }
+  .takeaway .n {
+    display: flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--ember-wash); color: var(--ember-ink);
+    border: 1px solid color-mix(in srgb, var(--ember) 28%, transparent);
+    font-family: ui-monospace, Consolas, monospace; font-size: 12px; font-weight: 700;
+  }
+  .takeaway p { margin: 0; font-size: 15.5px; }
+
+  /* ================= 5. RISK & IMPACT ================= */
+  .sectors {
+    border: 1px solid var(--hair); border-radius: 14px; overflow: hidden;
+    background: var(--surface); box-shadow: var(--shadow);
+  }
+  section.alt .sectors { background: var(--ground); }
+  .sector {
+    display: grid; grid-template-columns: minmax(150px, 1.1fr) 104px 92px 2fr;
+    gap: 16px; align-items: center;
+    padding: 15px 20px; border-bottom: 1px solid var(--hair);
+  }
+  .sector:last-child { border-bottom: none; }
+  .sector .name { font-weight: 700; font-size: 15.5px; }
+  .sector .why { font-size: 14px; color: var(--muted); }
+
+  .meter { display: flex; gap: 3px; }
+  .meter i {
+    display: block; height: 9px; flex: 1; border-radius: 2px;
+    background: var(--hair-strong); opacity: .5;
+  }
+  .level {
+    font-family: ui-monospace, Consolas, monospace; font-size: 10.5px; font-weight: 700;
+    letter-spacing: .1em; text-transform: uppercase; text-align: center;
+    padding: 3px 8px; border-radius: 100px; white-space: nowrap;
+  }
+
+  .sector.critical .meter i:nth-child(-n+5) { background: var(--risk-critical); opacity: 1; }
+  .sector.high     .meter i:nth-child(-n+4) { background: var(--risk-high);     opacity: 1; }
+  .sector.moderate .meter i:nth-child(-n+3) { background: var(--risk-moderate); opacity: 1; }
+  .sector.low      .meter i:nth-child(-n+2) { background: var(--risk-low);      opacity: 1; }
+  .sector.minimal  .meter i:nth-child(-n+1) { background: var(--risk-minimal);  opacity: 1; }
+
+  .sector.critical .level { color: #fff; background: var(--risk-critical); }
+  .sector.high     .level { color: var(--risk-high);     background: var(--risk-high-wash);     border: 1px solid color-mix(in srgb, var(--risk-high) 32%, transparent); }
+  .sector.moderate .level { color: var(--risk-moderate); background: var(--risk-moderate-wash); border: 1px solid color-mix(in srgb, var(--risk-moderate) 32%, transparent); }
+  .sector.low      .level { color: var(--risk-low);      background: var(--risk-low-wash);      border: 1px solid color-mix(in srgb, var(--risk-low) 32%, transparent); }
+  .sector.minimal  .level { color: var(--risk-minimal);  background: var(--risk-minimal-wash);  border: 1px solid var(--hair-strong); }
+
+  .risklegend {
+    display: flex; flex-wrap: wrap; gap: 18px; margin-top: 20px;
+    padding: 14px 18px; background: var(--surface-2);
+    border: 1px solid var(--hair); border-radius: 12px;
+    font-size: 13px; color: var(--muted);
+  }
+  .risklegend .item { display: flex; align-items: center; gap: 8px; }
+  .risklegend .sw { width: 22px; height: 8px; border-radius: 2px; }
+
+  /* ================= Footer ================= */
+  footer { border-top: 1px solid var(--hair); padding: 40px 0 64px; color: var(--muted); font-size: 14px; }
+  footer h3 { font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin: 0 0 14px; }
+  footer a { color: var(--ember-ink); }
+  .sources { counter-reset: s; display: grid; gap: 8px; margin: 0 0 26px; padding: 0; list-style: none; }
+  /* Counter absolutely positioned, not a grid column: an <li> holding a text node AND an
+     <a> produces three grid items, so the anchor wrapped into the 30px counter column and
+     the URL rendered about four characters wide. */
+  .sources li {
+    counter-increment: s; position: relative; padding-left: 40px;
+    font-size: 13.5px; overflow-wrap: anywhere;
+  }
+  .sources li::before {
+    content: counter(s); position: absolute; left: 0; top: 2px;
+    font-family: ui-monospace, Consolas, monospace; font-size: 11px;
+    font-weight: 700; color: var(--steel); background: var(--steel-wash);
+    border: 1px solid color-mix(in srgb, var(--steel) 24%, transparent);
+    border-radius: 4px; text-align: center; width: 30px; height: 20px; line-height: 18px;
+  }
+  .note {
+    margin-top: 12px; padding: 14px 16px; background: var(--surface-2);
+    border: 1px dashed var(--hair-strong); border-radius: 10px; color: var(--muted);
+    font-size: 13.5px;
+  }
+  code { font-family: ui-monospace, Consolas, monospace; font-size: .9em; background: var(--surface-2); padding: 1px 5px; border-radius: 3px; }
+
+
+/* ---------- part 2: attack flow (scoped under .flowpart) ---------- */
+.flowpart {
+    color-scheme: light;
+
+    --ground: #f6f4f2;
+    --surface: #ffffff;
+    --surface-2: #efece7;
+    --ink: #1b1e24;
+    --muted: #5c6470;
+    --hair: #ddd8d1;
+    --hair-strong: #c8c2b8;
+
+    --ember: #cf4a1f;
+    --ember-ink: #a8380f;
+    --ember-wash: rgba(207, 74, 31, 0.10);
+    --steel: #346b8f;
+    --steel-wash: rgba(52, 107, 143, 0.10);
+    --spine: #b9b2a8;
+
+    --sev-crit: #a4161a;  --sev-crit-wash: rgba(164, 22, 26, 0.10);
+    --sev-high: #b3541e;  --sev-high-wash: rgba(179, 84, 30, 0.10);
+    --sev-med:  #8a6a00;  --sev-med-wash:  rgba(138, 106, 0, 0.10);
+    --sev-low:  #4a6b2a;  --sev-low-wash:  rgba(74, 107, 42, 0.10);
+
+    --shadow: 0 1px 2px rgba(20,22,26,.06), 0 8px 24px rgba(20,22,26,.05);
+  }
+.flowpart * { box-sizing: border-box; }
+.flowpart {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.55; -webkit-font-smoothing: antialiased;
+  }
+.flowpart .wrap { max-width: 940px; margin: 0 auto; padding: 0 24px; }
+.flowpart header {
+    border-bottom: 1px solid var(--hair);
+    background: radial-gradient(120% 80% at 85% -10%, var(--ember-wash), transparent 60%), var(--surface);
+  }
+.flowpart .hero { padding: 64px 0 52px; }
+.flowpart .eyebrow {
+    font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+    font-size: 12px; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--muted); margin: 0 0 18px; display: flex; align-items: center; gap: 12px;
+  }
+.flowpart .eyebrow::after { content: ""; flex: 1; height: 1px; background: var(--hair-strong); }
+.flowpart .idtag { color: var(--ember-ink); font-weight: 600; }
+.flowpart h1 {
+    font-size: clamp(40px, 7vw, 68px); line-height: .98; letter-spacing: -.02em;
+    font-weight: 800; margin: 0 0 8px; text-wrap: balance;
+  }
+.flowpart h1 .destruct { color: var(--ember); }
+.flowpart .lede { font-size: clamp(17px, 2.4vw, 20px); color: var(--muted); max-width: 62ch; margin: 18px 0 0; }
+.flowpart .idrow { margin-top: 22px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.flowpart .idrow .label {
+    font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--muted); margin-right: 4px;
+  }
+.flowpart .chip,
+.flowpart .cve {
+    font-family: ui-monospace, Consolas, monospace; font-size: 12.5px;
+    padding: 4px 10px; border: 1px solid var(--hair-strong); border-radius: 100px;
+    color: var(--ink); background: var(--surface-2); white-space: nowrap;
+  }
+.flowpart .cve { font-weight: 600; }
+.flowpart .idrow.vulns .cve {
+    background: var(--ember-wash); color: var(--ember-ink);
+    border-color: color-mix(in srgb, var(--ember) 30%, transparent);
+  }
+.flowpart .facts {
+    margin-top: 36px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1px; background: var(--hair); border: 1px solid var(--hair); border-radius: 12px; overflow: hidden;
+  }
+.flowpart .fact { background: var(--surface); padding: 16px 18px; }
+.flowpart .fact .k { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0 0 6px; }
+.flowpart .fact .v { font-size: 15px; font-weight: 600; margin: 0; font-variant-numeric: tabular-nums; }
+.flowpart .fact .v.bad { color: var(--ember-ink); }
+.flowpart section { padding: 60px 0; }
+.flowpart .section-head { margin-bottom: 40px; }
+.flowpart .section-head .eyebrow { margin-bottom: 10px; }
+.flowpart .section-head h2 { font-size: clamp(26px, 4vw, 34px); letter-spacing: -.01em; font-weight: 800; margin: 0; text-wrap: balance; }
+.flowpart .section-head p { color: var(--muted); max-width: 64ch; margin: 12px 0 0; font-size: 15.5px; }
+.flowpart .sev {
+    font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; font-weight: 700;
+    letter-spacing: .04em; padding: 2px 8px; border-radius: 5px; white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+.flowpart .sev.crit { color: var(--sev-crit); background: var(--sev-crit-wash); border: 1px solid color-mix(in srgb, var(--sev-crit) 26%, transparent); }
+.flowpart .sev.high { color: var(--sev-high); background: var(--sev-high-wash); border: 1px solid color-mix(in srgb, var(--sev-high) 26%, transparent); }
+.flowpart .sev.med { color: var(--sev-med);  background: var(--sev-med-wash);  border: 1px solid color-mix(in srgb, var(--sev-med) 26%, transparent); }
+.flowpart .sev.low { color: var(--sev-low);  background: var(--sev-low-wash);  border: 1px solid color-mix(in srgb, var(--sev-low) 26%, transparent); }
+.flowpart .exp {
+    font-family: ui-monospace, Consolas, monospace; font-size: 10.5px; font-weight: 700;
+    letter-spacing: .09em; text-transform: uppercase; padding: 3px 9px;
+    border-radius: 100px; white-space: nowrap;
+  }
+.flowpart .exp.kev { background: var(--sev-crit); color: #fff; border: 1px solid var(--sev-crit); }
+.flowpart .exp.none { background: transparent; color: var(--muted); border: 1px solid var(--hair-strong); }
+.flowpart .cwe {
+    font-family: ui-monospace, Consolas, monospace; font-size: 11.5px;
+    color: var(--steel); background: var(--steel-wash); padding: 2px 7px; border-radius: 5px; white-space: nowrap;
+  }
+.flowpart .table-wrap { overflow-x: auto; }
+.flowpart table { border-collapse: collapse; width: 100%; font-size: 14px; }
+.flowpart thead th {
+    text-align: left; font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--muted); font-weight: 700; padding: 0 14px 10px 0;
+    border-bottom: 1px solid var(--hair-strong); white-space: nowrap;
+  }
+.flowpart tbody td { padding: 12px 14px 12px 0; border-bottom: 1px solid var(--hair); vertical-align: middle; }
+.flowpart tbody tr:last-child td { border-bottom: none; }
+.flowpart td.mono { font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+.flowpart .callout {
+    margin-top: 26px; padding: 18px 20px;
+    background: var(--surface); border: 1px solid var(--ember);
+    border-left: 4px solid var(--ember); border-radius: 12px; font-size: 15px;
+  }
+.flowpart .callout strong { color: var(--ember-ink); }
+.flowpart .callout p { margin: 0 0 12px; }
+.flowpart .callout p:last-child { margin: 0; }
+.flowpart .flow { position: relative; padding-left: 34px; }
+.flowpart .flow::before {
+    content: ""; position: absolute; left: 11px; top: 6px; bottom: 40px; width: 3px; border-radius: 3px;
+    background: linear-gradient(to bottom, var(--spine) 0%, var(--spine) 40%, var(--ember) 100%);
+  }
+.flowpart .phase { position: relative; margin-bottom: 14px; }
+.flowpart .node {
+    position: absolute; left: -34px; top: 22px; width: 25px; height: 25px; border-radius: 50%;
+    background: var(--surface); border: 3px solid var(--spine);
+    display: flex; align-items: center; justify-content: center;
+    font-family: ui-monospace, Consolas, monospace; font-size: 11px; font-weight: 700;
+    color: var(--muted); z-index: 2;
+  }
+.flowpart .phase.impact .node { border-color: var(--ember); background: var(--ember); color: #fff; }
+.flowpart .card { background: var(--surface); border: 1px solid var(--hair); border-radius: 14px; padding: 20px 22px; box-shadow: var(--shadow); }
+.flowpart .phase.impact .card {
+    border-color: var(--ember);
+    background: linear-gradient(0deg, var(--ember-wash), var(--ember-wash)), var(--surface);
+  }
+.flowpart .card-top { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-bottom: 6px; }
+.flowpart .ticon {
+    width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--steel-wash); color: var(--steel);
+    border: 1px solid color-mix(in srgb, var(--steel) 26%, transparent);
+  }
+.flowpart .ticon svg { width: 19px; height: 19px; display: block; }
+.flowpart .phase.impact .ticon {
+    background: var(--ember-wash); color: var(--ember);
+    border-color: color-mix(in srgb, var(--ember) 34%, transparent);
+  }
+.flowpart .tactic { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--steel); font-weight: 700; }
+.flowpart .phase.heat .ticon {
+    background: color-mix(in srgb, var(--ember-wash) 70%, var(--steel-wash));
+    color: color-mix(in srgb, var(--ember) 62%, var(--steel));
+    border-color: color-mix(in srgb, var(--ember) 24%, transparent);
+  }
+.flowpart .phase.heat .tactic { color: color-mix(in srgb, var(--ember-ink) 72%, var(--steel)); }
+.flowpart .phase.impact .tactic { color: var(--ember-ink); }
+.flowpart .card h3 { font-size: 19px; margin: 2px 0 10px; font-weight: 700; letter-spacing: -.01em; width: 100%; }
+.flowpart .card p { margin: 0 0 14px; color: var(--muted); font-size: 14.5px; }
+.flowpart .card p:last-child { margin-bottom: 0; }
+.flowpart .ttps { display: flex; flex-direction: column; gap: 8px; }
+.flowpart .ttp { display: flex; gap: 12px; align-items: baseline; font-size: 14px; }
+.flowpart .tid {
+    font-family: ui-monospace, Consolas, monospace; font-size: 12px; font-weight: 600;
+    color: var(--steel); background: var(--steel-wash); padding: 2px 7px; border-radius: 5px;
+    white-space: nowrap; flex-shrink: 0; min-width: 78px; text-align: center;
+  }
+.flowpart .ttp .desc { color: var(--ink); }
+.flowpart .viacve {
+    font-family: ui-monospace, Consolas, monospace; font-size: 11px; font-weight: 600;
+    color: var(--ember-ink); background: var(--ember-wash);
+    border: 1px solid color-mix(in srgb, var(--ember) 26%, transparent);
+    padding: 1px 6px; border-radius: 4px; white-space: nowrap;
+  }
+.flowpart .tool {
+    font-family: ui-monospace, Consolas, monospace; font-size: .92em;
+    color: var(--ember-ink); background: var(--ember-wash); padding: 1px 5px; border-radius: 4px;
+  }
+.flowpart .transition {
+    padding: 6px 0 6px 6px; font-size: 12.5px; color: var(--muted); font-style: italic;
+    display: flex; align-items: center; gap: 8px;
+  }
+.flowpart .transition svg { flex-shrink: 0; color: var(--spine); }
+.flowpart .transition.handoff {
+    font-style: normal; font-weight: 600; color: var(--ember-ink);
+    background: var(--ember-wash); border: 1px dashed color-mix(in srgb, var(--ember) 40%, transparent);
+    border-radius: 10px; padding: 12px 16px; margin: 6px 0 14px; font-size: 13.5px;
+  }
+.flowpart .transition.handoff svg { color: var(--ember); }
+.flowpart .arsenal { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
+.flowpart .weapon {
+    background: var(--surface); border: 1px solid var(--hair); border-left: 3px solid var(--steel);
+    border-radius: 10px; padding: 16px 18px;
+  }
+.flowpart .weapon.destruct { border-left-color: var(--ember); }
+.flowpart .weapon .wname {
+    font-family: ui-monospace, Consolas, monospace; font-weight: 700; font-size: 15px; margin: 0 0 2px;
+    display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
+  }
+.flowpart .weapon .sid { font-size: 11px; color: var(--muted); font-weight: 500; }
+.flowpart .weapon .role2 { font-size: 13px; color: var(--muted); margin: 6px 0 0; }
+.flowpart .weapon .kind {
+    display: inline-block; font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+    font-weight: 700; margin-top: 10px; color: var(--steel);
+  }
+.flowpart .weapon.destruct .kind { color: var(--ember); }
+.flowpart .fixgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px; }
+.flowpart .fix {
+    background: var(--surface); border: 1px solid var(--hair);
+    border-left: 3px solid var(--steel); border-radius: 10px; padding: 16px 18px;
+  }
+.flowpart .fix.urgent { border-left-color: var(--ember); }
+.flowpart .fix h3 { margin: 0 0 6px; font-size: 14.5px; font-weight: 700; }
+.flowpart .fix p { margin: 0; font-size: 13.5px; color: var(--muted); }
+.flowpart .fix .tagline {
+    display: inline-block; font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+    font-weight: 700; margin-top: 10px; color: var(--steel);
+  }
+.flowpart .fix.urgent .tagline { color: var(--ember); }
+.flowpart code {
+    font-family: ui-monospace, Consolas, monospace; font-size: .9em;
+    background: var(--surface-2); padding: 1px 5px; border-radius: 3px;
+  }
+.flowpart .legend {
+    display: flex; flex-wrap: wrap; gap: 20px; margin-top: 28px; padding: 16px 20px;
+    background: var(--surface-2); border: 1px solid var(--hair); border-radius: 12px;
+    font-size: 13px; color: var(--muted);
+  }
+.flowpart .legend .item { display: flex; align-items: center; gap: 9px; }
+.flowpart .legend .keys { display: flex; gap: 5px; }
+.flowpart .legend .ticon { width: 26px; height: 26px; border-radius: 7px; }
+.flowpart .legend .ticon svg { width: 14px; height: 14px; }
+.flowpart .legend .ticon.heat {
+    background: color-mix(in srgb, var(--ember-wash) 70%, var(--steel-wash));
+    color: color-mix(in srgb, var(--ember) 62%, var(--steel));
+    border-color: color-mix(in srgb, var(--ember) 24%, transparent);
+  }
+.flowpart .legend .ticon.impact {
+    background: var(--ember-wash); color: var(--ember);
+    border-color: color-mix(in srgb, var(--ember) 34%, transparent);
+  }
+.flowpart .legend .spinekey {
+    width: 26px; height: 8px; border-radius: 4px; flex-shrink: 0;
+    background: linear-gradient(90deg, var(--spine), var(--ember));
+  }
+.flowpart footer { border-top: 1px solid var(--hair); padding: 34px 0 56px; color: var(--muted); font-size: 13.5px; }
+.flowpart footer a { color: var(--ember-ink); }
+.flowpart footer .note {
+    margin-top: 10px; padding: 14px 16px; background: var(--surface-2);
+    border: 1px dashed var(--hair-strong); border-radius: 10px; color: var(--muted);
+  }
+.flowpart code.path { font-family: ui-monospace, Consolas, monospace; font-size: .92em; color: var(--ink); }
+
+
+
+/* ---------- bulletin chrome (step 4 only) ---------- */
+.partrule { border-top: 1px solid var(--hair); background: var(--ground); }
+.partrule .wrap { padding: 46px 0 8px; }
+.partrule .pnum {
+  display: inline-block; font-size: .68rem; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--ember); border: 1px solid var(--ember); border-radius: 2px;
+  padding: 3px 8px; margin-bottom: 12px;
+}
+.partrule h2 { font-size: 1.5rem; margin: 0; color: var(--ink); }
+.partrule p  { color: var(--muted); margin: 6px 0 0; max-width: 62ch; }
+
+.bsummary, .bdefence { border-top: 1px solid var(--hair); background: var(--surface); }
+.bsummary .wrap, .bdefence .wrap { padding: 40px 0; }
+.bslede { color: var(--ink); max-width: 68ch; }
+.bskey { margin: 18px 0 0; padding: 0; list-style: none; }
+.bskey li {
+  border-left: 2px solid var(--ember); padding: 4px 0 4px 14px;
+  margin-bottom: 10px; color: var(--ink); max-width: 68ch;
+}
+.bsteps { margin: 18px 0 0; padding-left: 20px; color: var(--ink); max-width: 68ch; }
+.bsteps li { margin-bottom: 10px; }
+.bwhat { display: block; font-weight: 600; }
+.bwhy  { display: block; color: var(--muted); font-size: .9rem; }
+
+/* The flow report carries its own hero. Inside a bulletin the cover already introduced the
+   subject, so the hero is demoted rather than repeated at cover scale. */
+.flowpart > header { padding-top: 0; }
+.flowpart header h1 { font-size: 1.9rem; }
+.flowpart header .lede { font-size: 1rem; }
+</style>
+
+<!-- ===================== 1. COVER ===================== -->
+<header class="cover">
+  <svg class="covermotif" viewBox="0 0 400 400" fill="none" aria-hidden="true">
+    <g class="arcs" stroke="currentColor" stroke-width="1.1">
+      <circle cx="286" cy="132" r="46"/>
+      <circle cx="286" cy="132" r="86"/>
+      <circle cx="286" cy="132" r="126"/>
+      <circle cx="286" cy="132" r="166"/>
+    </g>
+    <g class="rail" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+      <path d="M286 46 V318"/>
+    </g>
+    <g class="dots" fill="currentColor">
+      <circle cx="286" cy="86"  r="7"/>
+      <circle cx="286" cy="150" r="7"/>
+      <circle cx="286" cy="214" r="7"/>
+      <circle cx="286" cy="278" r="7"/>
+      <circle cx="196" cy="188" r="4"/>
+      <circle cx="352" cy="242" r="4"/>
+      <circle cx="230" cy="300" r="4"/>
+    </g>
+  </svg>
+
+  <div class="wrap">
+    <span class="tlp clear">TLP:CLEAR</span>
+
+    <p class="eyebrow">Campaign Analysis <span class="idtag">G1030</span></p>
+    <h1>Agrius<span class="accent">.</span></h1>
+    <p class="standfirst">
+      A destruction crew that sends a ransom note it has no intention of honouring — by the
+      time the demand arrives the data is already unrecoverable, and paying buys nothing.
+    </p>
+
+    <div class="covermeta">
+      <div><p class="k">Subject type</p><p class="v">Campaign &middot; actor + CVE</p></div>
+      <div><p class="k">Attribution</p><p class="v">Iran &middot; MOIS-linked</p></div>
+      <div><p class="k">First observed</p><p class="v">2020</p></div>
+      <div><p class="k">Assessed risk</p><p class="v">Critical</p></div>
+      <div><p class="k">Report date</p><p class="v">17 August 2026</p></div>
+      <div><p class="k">Analyst</p><p class="v">Threat Intelligence</p></div>
+    </div>
+  </div>
+</header>
+
+<!-- BULLETIN:SUMMARY -->
+  <section class="bsummary">
+    <div class="wrap">
+      <p class="eyebrow">Executive summary</p>
+      <p class="bslede">
+        Agrius is an Iranian state-aligned crew that has been destroying data in the Middle
+        East since 2020 while dressing the result up as ransomware. Victims receive a demand,
+        but the files are already unrecoverable and no key exists — the payment request is
+        cover for sabotage. It gets in through internet-facing edge devices, most often a
+        FortiOS SSL VPN flaw that was patched two years before the group started using it,
+        then steals data, kills the endpoint protection from kernel mode, and wipes.
+      </p>
+      <ul class="bskey">
+        <li>
+          <strong>Route this to recovery, not to negotiation.</strong> The single most
+          expensive mistake available here is treating the ransom note as genuine. Hours spent
+          waiting on a decryptor are hours not spent restoring, and the decryptor is never
+          coming — early Apostle builds could not even destroy files reliably, let alone
+          reverse the damage.
+        </li>
+        <li>
+          <strong>Your sector ranking inverts against this actor.</strong> Government and
+          energy sit at critical while healthcare sits at low — the opposite of a criminal
+          ransomware crew. Selection is on geopolitical value, not ability to pay, so the usual
+          "we're a rich target" reasoning gives the wrong answer in both directions.
+        </li>
+        <li>
+          <strong>One patched CVE is the whole documented front door.</strong> CVE-2018-13379
+          was fixed years before these campaigns. Part 2's handoff line shows exactly how
+          little of the intrusion that patch addresses — but it is the one step on the page a
+          defender can close outright today.
+        </li>
+        <li>
+          <strong>Backups are attacked as part of the operation, not incidentally.</strong>
+          Data is stolen before destruction, so a clean restore ends the outage without ending
+          the incident. Offline copies and a leak-response plan are two separate requirements
+          and this actor triggers both.
+        </li>
+        <li>
+          <strong>Geography stopped being a filter in December 2022.</strong> The diamond-industry
+          intrusions reached South Africa and Hong Kong. Any exposure assessment resting on
+          "we are not in Israel" needs replacing with one resting on what you expose to the
+          internet.
+        </li>
+      </ul>
+    </div>
+  </section><!-- /BULLETIN:SUMMARY -->
+
+
+
+<main>
+
+  <!-- ===================== 2. OVERVIEW ===================== -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Overview</p>
+        <h2>The ransom note is the disguise</h2>
+      </div>
+
+      <div class="prose">
+        <p>
+          Agrius is an Iranian threat actor active since <strong>2020</strong>, known for
+          ransomware and wiper operations across the Middle East with a heavy emphasis on
+          Israeli targets. Public reporting links the group to Iran's Ministry of Intelligence
+          and Security.<a class="src" href="#s1">1</a><a class="src" href="#s3">3</a>
+        </p>
+        <p>
+          The defining characteristic is that <strong>the ransomware is cover</strong>. Victims
+          receive a ransom note, but the data has already been destroyed — payment recovers
+          nothing. Treating an Agrius incident as an extortion event rather than a destructive
+          one leads defenders to the wrong response: negotiating for a key that was never
+          generated, instead of moving immediately to
+          recovery.<a class="src" href="#s3">3</a>
+        </p>
+        <p>
+          Across its campaigns the group's documented tradecraft is consistent: entry through
+          internet-facing applications, ASPXSpy web shells relaying commands to
+          <code>cmd.exe</code>, the IPsec Helper backdoor registered as a Windows service,
+          Plink renamed to <code>systems.exe</code> for tunnelling, the vulnerable
+          <code>GMER64.sys</code> driver loaded to terminate EDR from kernel mode, Mimikatz
+          against LSASS and the SAM hive, WinEggDrop and NBTscan for internal discovery, RDP
+          tunnelled through web shells for lateral movement, 7zip archives staged in
+          <code>C:\windows\temp\s\</code>, and exfiltration over PuTTY and WinSCP before the
+          wipers run.<a class="src" href="#s1">1</a><a class="src" href="#s3">3</a>
+        </p>
+      </div>
+
+      <h3 style="font-size:20px;font-weight:700;margin:38px 0 22px;">Activity, oldest first</h3>
+
+      <div class="chrono">
+        <div class="entry key">
+          <div class="when">2020</div>
+          <h3>First observed operating against Israeli targets</h3>
+          <p>
+            Researchers began tracking the group as a distinct cluster operating in Israel.
+            Initial access was achieved by exploiting internet-facing applications, including
+            <strong>CVE-2018-13379</strong> in FortiOS SSL VPN and SQL injection against web
+            applications, with operator traffic routed through commercial VPN services to
+            obscure origin.<a class="src" href="#s1">1</a><a class="src" href="#s2">2</a><a class="src" href="#s3">3</a>
+          </p>
+        </div>
+
+        <div class="entry key">
+          <div class="when">2020-11</div>
+          <h3>Apostle wiper developed</h3>
+          <p>
+            The Apostle wiper was built around November 2020. Early builds frequently failed to
+            destroy files, so the group fell back to the DEADWOOD wiper to complete intrusions
+            — an operational tell that destruction, not encryption, was the objective from the
+            outset.<a class="src" href="#s3">3</a>
+          </p>
+        </div>
+
+        <div class="entry">
+          <div class="when">2020-12</div>
+          <h3>Shirbit insurance targeted</h3>
+          <p>
+            The Israeli insurance company Shirbit was struck in a destructive operation
+            presented publicly as a ransomware incident, following the group's pattern of data
+            theft ahead of destruction.<a class="src" href="#s3">3</a>
+          </p>
+        </div>
+
+        <div class="entry">
+          <div class="when">2021</div>
+          <h3>Bar-Ilan University and the IPsec Helper backdoor</h3>
+          <p>
+            Agrius targeted Bar-Ilan University, deploying the Apostle wiper alongside a custom
+            .NET backdoor tracked as IPsec Helper, which was registered as a Windows service
+            for persistence. Apostle was progressively reworked from a failing wiper into
+            functional ransomware.<a class="src" href="#s1">1</a><a class="src" href="#s3">3</a>
+          </p>
+        </div>
+
+        <div class="entry key">
+          <div class="when">2022-12</div>
+          <h3>Diamond industry intrusions</h3>
+          <p>
+            The group was attributed to attempted disruptive intrusions against diamond
+            industry organisations in <strong>South Africa, Israel and Hong Kong</strong>,
+            marking the first widely reported expansion of targeting beyond
+            Israel.<a class="src" href="#s4">4</a><a class="src" href="#s5">5</a>
+          </p>
+        </div>
+
+        <div class="entry key">
+          <div class="when">2023-05</div>
+          <h3>Moneybird ransomware deployed</h3>
+          <p>
+            A new ransomware strain written in C++ and tracked as Moneybird was deployed
+            against Israeli organisations. Unlike the .NET-based Apostle, Moneybird represented
+            a deliberate rewrite, indicating sustained tooling investment rather than
+            opportunistic reuse.<a class="src" href="#s4">4</a><a class="src" href="#s5">5</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- History section deliberately omitted: the chronology opens at first observation, so
+       the origin story is already the first entry. A History section here would restate the
+       Overview rather than add to it. -->
+
+  <!-- ===================== 4. CONCLUSION ===================== -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Conclusion</p>
+        <h2>A destructive operation wearing a criminal costume</h2>
+      </div>
+
+      <div class="prose">
+        <p>
+          Three years of reporting describe an operation that looks like eCrime and behaves
+          like sabotage. The ransom notes, the leak-site conventions and the ransomware
+          branding all point at a financially motivated crew; the wiper development history,
+          the state attribution and the choice of victims point somewhere else entirely. The
+          gap between those two readings is the single most consequential thing about this
+          actor, because it determines whether an incident response team spends its first
+          hours negotiating or restoring.
+        </p>
+      </div>
+
+      <div class="takeaways">
+        <div class="takeaway"><span class="n">1</span><p>
+          <strong>A ransom note from Agrius is misdirection.</strong> The data is already gone
+          when the demand arrives. Any playbook that routes this to negotiation, or waits on a
+          decryptor, is spending the most valuable hours of the response on an outcome that
+          cannot happen.
+        </p></div>
+        <div class="takeaway"><span class="n">2</span><p>
+          <strong>Recovery capability is the control that matters, not decryption.</strong>
+          There is no key to buy. Tested, offline restores are the difference between an outage
+          and a permanent loss — and the group steals data before destroying it, so restoring
+          does not end the incident either.
+        </p></div>
+        <div class="takeaway"><span class="n">3</span><p>
+          <strong>The documented way in is a flaw patched years before it was used.</strong>
+          CVE-2018-13379 was disclosed and fixed long before these campaigns. This is an
+          exposure-management failure rather than a zero-day problem, which makes it one of the
+          few things on this page a defender can close outright.
+        </p></div>
+        <div class="takeaway"><span class="n">4</span><p>
+          <strong>Wiper failure drove tool investment, not retreat.</strong> Apostle's early
+          builds could not destroy files, so DEADWOOD covered the gap and Apostle was reworked;
+          Moneybird was later a deliberate C++ rewrite. A group that re-engineers after failure
+          is not opportunistic and will not be deterred by one closed door.
+        </p></div>
+        <div class="takeaway"><span class="n">5</span><p>
+          <strong>Geography stopped being a reliable filter in December 2022.</strong> The
+          diamond-industry intrusions reached South Africa and Hong Kong. Organisations that
+          previously judged their exposure by not being in Israel need a different test.
+        </p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 5. RISK & IMPACT ===================== -->
+  <section class="alt">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Risk &amp; Impact</p>
+        <h2>Who this actor actually hits</h2>
+        <p>
+          Agrius selects on geopolitical value rather than on what a victim can pay. The levels
+          below track where victims have actually been observed, which is why sectors that
+          would rank high against a financially motivated crew rank low here.
+        </p>
+      </div>
+
+      <div class="sectors">
+        <div class="sector critical">
+          <div class="name">Government</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Critical</div>
+          <div class="why">Israeli government bodies are the stated focus of repeated destructive operations.</div>
+        </div>
+        <div class="sector critical">
+          <div class="name">Energy and utilities</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Critical</div>
+          <div class="why">Targeted in destructive operations where the objective was disruption rather than revenue.</div>
+        </div>
+        <div class="sector high">
+          <div class="name">Manufacturing and logistics</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">High</div>
+          <div class="why">The December 2022 diamond-industry intrusions show targeting extends to high-value commercial supply chains.</div>
+        </div>
+        <div class="sector high">
+          <div class="name">Financial services</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">High</div>
+          <div class="why">The Shirbit insurance incident places financial services inside the observed victim set.</div>
+        </div>
+        <div class="sector low">
+          <div class="name">Healthcare</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Low</div>
+          <div class="why">Outside the documented targeting; no reporting places Agrius in this sector.</div>
+        </div>
+        <div class="sector minimal">
+          <div class="name">Retail and hospitality</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Minimal</div>
+          <div class="why">No indication of interest. Low geopolitical value to a state-aligned destructive actor.</div>
+        </div>
+      </div>
+
+      <div class="risklegend">
+        <div class="item"><span class="sw" style="background:var(--risk-critical)"></span> Critical — actively targeted</div>
+        <div class="item"><span class="sw" style="background:var(--risk-high)"></span> High — fits the victim profile</div>
+        <div class="item"><span class="sw" style="background:var(--risk-moderate)"></span> Moderate — plausible, not observed</div>
+        <div class="item"><span class="sw" style="background:var(--risk-low)"></span> Low — outside the pattern</div>
+        <div class="item"><span class="sw" style="background:var(--risk-minimal)"></span> Minimal — no indication</div>
+      </div>
+
+      <div class="callout">
+        <p>
+          <strong>Bottom line.</strong> Exposure to Agrius is decided by geopolitical alignment
+          and by what you expose to the internet — not by how much you could afford to pay.
+          That inverts the usual ransomware calculation: a well-funded retailer is a poor target
+          here, while a modestly resourced utility with an unpatched edge appliance is a good
+          one. Healthcare sits low on this table for the same reason it would sit high against
+          a criminal crew.
+        </p>
+        <p>
+          For <em>how</em> a compromise actually unfolds — the techniques, the tooling and the
+          order they run in — see the companion attack-flow report,
+          <code>agrius-fortios-campaign-flow.html</code>.
+        </p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <h3>Part 1 sources</h3>
+    <ol class="sources">
+      <li id="s1">MITRE ATT&amp;CK — Groups: Agrius (G1030) — <a href="https://attack.mitre.org/groups/G1030/">https://attack.mitre.org/groups/G1030/</a></li>
+      <li id="s2">NVD — CVE-2018-13379 (Fortinet FortiOS SSL VPN path traversal) — <a href="https://nvd.nist.gov/vuln/detail/CVE-2018-13379">https://nvd.nist.gov/vuln/detail/CVE-2018-13379</a></li>
+      <li id="s3">SentinelOne SentinelLabs — From Wiper to Ransomware: The Evolution of Agrius — <a href="https://www.sentinelone.com/labs/from-wiper-to-ransomware-the-evolution-of-agrius/">https://www.sentinelone.com/labs/from-wiper-to-ransomware-the-evolution-of-agrius/</a></li>
+      <li id="s4">Check Point Research — Agrius Deploys Moneybird in Targeted Attacks Against Israeli Organizations — <a href="https://research.checkpoint.com/2023/agrius-deploys-moneybird-in-targeted-attacks-against-israeli-organizations/">https://research.checkpoint.com/2023/agrius-deploys-moneybird-in-targeted-attacks-against-israeli-organizations/</a></li>
+      <li id="s5">The Hacker News — Iranian Agrius Hackers Targeting Israeli Organizations — <a href="https://thehackernews.com/2023/05/iranian-agrius-hackers-targeting.html">https://thehackernews.com/2023/05/iranian-agrius-hackers-targeting.html</a></li>
+    </ol>
+
+    <p class="note">
+      <strong>Confidence and sourcing.</strong> The chronology, tooling and victimology are
+      drawn from vendor and government reporting and are stated as reported. Attribution to
+      Iran's Ministry of Intelligence and Security rests on published vendor assessment and is
+      an <em>assessed</em> link rather than an established fact; the wording throughout keeps
+      that distinction. Source 5 is a corroborating news outlet reporting the vendor research
+      at source 4, and carries timeline and reach only — it is not an independent basis for the
+      attribution claim. Sector risk levels are analyst assessments, not measured values; they
+      deliberately share a colour ramp with CVSS severity but are rendered as meters rather
+      than scores so the two are not confused.
+    </p>
+    <p class="note">
+      <strong>Pipeline.</strong> Step 1 of TI-Reporting. This report was rendered from the
+      existing <code>analysis.json</code> rather than from fresh research, because the
+      companion ATT&amp;CK mapping was derived from that same evidence and new sourcing would
+      risk the two halves disagreeing. The JSON handoff lives in
+      <code>subjects/agrius/handoff/</code>.
+    </p>
+  </div>
+</footer>
+
+<section class="partrule">
+  <div class="wrap">
+    <span class="pnum">Part 2</span>
+    <h2>ATT&amp;CK attack flow</h2>
+    <p>How a compromise unfolds, tactic by tactic and in order. Part 1 established who is at
+       risk and why; this part is how they get hit.</p>
+  </div>
+</section>
+
+<div class="flowpart">
+<header>
+  <div class="wrap hero">
+    <p class="eyebrow">Campaign Flow <span class="idtag">G1030 · CVE-2018-13379</span></p>
+    <h1>Agrius<span class="destruct">.</span></h1>
+    <p class="lede">
+      An Iranian destruction crew walking through a <strong>2018 Fortinet flaw</strong> that
+      hands out VPN credentials to anyone who asks. The vulnerability buys them the front
+      door and nothing else — every wiper, web shell and killed EDR agent downstream is
+      Agrius tradecraft that would work identically from any other foothold.
+    </p>
+
+    <div class="idrow">
+      <span class="label">Also tracked as</span>
+      <span class="chip">Pink Sandstorm</span>
+      <span class="chip">AMERICIUM</span>
+      <span class="chip">Agonizing Serpens</span>
+      <span class="chip">BlackShadow</span>
+    </div>
+
+    <div class="idrow vulns">
+      <span class="label">Exploits</span>
+      <span class="cve">CVE-2018-13379</span>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><p class="k">Attribution</p><p class="v">Iran · MOIS-linked</p></div>
+      <div class="fact"><p class="k">Active since</p><p class="v">2020</p></div>
+      <div class="fact"><p class="k">Objective</p><p class="v bad">Destruction</p></div>
+      <div class="fact"><p class="k">Entry vector</p><p class="v">FortiOS SSL VPN</p></div>
+      <div class="fact"><p class="k">CVSS</p><p class="v bad">9.8 Critical</p></div>
+      <div class="fact"><p class="k">CISA KEV</p><p class="v bad">Since Nov 2021</p></div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ===================== 1. VULNERABILITY ===================== -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Vulnerability</p>
+        <h2>A path traversal that gives away credentials</h2>
+        <p>
+          One CVE, and an old one. Its value to Agrius is not code execution — it is that an
+          unauthenticated request retrieves files from the SSL VPN appliance, and those files
+          contain the credentials needed to log in as a legitimate user.
+        </p>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>CVE</th><th>CVSS</th><th>Exploitation</th><th>CWE</th><th>What it gives the actor</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="cve">CVE-2018-13379</span></td>
+              <td><span class="sev crit">9.8</span></td>
+              <td><span class="exp kev">KEV</span></td>
+              <td><span class="cwe">CWE-22</span></td>
+              <td>Unauthenticated file read on the FortiOS / FortiProxy SSL VPN portal, yielding VPN credentials rather than execution</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout">
+        <p>
+          <strong>What patching buys you.</strong> It closes <em>one</em> of Agrius's documented
+          entry routes. MITRE's own wording is worth reading carefully: initial access "examples
+          include widespread attempts to exploit CVE-2018-13379 in FortiOS devices <strong>and SQL
+          injection activity</strong>." Two named routes, presented as examples rather than an
+          exhaustive list. A patched FortiOS estate is not an Agrius-proof estate.
+        </p>
+        <p>
+          <strong>What it does not.</strong> Nothing below phase 02 of the flow. The ASPXSpy web
+          shells, the vulnerable-driver EDR kill, Mimikatz, the lateral movement and the wipers are
+          all indifferent to how Agrius got in. Patch to close the door; hunt because the door may
+          already have been used.
+        </p>
+        <p>
+          <strong>The age is the story.</strong> Fortinet fixed this in 2018 and CISA set a federal
+          remediation deadline of May 2022, yet it remained a viable mass-exploitation route well
+          beyond both. Internet-facing security appliances are routinely the least-patched
+          infrastructure an organisation owns, and Agrius scanned for exactly that.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 2. THE INTRUSION ===================== -->
+  <section style="background:var(--surface); border-top:1px solid var(--hair); border-bottom:1px solid var(--hair);">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">The Intrusion</p>
+        <h2>One phase of vulnerability, ten of tradecraft</h2>
+        <p>
+          The CVE tag appears once and then stops. Where it stops is the point of this page: the
+          ratio of vulnerability to tradecraft is one to ten, and it tells you how much of this
+          campaign patching actually addresses.
+        </p>
+      </div>
+
+      <div class="flow">
+
+        <div class="phase">
+          <div class="node">01</div>
+          <div class="card">
+            <div class="card-top">
+              <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.7 2.6 15.3 0 18M12 3c-2.6 2.7-2.6 15.3 0 18"/></svg></span>
+              <span class="tactic">Resource Development</span>
+            </div>
+            <h3>Anonymise before touching anything</h3>
+            <div class="ttps">
+              <div class="ttp"><span class="tid">T1583</span><span class="desc">Acquire Infrastructure — routes operator traffic through commercial VPNs such as <span class="tool">ProtonVPN</span>, so the scanning and the intrusion do not trace back.</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="transition">
+          <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1v12M3 9l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          anonymised, they sweep for the unpatched edge
+        </div>
+
+        <div class="phase">
+          <div class="node">02</div>
+          <div class="card">
+            <div class="card-top">
+              <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5l7.5 3.2v6c0 4.4-3.1 8.1-7.5 9.6-4.4-1.5-7.5-5.2-7.5-9.6v-6L12 2.5z"/><path d="M13.2 7.8l-2.9 4.7h3.4l-2.9 4.2"/></svg></span>
+              <span class="tactic">Initial Access</span>
+            </div>
+            <h3>Read the credentials off the VPN appliance</h3>
+            <div class="ttps">
+              <div class="ttp">
+                <span class="tid">T1190</span>
+                <span class="desc">Exploit Public-Facing Application — path traversal against the FortiOS SSL VPN portal retrieves system files without authenticating, and the credentials inside are then used to connect as a real user. <span class="viacve">via CVE-2018-13379</span></span>
+              </div>
+              <div class="ttp">
+                <span class="tid">T1190</span>
+                <span class="desc">Exploit Public-Facing Application — SQL injection against internet-facing web applications, the second documented route in and the reason patching FortiOS alone does not close the door.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="transition handoff">
+          <svg width="15" height="15" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1v12M3 9l4 4 4-4" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          The vulnerability's contribution ends here — it delivered a working login and nothing more.
+          Everything below is Agrius's own tradecraft and would follow identically from the SQL
+          injection route, from stolen credentials, or from any other foothold.
+        </div>
+
+        <div class="phase">
+          <div class="node">03</div>
+          <div class="card">
+            <div class="card-top">
+              <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.8" y="4.2" width="18.4" height="15.6" rx="2.2"/><path d="M7 9.5l3 2.9-3 2.9M13 15.3h4.2"/></svg></span>
+              <span class="tactic">Execution</span>
+            </div>
+            <h3>Run commands through a web shell</h3>
+            <div class="ttps">
+              <div class="ttp"><span class="tid">T1059.003</span><span class="desc">Windows Command Shell — <span class="tool">ASPXSpy</span> web shells relay operator input to <span class="tool">cmd.exe</span> on the compromised server.</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="transition">
+          <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1v12M3 9l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          a stolen login can be revoked — the next step cannot
+        </div>
+
+        <div class="phase">
+          <div class="node">04</div>
+          <div class="card">
+            <div class="card-top">
+              <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4.6" r="2.3"/><path d="M12 6.9v14.2M5 12v1.2a7 7 0 0 0 14 0V12"/><path d="M3.2 12h4.2M16.6 12h4.2"/></svg></span>
+              <span class="tactic">Persistence</span>
+            </div>
+            <h3>Lock in the foothold</h3>
+            <div class="ttps">
+              <div class="ttp"><span class="tid">T1505.003</span><span class="desc">Web Shell — plants multiple <span class="tool">ASPXSpy</span> variants as durable re-entry points.</span></div>
+              <div class="ttp"><span class="tid">T1543.003</span><span class="desc">Windows Service — registers the <span class="tool">IPsec Helper</span> backdoor as a service that auto-starts.</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="transition">
+          <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1v12M3 9l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          durable access still has to look unremarkable
+        </div>
+
+        <div class="phase heat">
+          <div class="node">05</div>
+          <div class="card">
+            <div class="card-top">
+              <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.2 12S5.8 5.8 12 5.8 21.8 12 21.8 12 18.2 18.2 12 18.2 2.2 12 2.2 12z"/><circle cx="12" cy="12" r="2.6"/><path d="M4.1 20.2L19.9 3.8"/></svg></span>
+              <span class="tactic">Stealth</span>
+            </div>
+            <h3>Disguise the operation</h3>
+            <div class="ttps">
+              <div class="ttp"><span class="tid">T1036</span><span class="desc">Masquerading — renames the Plink tunnelling tool to <span class="tool">systems.exe</span> to blend with system binaries.</span></div>
+              <div class="ttp"><span class="tid">T1140</span><span class="desc">Deobfuscate/Decode — deploys base64-encoded ASPXSpy variants to slip past signatures.</span></div>
+              <div class="ttp"><span class="tid">T1078.002</span><span class="desc">Domain Accounts — reuses valid domain credentials so activity reads as legitimate.</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="transition">
+          <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1v12M3 9l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          blending in is not enough — next they break the sensors outright
+        </div>
+
+        <div class="phase heat">
+          <div class="node">06</div>
+          <div class="card">
+            <div class="card-top">
+              <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8.6a6 6 0 1 0-12 0c0 6.4-2.4 8.2-2.4 8.2h16.8S18 15 18 8.6z"/><path d="M13.7 20.4a2 2 0 0 1-3.4 0"/><path d="M3.6 3.6l16.8 16.8"/></svg></span>
+              <span class="tactic">Defense Impairment</span>
+            </div>
+            <h3>Kill the security stack</h3>
+            <div class="ttps">
+              <div class="ttp"><span class="tid">T1685</span><span class="desc">Disable or Modify Tools — loads the vulnerable <span class="tool">GMER64.sys</span> driver to terminate EDR and antivirus services from kernel mode.</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="transition">
+          <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1v12M3 9l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          with EDR blinded, they harvest credentials unobserved
+        </div>
+
+        <div class="phase heat">
+          <div class="node">07</div>
+          <div class="card">
+            <div class="card-top">
+              <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.8" cy="12" r="4.3"/><path d="M12.1 12h9.1M17.6 12v3.9M20.4 12v2.8"/></svg></span>
+              <span class="tactic">Credential Access</span>
+            </div>
+            <h3>Steal the keys to the domain</h3>
+            <div class="ttps">
+              <div class="ttp"><span class="tid">T1003.001</span><span class="desc">LSASS Memory — <span class="tool">Mimikatz</span> dumps plaintext and hashed credentials from memory.</span></div>
+              <div class="ttp"><span class="tid">T1003.002</span><span class="desc">Security Account Manager — extracts the local <span class="tool">SAM</span> hive.</span></div>
+              <div class="ttp"><span class="tid">T1110.003</span><span class="desc">Password Spraying — sprays credentials over SMB to reach more hosts.</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="transition">
+          <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1v12M3 9l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          credentials in hand, they map the network
+        </div>
+
+        <div class="phase heat">
+          <div class="node">08</div>
+          <div class="card">
+            <div class="card-top">
+              <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.6"/><circle cx="12" cy="12" r="1.1"/><path d="M12 12l6.4-5.3"/></svg></span>
+              <span class="tactic">Discovery</span>
+            </div>
+            <h3>Chart the internal terrain</h3>
+            <div class="ttps">
+              <div class="ttp"><span class="tid">T1046</span><span class="desc">Network Service Discovery — scans hosts and services with the <span class="tool">WinEggDrop</span> port scanner.</span></div>
+              <div class="ttp"><span class="tid">T1018</span><span class="desc">Remote System Discovery — enumerates reachable hosts with <span class="tool">NBTscan</span>.</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="transition">
+          <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1v12M3 9l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          mapped targets become movement destinations
+        </div>
+
+        <div class="phase heat">
+          <div class="node">09</div>
+          <div class="card">
+            <div class="card-top">
+              <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="1.8" y="7.8" width="7.4" height="8.4" rx="1.6"/><rect x="14.8" y="7.8" width="7.4" height="8.4" rx="1.6"/><path d="M9.6 12h4.8M12.4 9.6l2.4 2.4-2.4 2.4"/></svg></span>
+              <span class="tactic">Lateral Movement</span>
+            </div>
+            <h3>Spread to high-value hosts</h3>
+            <div class="ttps">
+              <div class="ttp"><span class="tid">T1021.001</span><span class="desc">Remote Desktop Protocol — tunnels RDP through web shells and <span class="tool">Plink</span> to pivot deeper.</span></div>
+              <div class="ttp"><span class="tid">T1570</span><span class="desc">Lateral Tool Transfer — pulls payloads from file-sharing sites (<span class="tool">ufile.io</span>, <span class="tool">easyupload.io</span>).</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="transition">
+          <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1v12M3 9l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          on the crown-jewel servers, they collect before they destroy
+        </div>
+
+        <div class="phase heat">
+          <div class="node">10</div>
+          <div class="card">
+            <div class="card-top">
+              <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8l9.2 4.6-9.2 4.6-9.2-4.6L12 2.8z"/><path d="M2.8 12L12 16.6 21.2 12"/><path d="M2.8 16.6L12 21.2l9.2-4.6"/></svg></span>
+              <span class="tactic">Collection</span>
+            </div>
+            <h3>Gather and stage the goods</h3>
+            <div class="ttps">
+              <div class="ttp"><span class="tid">T1119</span><span class="desc">Automated Collection — custom <span class="tool">sql.net4.exe</span> queries SQL databases for PII.</span></div>
+              <div class="ttp"><span class="tid">T1005</span><span class="desc">Data from Local System — pulls files from databases and critical servers.</span></div>
+              <div class="ttp"><span class="tid">T1560.001</span><span class="desc">Archive via Utility — compresses the haul with <span class="tool">7zip</span>.</span></div>
+              <div class="ttp"><span class="tid">T1074.001</span><span class="desc">Local Data Staging — parks archives in <span class="tool">C:\windows\temp\s\</span> before exfil.</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="transition">
+          <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1v12M3 9l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          staged data leaves over the operator's own channel
+        </div>
+
+        <div class="phase heat">
+          <div class="node">11</div>
+          <div class="card">
+            <div class="card-top">
+              <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4.2 14.8v4a2.2 2.2 0 0 0 2.2 2.2h11.2a2.2 2.2 0 0 0 2.2-2.2v-4"/><path d="M12 2.9v12.2M7.9 7l4.1-4.1L16.1 7"/></svg></span>
+              <span class="tactic">Exfiltration</span>
+            </div>
+            <h3>Ship the data out</h3>
+            <div class="ttps">
+              <div class="ttp"><span class="tid">T1041</span><span class="desc">Exfiltration Over C2 Channel — moves the staged archives out using <span class="tool">PuTTY</span> and <span class="tool">WinSCP</span>.</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="transition">
+          <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1v12M3 9l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          with data secured, the real objective executes
+        </div>
+
+        <div class="phase impact">
+          <div class="node">12</div>
+          <div class="card">
+            <div class="card-top">
+              <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5.6" rx="7.8" ry="2.9"/><path d="M19.8 5.6v12.8c0 1.6-3.5 2.9-7.8 2.9s-7.8-1.3-7.8-2.9V5.6"/><path d="M8.7 10.9l6.6 6.6M15.3 10.9l-6.6 6.6"/></svg></span>
+              <span class="tactic">Impact — The Objective</span>
+            </div>
+            <h3>Destroy the environment</h3>
+            <p>
+              Everything above exists to reach this. Agrius detonates <strong>wipers disguised as
+              ransomware</strong>: victims see a ransom note, but the data is already unrecoverable.
+              Destruction, not payment, is the goal — which is why the entry vector mattered so
+              little to them and the dwell time mattered so much.
+            </p>
+            <div class="ttps">
+              <div class="ttp"><span class="tid">Wiper</span><span class="desc"><span class="tool">Apostle</span>, <span class="tool">DEADWOOD</span>, <span class="tool">MultiLayer Wiper</span> and <span class="tool">BFG Agonizer</span> overwrite and corrupt data.</span></div>
+              <div class="ttp"><span class="tid">Ransom</span><span class="desc"><span class="tool">Moneybird</span> provides ransomware cover for the destructive intent.</span></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="legend">
+        <div class="item">
+          <span class="keys" aria-hidden="true">
+            <span class="ticon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="7.6"/><circle cx="12" cy="12" r="2.4"/></svg></span>
+            <span class="ticon heat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="7.6"/><circle cx="12" cy="12" r="2.4"/></svg></span>
+            <span class="ticon impact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="7.6"/><circle cx="12" cy="12" r="2.4"/></svg></span>
+          </span>
+          Tactic icon and label warm as the intrusion advances
+        </div>
+        <div class="item"><span class="spinekey" aria-hidden="true"></span> The spine tracks the same progression</div>
+        <div class="item"><span class="tid" style="min-width:0">T####</span> ATT&amp;CK technique ID</div>
+        <div class="item"><span class="viacve">via CVE</span> Enabled by the vulnerability — absent below the handoff</div>
+        <div class="item"><span class="tool">tool.exe</span> Observed tooling / IOC</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 3. THE ARSENAL ===================== -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">The Arsenal</p>
+        <h2>Named software behind the campaign</h2>
+        <p>
+          Note the split: the access and credential tooling is commodity, and the destructive
+          tooling is bespoke. That is where a wiper crew spends its development budget.
+        </p>
+      </div>
+      <div class="arsenal">
+        <div class="weapon"><p class="wname">ASPXSpy <span class="sid">S0073</span></p><p class="role2">ASP.NET web shell — execution and persistence foothold.</p><span class="kind">Web shell</span></div>
+        <div class="weapon"><p class="wname">IPsec Helper <span class="sid">S1132</span></p><p class="role2">Post-exploitation remote-access framework run as a service.</p><span class="kind">Backdoor</span></div>
+        <div class="weapon"><p class="wname">Mimikatz <span class="sid">S0002</span></p><p class="role2">Credential dumping from LSASS memory.</p><span class="kind">Cred access</span></div>
+        <div class="weapon"><p class="wname">NBTscan <span class="sid">S0590</span></p><p class="role2">NetBIOS scanner for remote-host discovery.</p><span class="kind">Discovery</span></div>
+        <div class="weapon destruct"><p class="wname">Apostle <span class="sid">S1133</span></p><p class="role2">Wiper masquerading as ransomware.</p><span class="kind">Wiper</span></div>
+        <div class="weapon destruct"><p class="wname">DEADWOOD <span class="sid">S1134</span></p><p class="role2">Standalone data-destruction wiper.</p><span class="kind">Wiper</span></div>
+        <div class="weapon destruct"><p class="wname">MultiLayer Wiper <span class="sid">S1135</span></p><p class="role2">Multi-stage file-destruction tool.</p><span class="kind">Wiper</span></div>
+        <div class="weapon destruct"><p class="wname">BFG Agonizer <span class="sid">S1136</span></p><p class="role2">Wiper used in later destructive operations.</p><span class="kind">Wiper</span></div>
+        <div class="weapon destruct"><p class="wname">Moneybird <span class="sid">S1137</span></p><p class="role2">Ransomware providing cover for destruction.</p><span class="kind">Ransomware</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 4. REMEDIATION ===================== -->
+  <section style="background:var(--surface); border-top:1px solid var(--hair); border-bottom:1px solid var(--hair);">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Remediation</p>
+        <h2>Close the door, then assume it was used</h2>
+        <p>
+          The patch is trivial and seven years old. The harder work is the assumption that follows
+          it — because this flaw leaks credentials, patching does not invalidate what was already
+          taken.
+        </p>
+      </div>
+
+      <div class="fixgrid">
+        <div class="fix urgent">
+          <h3>Patch FortiOS and FortiProxy</h3>
+          <p>FortiOS <code>5.4.13+</code>, <code>5.6.8+</code> or <code>6.0.5+</code>; FortiProxy <code>1.2.9+</code>. Anything still on an affected build in 2026 should be treated as compromised rather than merely vulnerable.</p>
+          <span class="tagline">Patch</span>
+        </div>
+        <div class="fix urgent">
+          <h3>Rotate every VPN credential</h3>
+          <p>The vulnerability discloses credentials, so patching stops future theft but does nothing about what already leaked. Reset all SSL VPN account passwords and enforce MFA — a stolen password is worthless against a second factor.</p>
+          <span class="tagline">Credentials</span>
+        </div>
+        <div class="fix urgent">
+          <h3>Hunt below the handoff</h3>
+          <p>Look for ASPXSpy artefacts on web-facing servers, <code>GMER64.sys</code> or unexpected driver loads, Plink renamed to <code>systems.exe</code>, and staging in <code>C:\windows\temp\s\</code>. Patching closes the door; it does not remove anyone already through it.</p>
+          <span class="tagline">Hunt</span>
+        </div>
+      </div>
+
+      <div class="table-wrap" style="margin-top:22px">
+        <table>
+          <thead>
+            <tr><th>CVE</th><th>CVSS</th><th>Affected</th><th>Fixed in</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="cve">CVE-2018-13379</span></td>
+              <td><span class="sev crit">9.8</span></td>
+              <td class="mono">FortiOS 5.4.6–5.4.12, 5.6.3–5.6.7, 6.0.0–6.0.4 · FortiProxy 1.0.0–1.0.7, 1.1.0–1.1.6, 1.2.0–1.2.8, 2.0.0</td>
+              <td class="mono">FortiOS 5.4.13 / 5.6.8 / 6.0.5 · FortiProxy 1.2.9</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>
+      Part 2 sources: MITRE ATT&amp;CK — <a href="https://attack.mitre.org/groups/G1030/">Agrius (G1030)</a>;
+      NVD — <a href="https://nvd.nist.gov/vuln/detail/CVE-2018-13379">CVE-2018-13379</a>.
+      CVSS, CWE, affected and fixed versions verified against NVD; techniques and software taken
+      from the published G1030 mapping.
+    </p>
+    <p class="note">
+      <strong>Attribution confidence — high, and published.</strong> The link between Agrius and
+      CVE-2018-13379 is not inferred here. MITRE's own G1030 entry for T1190 names the CVE directly,
+      and names SQL injection alongside it as a second route. Both are given as <em>examples</em>,
+      so treat the two documented vectors as a floor rather than a complete list of how this actor
+      gets in.
+    </p>
+    <p class="note">
+      <strong>Scope note.</strong> This is a campaign view: Agrius read through one entry vector,
+      for a reader who owns Fortinet appliances and needs to know what patching achieves. The full
+      technique set is here rather than split across a separate actor profile, because Agrius has a
+      documented CVE and the tradecraft does not change with the door — a campaign report is the
+      correct single home for both halves. CVE-2018-13379 is widely exploited by many actors; patch
+      it because it is exposed, not because of who is on this page.
+    </p>
+    <p class="note">
+      <strong>Reference artifact</strong> for the <code class="path">mitre-visualizer</code> skill — the
+      worked example for <code class="path">threat-vuln-flow-template.html</code>. It demonstrates the
+      `.viacve` chip appearing once and stopping, the `.transition.handoff` marking that boundary, and
+      a section 1 callout split into what patching buys and what it does not.
+    </p>
+  </div>
+</footer>
+</div>
+
+<!-- BULLETIN:DEFENCE -->
+
+  <!-- Intentionally empty. This is a campaign subject, so Part 2 carries its own
+       Remediation section. Duplicating it here would create two versions of the same
+       guidance that drift apart. -->
+<!-- /BULLETIN:DEFENCE -->

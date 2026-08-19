@@ -209,7 +209,7 @@ the same CSS the bulletin was designed against, so it is the only route that gua
 PDF matches the page you reviewed. The script finds the engine itself and refuses if neither
 is there.
 
-Two things the exporter fixes before printing, both of which would otherwise ruin the page:
+Three things the exporter adds or fixes before printing:
 
 - **The bulletin is an HTML fragment** — no doctype, `html`, `head` or `body`. Printed as-is a
   browser renders it in quirks mode, so it is wrapped in a real document first.
@@ -218,6 +218,12 @@ Two things the exporter fixes before printing, both of which would otherwise rui
   accent that asserts the actor's objective. Losing it does not merely look worse, it removes
   information. The wrapper forces `print-color-adjust: exact`, widens the 940px reading column
   to the printable width so nothing is clipped, and stops cards breaking across pages.
+- **Nothing numbers the pages.** Every page but the cover carries its number bottom-left, set
+  in an `@page` margin box. That is the only mechanism available: `string-set` is unimplemented
+  in every browser, but Chromium honours margin boxes, and this exporter is Chromium-only by
+  design. `@page :first` blanks it on the cover. Because the numbering depends on an engine
+  feature rather than on anything here, `Test-Pipeline.ps1 -IncludeExport` reads the numbers
+  back out of the finished PDF rather than trusting that the CSS took.
 
 **The exporter runs `Verify-Bulletin.ps1` itself and refuses on failure.** That gate is not
 politeness — the PDF is a faithful render of whatever it is handed, including a bulletin with

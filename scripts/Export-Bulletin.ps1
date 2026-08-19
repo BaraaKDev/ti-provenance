@@ -73,7 +73,22 @@ begin {
     function Get-PrintCss {
         param([string]$Size)
         return @"
-@page { size: $Size; margin: 12mm 10mm; }
+/* Page numbering lives in the page margin, which is the only place a running element can
+   sit: string-set is unimplemented everywhere, but Chromium does honour @page margin boxes,
+   and this export is Chromium-only by design. The bottom margin is wider than the top to
+   make room for it. The cover is page one and carries no furniture. */
+@page {
+  size: $Size;
+  margin: 12mm 10mm 16mm;
+  @bottom-left {
+    content: counter(page);
+    font-family: ui-monospace, Consolas, monospace;
+    font-size: 8pt;
+    color: #55607a;
+    vertical-align: top;
+  }
+}
+@page :first { @bottom-left { content: ""; } }
 
 /* The whole report encodes meaning in colour - sector risk meters, CVSS severity chips,
    phase heat, the accent that asserts the actor's objective. Printing it monochrome does

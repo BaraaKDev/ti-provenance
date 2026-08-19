@@ -489,6 +489,28 @@ if ($IncludeExport) {
         Assert 'PDF header is %PDF-' ($magic -eq '%PDF-') $magic
         Assert 'page size is Letter (612x792)' ($raw -match '/MediaBox\s*\[\s*0\s+0\s+612\s+792') 'MediaBox'
         Assert 'more than one page' (([regex]::Matches($raw, '/Type\s*/Page[^s]')).Count -gt 1) "$(([regex]::Matches($raw,'/Type\s*/Page[^s]')).Count) pages"
+        # Page numbering rides on @page margin boxes, which is an engine feature rather than
+        # anything this project controls - a Chromium regression would drop the numbers
+        # silently. Needs poppler to read the text back, so it is skipped when absent.
+        # The number is not reliably the LAST extracted line: pdftotext orders the margin box
+        # against the content by position, so on some pages body text follows it. Testing for
+        # a standalone line anywhere on the page is what actually holds.
+        if (Get-Command pdftotext -ErrorAction SilentlyContinue) {
+            $tf = Join-Path $fixRoot 'export-test.txt'
+            & pdftotext $pdf $tf 2>$null | Out-Null
+            $pp = @((Read-Text $tf) -split "`f" | Where-Object { $_.Trim() -ne '' })
+            $numbered = 0
+            $coverBare = $true
+            for ($i = 0; $i -lt $pp.Count; $i++) {
+                $lines = @($pp[$i] -split "`n" | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+                $has = @($lines | Where-Object { $_ -eq [string]($i + 1) }).Count -gt 0
+                if ($i -eq 0) { $coverBare = -not $has } elseif ($has) { $numbered++ }
+            }
+            $ok = $coverBare -and $pp.Count -gt 1 -and $numbered -eq $pp.Count - 1
+            Assert 'every page but the cover carries its number' $ok $(
+                if ($ok) { "$numbered numbered, cover bare" }
+                else { "$numbered of $($pp.Count - 1) numbered, cover bare: $coverBare" })
+        }
         # This fixture is a test artefact; it must not be left in the deliverable folder.
         Remove-Item $pdf -Force
     }

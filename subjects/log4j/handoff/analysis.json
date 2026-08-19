@@ -1,0 +1,136 @@
+{
+  "schema": "analysis/1.0",
+  "subject": "Log4j",
+  "slug": "log4j",
+  "subject_type": "vulnerability",
+  "matrix": "enterprise",
+  "aliases": ["Log4Shell", "LogJam"],
+  "objective": "unknown",
+  "objective_note": "A logging flaw grants a capability, not an intent - the objective belongs to whoever picks it up, and cryptominers, ransomware crews and four states' intelligence services all did.",
+  "cves": ["CVE-2021-44228", "CVE-2021-45046", "CVE-2021-45105", "CVE-2021-44832"],
+  "vuln_relationship": "remediation-cascade",
+  "confidence": "derived",
+  "facts": {
+    "vulnerabilities": "4",
+    "highest_cvss": "10.0",
+    "in_cisa_kev": "2 of 4",
+    "product": "Apache Log4j 2",
+    "exposure": "Any logged input",
+    "cascade_ends": "2.17.1"
+  },
+  "background": [
+    "Apache Log4j 2 is a logging library, not a product. It is compiled into Java applications, bundled inside appliances and shipped as a transitive dependency of software whose authors never chose it, which is why the question after December 2021 was rarely whether an organisation was affected and almost always where the library was. CVE-2021-44228, named Log4Shell, carries CVSS 10.0 with a changed scope: JNDI lookups were resolved inside log messages, so an attacker who could get a string into a log - a username, a User-Agent header, a chat message - could make the logging call fetch and execute code from an LDAP server they controlled. No credentials, no user interaction, and no need to reach the vulnerable component directly. Cisco Talos observed exploit strings firing as they transited internal logging and SIEM infrastructure rather than only on the systems they were aimed at.",
+    "What makes these four worth reading as one story is that they are not four independent bugs found by four researchers. Three were created or revealed by the fix for the one before. The 2.15.0 release that answered Log4Shell proved incomplete in non-default configurations, which became CVE-2021-45046. The 2.16.0 release that closed that left uncontrolled recursion in self-referential lookups, which became CVE-2021-45105. The 2.17.0 release that closed that left a JDBC Appender path to remote code execution, which became CVE-2021-44832. The cascade ends at 2.17.1. This is a chain on the defender's side of the fence: it describes the sequence of versions an organisation passed through while patching, not a sequence of steps an attacker composes. The severities fall away sharply after the first two - CVE-2021-45105 is a 5.9 denial of service and CVE-2021-44832 is a 6.6 that requires the attacker to already control the logging configuration - and only CVE-2021-44228 and CVE-2021-45046 carry the unauthenticated remote code execution that made this event what it was.",
+    "The exploitation that followed was unusually broad rather than unusually sophisticated. Mandiant recorded mass scanning from the day of disclosure and described a very long tail, on the reasoning that Log4j sits inside an unknown number of applications and cannot be inventoried by asking. Financially motivated cryptomining crews were first at scale; state-sponsored groups tracked to China, Iran, North Korea and Turkey followed within days; and access brokers used the flaw to build footholds they then sold on to ransomware affiliates. CVE-2021-44228 and CVE-2021-45046 are listed in the CISA Known Exploited Vulnerabilities catalog."
+  ],
+  "chronology": [
+    {
+      "date": "2021-12-02",
+      "event": "Exploitation predates public disclosure",
+      "detail": "Cisco Talos records attacker activity against the flaw beginning 2 December 2021, with unverified reports of activity from 1 December - a week before the 9 December public disclosure. Talos advises defenders to backdate compromise hunting by several weeks rather than starting from the disclosure date, because the earliest exploitation was already historical by the time anyone knew to look for it.",
+      "key": true,
+      "sources": [4]
+    },
+    {
+      "date": "2021-12-10",
+      "event": "Mass opportunistic scanning and exploitation begins",
+      "detail": "Mandiant observes mass scanning and exploitation attempts across a large variety of customers beginning the day of disclosure. Palo Alto Unit 42 records 125,894,944 hits on its Log4j remote code execution signature between 10 December 2021 and 2 February 2022, with the largest spike over 12-16 December. Beyond code execution, attackers use the JNDI lookup itself as an exfiltration channel, crafting strings that interpolate environment variables such as AWS_SECRET_ACCESS_KEY into an LDAP or DNS callback so that credentials leave the host inside the resolver query.",
+      "key": true,
+      "sources": [6, 7]
+    },
+    {
+      "date": "2021-12-11",
+      "event": "State-sponsored groups and access brokers adopt the flaw",
+      "detail": "Microsoft reports that groups tracked to China, Iran, North Korea and Turkey moved from experimentation during development to in-the-wild payload deployment. PHOSPHORUS, an Iranian actor known to deploy ransomware, acquired and modified the exploit and operationalised it. HAFNIUM used it against virtualization infrastructure, fingerprinting targets by DNS, which extended their usual targeting. Multiple access broker groups used it to gain initial access to Linux and Windows networks for resale to ransomware affiliates. Observed post-exploitation payloads include Cobalt Strike, Meterpreter, HabitsRAT, Bladabindi, Webtoos, Tsunami backdoors on Linux hosts, the Mirai botnet and coin miners. Khonsari ransomware is delivered from compromised Minecraft servers running a vulnerable Log4j version.",
+      "key": true,
+      "sources": [5]
+    },
+    {
+      "date": "2021-12-13",
+      "event": "AQUATIC PANDA exploits VMware Horizon",
+      "detail": "CrowdStrike OverWatch observes AQUATIC PANDA, a China-based actor whose documented remit covers intelligence collection and industrial espionage, exploiting a vulnerable VMware Horizon instance. Connectivity checks run as DNS lookups for a subdomain of dns.1433.eu.org, executed under the Apache Tomcat service. The intrusion uses JNDI-Injection-Exploit-1.0.jar, released on a public GitHub project on 13 December. The actor then enumerates privilege, system and domain detail using native operating system binaries, attempts to discover and stop a third-party EDR service, and runs a Base64-encoded PowerShell command to retrieve further tooling.",
+      "sources": [8]
+    },
+    {
+      "date": "2021-12-20",
+      "event": "Commodity payloads dominate at volume",
+      "detail": "Sophos records millions of exploit attempts in customer telemetry, peaking on 15 December and staying elevated through late December. The majority originate from IP addresses in Russia and China, with a single Russian address accounting for 11 percent of identifiable traffic and linked to the Kinsing botnet. Payload families exceed twenty and include XMRig and other Linux coin miners, TellYouThePass ransomware, backdoors, DDoS tools and rootkits. Unit 42 separately observes the Kinsing coinminer, a password stealer exfiltrating the contents of /etc/passwd and environment variables over HTTP POST and DNS tunnelling, and a Cobalt Strike server standing up on 18 December.",
+      "sources": [9, 7]
+    },
+    {
+      "date": "2022-01-04",
+      "event": "NightSky ransomware deployed through VMware Horizon",
+      "detail": "Microsoft reports DEV-0401, a China-based ransomware operator previously associated with the LockFile, AtomSilo and Rook families, exploiting internet-facing VMware Horizon systems to deploy NightSky ransomware. This marks the shift from opportunistic payloads dropped at scanning scale to deliberate use of the flaw against one specific exposed product.",
+      "key": true,
+      "sources": [5]
+    },
+    {
+      "date": "2022-02",
+      "event": "Iranian state actors reach a US federal network",
+      "detail": "Iranian government-sponsored APT actors exploit Log4Shell on an unpatched VMware Horizon server to gain initial access to a federal civilian executive branch network. They install XMRig cryptomining software, move laterally to the domain controller, compromise credentials, and implant Ngrok reverse proxies on several hosts for persistence. CISA and the FBI conduct the incident response engagement between mid-June and mid-July 2022 and publish the findings that November. IRGC-affiliated actors are separately recorded using the same route into a US municipal government network in the same month.",
+      "key": true,
+      "sources": [10]
+    },
+    {
+      "date": "2022-06",
+      "event": "Exploitation of unpatched VMware Horizon continues six months on",
+      "detail": "CISA and United States Coast Guard Cyber Command publish a joint advisory recording that malicious actors are still exploiting Log4Shell in unpatched VMware Horizon and Unified Access Gateway servers, six months after fixed versions shipped. What keeps the vulnerability productive at this point is the gap between an available patch and a patched estate, not any change in attacker capability.",
+      "key": true,
+      "sources": [11]
+    }
+  ],
+  "risk": [
+    {
+      "sector": "Government and public administration",
+      "level": "critical",
+      "why": "The only Log4Shell intrusions attributed to state actors in the cited reporting are against government - a US federal civilian executive branch network and a US municipal government, both entered through an unpatched VMware Horizon server."
+    },
+    {
+      "sector": "Technology and cloud services",
+      "level": "critical",
+      "why": "The products actually exploited - VMware Horizon, Apache Tomcat, Elasticsearch - are this sector's own operating stack, and it carries the largest internet-facing Java estate, which is what the scanning telemetry was finding."
+    },
+    {
+      "sector": "Manufacturing and industrial",
+      "level": "high",
+      "why": "AQUATIC PANDA, whose documented mission includes industrial espionage, was among the first actors observed using Log4Shell, and used it against VMware Horizon rather than at scanning scale."
+    },
+    {
+      "sector": "Financial services",
+      "level": "high",
+      "why": "Fits the observed profile closely - large internet-facing Java estates and heavy appliance use - but the cited reporting names no financial victim, so this rests on exposure rather than on observed targeting."
+    },
+    {
+      "sector": "Education and research",
+      "level": "moderate",
+      "why": "Plausible on the same exposure reasoning, and the Minecraft server compromises that delivered Khonsari sit adjacent to it, but no education victim appears in the cited reporting."
+    },
+    {
+      "sector": "Retail and hospitality",
+      "level": "low",
+      "why": "No exploitation against retail appears in any of the cited sources. The level reflects that absence of reporting, not structural protection - a retail estate running a vulnerable Log4j 2 is exactly as exploitable as any other."
+    },
+    {
+      "sector": "Estates with no Java runtime in scope",
+      "level": "minimal",
+      "why": "Log4j 2 is a Java library, so an estate that runs none is not exposed regardless of industry. This row exists to make the point the rest of the table cannot: for this subject the discriminator is the runtime, not the sector."
+    }
+  ],
+  "sources": [
+    "https://nvd.nist.gov/vuln/detail/CVE-2021-44228",
+    "https://nvd.nist.gov/vuln/detail/CVE-2021-45046",
+    "https://nvd.nist.gov/vuln/detail/CVE-2021-45105",
+    "https://nvd.nist.gov/vuln/detail/CVE-2021-44832",
+    "https://blog.talosintelligence.com/apache-log4j-rce-vulnerability/",
+    "https://www.microsoft.com/en-us/security/blog/2021/12/11/guidance-for-preventing-detecting-and-hunting-for-cve-2021-44228-log4j-2-exploitation/",
+    "https://cloud.google.com/blog/topics/threat-intelligence/log4shell-recommendations",
+    "https://unit42.paloaltonetworks.com/apache-log4j-vulnerability-cve-2021-44228/",
+    "https://www.crowdstrike.com/en-us/blog/overwatch-exposes-aquatic-panda-in-possession-of-log-4-shell-exploit-tools/",
+    "https://www.sophos.com/en-us/blog/logjam-log4j-exploit-attempts-continue-in-globally-distributed-scans-attacks",
+    "https://www.cisa.gov/news-events/cybersecurity-advisories/aa22-320a",
+    "https://www.cisa.gov/news-events/cybersecurity-advisories/aa22-174a",
+    "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+    "https://www.tenable.com/blog/cve-2021-44228-cve-2021-45046-cve-2021-4104-frequently-asked-questions-about-log4shell"
+  ],
+  "report": "analysis.html"
+}

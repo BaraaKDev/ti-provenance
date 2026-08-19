@@ -1,0 +1,644 @@
+<title>Log4j &middot; Vulnerability Analysis</title>
+
+<style>
+  /* ---- Tokens: shared across TI-Reporting - see CLAUDE.md ---- */
+  :root {
+    color-scheme: light;
+
+    --ground: #ffffff;
+    --surface: #ffffff;
+    --surface-2: #f3f6fc;
+    --ink: #14181f;
+    --muted: #5b6474;
+    --hair: #e3e8f2;
+    --hair-strong: #c6cede;
+
+    /* ACCENT - objective is unknown by design: a logging flaw grants a capability, not
+       an intent. Signal blue, the same values the flow report uses. */
+    --ember: #1d4ed8;
+    --ember-ink: #1e40af;
+    --ember-wash: rgba(29, 78, 216, 0.09);
+    --steel: #55607a;
+    --steel-wash: rgba(85, 96, 122, 0.10);
+    --spine: #c2cadb;
+
+    /* SECTOR RISK - shares the CVSS ramp, separate tokens, different form. */
+    --risk-critical: #a4161a;  --risk-critical-wash: rgba(164, 22, 26, 0.10);
+    --risk-high:     #b3541e;  --risk-high-wash:     rgba(179, 84, 30, 0.10);
+    --risk-moderate: #8a6a00;  --risk-moderate-wash: rgba(138, 106, 0, 0.10);
+    --risk-low:      #4a6b2a;  --risk-low-wash:      rgba(74, 107, 42, 0.10);
+    --risk-minimal:  #5c6470;  --risk-minimal-wash:  rgba(92, 100, 112, 0.10);
+
+    --shadow: 0 1px 2px rgba(20,22,26,.06), 0 8px 24px rgba(20,22,26,.05);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.55; -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 940px; margin: 0 auto; padding: 0 24px; }
+
+  /* ================= 1. COVER ================= */
+  .cover {
+    position: relative; overflow: hidden;
+    border-bottom: 1px solid var(--hair);
+    background:
+      radial-gradient(120% 90% at 88% -5%, var(--ember-wash), transparent 62%),
+      var(--surface);
+  }
+  .cover .wrap { position: relative; z-index: 2; padding-top: 84px; padding-bottom: 76px; }
+
+  .covermotif {
+    position: absolute; top: -40px; right: -60px; width: 460px; height: 460px;
+    color: var(--ember); pointer-events: none; z-index: 1;
+  }
+  .covermotif .arcs   { opacity: .16; }
+  .covermotif .rail   { opacity: .30; }
+  .covermotif .dots   { opacity: .22; }
+
+  .tlp {
+    display: inline-block; font-family: ui-monospace, Consolas, monospace;
+    font-size: 10.5px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
+    padding: 4px 10px; border-radius: 4px; margin-bottom: 26px;
+    background: var(--surface-2); border: 1px solid var(--hair-strong); color: var(--muted);
+  }
+  .tlp.clear { color: var(--muted); }
+  .tlp.green { color: var(--risk-low);      border-color: color-mix(in srgb, var(--risk-low) 40%, transparent);      background: var(--risk-low-wash); }
+  .tlp.amber { color: var(--risk-high);     border-color: color-mix(in srgb, var(--risk-high) 40%, transparent);     background: var(--risk-high-wash); }
+  .tlp.red   { color: var(--risk-critical); border-color: color-mix(in srgb, var(--risk-critical) 40%, transparent); background: var(--risk-critical-wash); }
+
+  .eyebrow {
+    font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+    font-size: 11.5px; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--muted); margin: 0 0 18px; display: flex; align-items: center; gap: 12px;
+  }
+  .eyebrow::after { content: ""; flex: 1; height: 1px; background: var(--hair-strong); }
+  .idtag { color: var(--ember-ink); font-weight: 600; }
+
+  .cover h1 {
+    font-size: clamp(34px, 5.6vw, 54px); line-height: .96; letter-spacing: -.025em;
+    font-weight: 800; margin: 0 0 10px; text-wrap: balance; max-width: 16ch;
+  }
+  .cover h1 .accent { color: var(--ember); }
+  /* The cover is deliberately left at the original scale - it is the one page that is not
+     dense reading, and the body-copy reduction is not wanted here. The explicit line-height
+     restores what it inherited before body dropped to 1.55. */
+  .cover .standfirst {
+    font-size: clamp(15px, 2vw, 17.5px); line-height: 1.6; color: var(--muted);
+    max-width: 60ch; margin: 20px 0 0;
+  }
+  /* Six cells. auto-fit leaves the last row short at print width, and the gap lets the
+     container's hairline background show through as an empty grey block - so the columns
+     are pinned instead. Three divides six exactly, and so does two on a narrow screen.
+     CHANGE THE NUMBER OF CELLS AND YOU MUST CHANGE THIS RULE. */
+  .covermeta {
+    margin-top: 42px; display: grid; gap: 1px;
+    grid-template-columns: repeat(3, 1fr);
+    background: var(--hair); border: 1px solid var(--hair); border-radius: 12px; overflow: hidden;
+  }
+  @media (max-width: 640px) { .covermeta { grid-template-columns: repeat(2, 1fr); } }
+  .covermeta div { background: var(--surface); padding: 15px 18px; }
+  .covermeta .k { font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0 0 5px; }
+  .covermeta .v { font-size: 13.5px; font-weight: 600; margin: 0; }
+
+  /* ================= Sections ================= */
+  section { padding: 46px 0; }
+  section.alt { background: var(--surface); border-top: 1px solid var(--hair); border-bottom: 1px solid var(--hair); }
+  .section-head { margin-bottom: 28px; }
+  /* Section labels carry heading weight, not kicker weight - the executive summary and
+     defensive priorities have no h2 under them, so this line IS their heading. The cover
+     and hero eyebrows are deliberately excluded: they sit under display type already. */
+  .section-head .eyebrow { font-size: 18.5px; letter-spacing: .18em; margin-bottom: 10px; }
+  .section-head h2 {
+    font-size: 28px; letter-spacing: -.015em;
+    font-weight: 800; margin: 0; text-wrap: balance;
+  }
+  .section-head p { color: var(--muted); max-width: 68ch; margin: 10px 0 0; font-size: 13px; }
+
+  .prose { max-width: 68ch; }
+  .prose p { margin: 0 0 15px; font-size: 13.5px; }
+  .prose p:last-child { margin-bottom: 0; }
+  .prose strong { font-weight: 700; }
+  .prose h3 {
+    font-size: 24px; font-weight: 700; letter-spacing: -.01em;
+    margin: 34px 0 12px; text-wrap: balance;
+  }
+
+  .src {
+    font-family: ui-monospace, Consolas, monospace; font-size: 10.5px; font-weight: 700;
+    color: var(--steel); background: var(--steel-wash);
+    border: 1px solid color-mix(in srgb, var(--steel) 24%, transparent);
+    padding: 0 5px; border-radius: 4px; vertical-align: 1px; margin-left: 3px;
+    text-decoration: none; white-space: nowrap;
+  }
+
+  /* ================= 2. CHRONOLOGY ================= */
+  .chrono { position: relative; padding-left: 116px; }
+  .chrono::before {
+    content: ""; position: absolute; left: 92px; top: 10px; bottom: 10px;
+    width: 3px; border-radius: 3px;
+    background: linear-gradient(to bottom, var(--spine) 0%, var(--spine) 45%, var(--ember) 100%);
+  }
+  .entry { position: relative; margin-bottom: 30px; }
+  .entry:last-child { margin-bottom: 0; }
+  .entry .when {
+    position: absolute; left: -116px; top: 1px; width: 76px; text-align: right;
+    font-family: ui-monospace, Consolas, monospace; font-size: 12px; font-weight: 700;
+    color: var(--ember-ink); letter-spacing: .02em;
+  }
+  .entry::after {
+    content: ""; position: absolute; left: -27px; top: 7px;
+    width: 11px; height: 11px; border-radius: 50%;
+    background: var(--surface); border: 3px solid var(--spine); z-index: 2;
+  }
+  .entry.key::after { border-color: var(--ember); background: var(--ember); }
+  .entry h3 { margin: 0 0 6px; font-size: 24px; font-weight: 700; letter-spacing: -.01em; }
+  .entry p { margin: 0 0 10px; font-size: 13px; max-width: 66ch; }
+  .entry p:last-child { margin-bottom: 0; }
+
+  /* ================= 4. CONCLUSION ================= */
+  .callout {
+    margin-top: 28px; padding: 20px 22px;
+    background: var(--surface); border: 1px solid var(--ember);
+    border-left: 4px solid var(--ember); border-radius: 12px; font-size: 13.5px;
+  }
+  section.alt .callout { background: var(--ground); }
+  .callout strong { color: var(--ember-ink); }
+  .callout p { margin: 0 0 14px; }
+  .callout p:last-child { margin: 0; }
+
+  .takeaways { display: grid; gap: 12px; margin-top: 26px; }
+  .takeaway {
+    display: grid; grid-template-columns: 30px 1fr; gap: 0 14px; align-items: start;
+    background: var(--surface); border: 1px solid var(--hair);
+    border-radius: 12px; padding: 16px 18px; box-shadow: var(--shadow);
+  }
+  section.alt .takeaway { background: var(--ground); }
+  .takeaway .n {
+    display: flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--ember-wash); color: var(--ember-ink);
+    border: 1px solid color-mix(in srgb, var(--ember) 28%, transparent);
+    font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; font-weight: 700;
+  }
+  .takeaway p { margin: 0; font-size: 13px; }
+
+  /* ================= 5. RISK & IMPACT ================= */
+  .sectors {
+    border: 1px solid var(--hair); border-radius: 14px; overflow: hidden;
+    background: var(--surface); box-shadow: var(--shadow);
+  }
+  section.alt .sectors { background: var(--ground); }
+  .sector {
+    display: grid; grid-template-columns: minmax(150px, 1.1fr) 104px 92px 2fr;
+    gap: 16px; align-items: center;
+    padding: 15px 20px; border-bottom: 1px solid var(--hair);
+  }
+  .sector:last-child { border-bottom: none; }
+  .sector .name { font-weight: 700; font-size: 13px; }
+  .sector .why { font-size: 12.5px; color: var(--muted); }
+
+  .meter { display: flex; gap: 3px; }
+  .meter i {
+    display: block; height: 9px; flex: 1; border-radius: 2px;
+    background: var(--hair-strong); opacity: .5;
+  }
+  .level {
+    font-family: ui-monospace, Consolas, monospace; font-size: 10px; font-weight: 700;
+    letter-spacing: .1em; text-transform: uppercase; text-align: center;
+    padding: 3px 8px; border-radius: 100px; white-space: nowrap;
+  }
+
+  .sector.critical .meter i:nth-child(-n+5) { background: var(--risk-critical); opacity: 1; }
+  .sector.high     .meter i:nth-child(-n+4) { background: var(--risk-high);     opacity: 1; }
+  .sector.moderate .meter i:nth-child(-n+3) { background: var(--risk-moderate); opacity: 1; }
+  .sector.low      .meter i:nth-child(-n+2) { background: var(--risk-low);      opacity: 1; }
+  .sector.minimal  .meter i:nth-child(-n+1) { background: var(--risk-minimal);  opacity: 1; }
+
+  .sector.critical .level { color: #fff; background: var(--risk-critical); }
+  .sector.high     .level { color: var(--risk-high);     background: var(--risk-high-wash);     border: 1px solid color-mix(in srgb, var(--risk-high) 32%, transparent); }
+  .sector.moderate .level { color: var(--risk-moderate); background: var(--risk-moderate-wash); border: 1px solid color-mix(in srgb, var(--risk-moderate) 32%, transparent); }
+  .sector.low      .level { color: var(--risk-low);      background: var(--risk-low-wash);      border: 1px solid color-mix(in srgb, var(--risk-low) 32%, transparent); }
+  .sector.minimal  .level { color: var(--risk-minimal);  background: var(--risk-minimal-wash);  border: 1px solid var(--hair-strong); }
+
+  .risklegend {
+    display: flex; flex-wrap: wrap; gap: 18px; margin-top: 20px;
+    padding: 14px 18px; background: var(--surface-2);
+    border: 1px solid var(--hair); border-radius: 12px;
+    font-size: 12.5px; color: var(--muted);
+  }
+  .risklegend .item { display: flex; align-items: center; gap: 8px; }
+  .risklegend .sw { width: 22px; height: 8px; border-radius: 2px; }
+
+  /* ================= Footer ================= */
+  footer { border-top: 1px solid var(--hair); padding: 32px 0 44px; color: var(--muted); font-size: 12px; }
+  footer h3 { font-size: 11.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin: 0 0 14px; }
+  footer a { color: var(--ember-ink); }
+  .sources { counter-reset: s; display: grid; gap: 8px; margin: 0 0 26px; padding: 0; list-style: none; }
+  /* Counter absolutely positioned, not a grid column: an <li> holding a text node AND an
+     <a> produces three grid items, so the anchor wrapped into the 30px counter column and
+     the URL rendered about four characters wide. */
+  .sources li {
+    counter-increment: s; position: relative; padding-left: 40px;
+    font-size: 12.5px; overflow-wrap: anywhere;
+  }
+  .sources li::before {
+    content: counter(s); position: absolute; left: 0; top: 2px;
+    font-family: ui-monospace, Consolas, monospace; font-size: 10.5px;
+    font-weight: 700; color: var(--steel); background: var(--steel-wash);
+    border: 1px solid color-mix(in srgb, var(--steel) 24%, transparent);
+    border-radius: 4px; text-align: center; width: 30px; height: 20px; line-height: 18px;
+  }
+  .note {
+    margin-top: 12px; padding: 14px 16px; background: var(--surface-2);
+    border: 1px dashed var(--hair-strong); border-radius: 10px; color: var(--muted);
+    font-size: 12.5px;
+  }
+  code { font-family: ui-monospace, Consolas, monospace; font-size: .9em; background: var(--surface-2); padding: 1px 5px; border-radius: 3px; }
+</style>
+
+<!-- ===================== 1. COVER ===================== -->
+<header class="cover">
+  <svg class="covermotif" viewBox="0 0 400 400" fill="none" aria-hidden="true">
+    <g class="arcs" stroke="currentColor" stroke-width="1.1">
+      <circle cx="286" cy="132" r="46"/>
+      <circle cx="286" cy="132" r="86"/>
+      <circle cx="286" cy="132" r="126"/>
+      <circle cx="286" cy="132" r="166"/>
+    </g>
+    <g class="rail" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+      <path d="M286 46 V318"/>
+    </g>
+    <g class="dots" fill="currentColor">
+      <circle cx="286" cy="86"  r="7"/>
+      <circle cx="286" cy="150" r="7"/>
+      <circle cx="286" cy="214" r="7"/>
+      <circle cx="286" cy="278" r="7"/>
+      <circle cx="196" cy="188" r="4"/>
+      <circle cx="352" cy="242" r="4"/>
+      <circle cx="230" cy="300" r="4"/>
+    </g>
+  </svg>
+
+  <div class="wrap">
+    <span class="tlp clear">TLP:CLEAR</span>
+
+    <p class="eyebrow">Vulnerability Analysis <span class="idtag">CVE-2021-44228 &middot; +3</span></p>
+    <h1>Log4j<span class="accent">.</span></h1>
+    <p class="standfirst">A logging library that executes whatever it is asked to log, in four CVEs across
+      five weeks &mdash; three of them created or revealed by the fix for the one before.</p>
+
+    <div class="covermeta">
+      <div><p class="k">Subject type</p><p class="v">Vulnerability &middot; remediation cascade</p></div>
+      <div><p class="k">Attribution</p><p class="v">No single actor &middot; state and criminal</p></div>
+      <div><p class="k">First observed</p><p class="v">December 2021</p></div>
+      <div><p class="k">Assessed risk</p><p class="v">Critical</p></div>
+      <div><p class="k">Report date</p><p class="v">19 August 2026</p></div>
+      <div><p class="k">Is active?</p><p class="v">Yes</p></div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ===================== 2. OVERVIEW ===================== -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Overview</p>
+        <h2>A library nobody chose, on a path nobody mapped</h2>
+      </div>
+
+      <div class="prose">
+        <p>Apache Log4j 2 is a logging library, not a product. It is compiled into Java applications,
+          bundled inside appliances and shipped as a transitive dependency of software whose authors
+          never chose it, which is why the question after December 2021 was rarely whether an
+          organisation was affected and almost always <em>where the library was</em>. CVE-2021-44228,
+          named Log4Shell, carries <strong>CVSS 10.0</strong> with a changed scope: JNDI lookups were
+          resolved inside log messages, so an attacker who could get a string into a log &mdash; a
+          username, a User-Agent header, a chat message &mdash; could make the logging call fetch and
+          execute code from an LDAP server they controlled.<a class="src" href="#s1">1</a> No
+          credentials, no user interaction, and no need to reach the vulnerable component directly.
+          Cisco Talos observed exploit strings firing as they transited internal logging and SIEM
+          infrastructure rather than only on the systems they were aimed at.<a class="src" href="#s5">5</a></p>
+
+        <p>What makes these four worth reading as one story is that they are not four independent bugs
+          found by four researchers. <strong>Three were created or revealed by the fix for the one
+          before.</strong> The 2.15.0 release that answered Log4Shell proved incomplete in non-default
+          configurations, which became CVE-2021-45046.<a class="src" href="#s2">2</a> The 2.16.0
+          release that closed that left uncontrolled recursion in self-referential lookups, which
+          became CVE-2021-45105.<a class="src" href="#s3">3</a> The 2.17.0 release that closed
+          <em>that</em> left a JDBC Appender path to remote code execution, which became
+          CVE-2021-44832.<a class="src" href="#s4">4</a> The cascade ends at 2.17.1. This is a chain on
+          the defender's side of the fence: it describes the sequence of versions an organisation
+          passed through while patching, not a sequence of steps an attacker composes. The severities
+          fall away sharply after the first two &mdash; CVE-2021-45105 is a 5.9 denial of service and
+          CVE-2021-44832 is a 6.6 that requires the attacker to already control the logging
+          configuration &mdash; and only CVE-2021-44228 and CVE-2021-45046 carry the unauthenticated
+          remote code execution that made this event what it was.</p>
+
+        <p>The exploitation that followed was unusually broad rather than unusually sophisticated.
+          Mandiant recorded mass scanning from the day of disclosure and described a very long tail, on
+          the reasoning that Log4j sits inside an unknown number of applications and cannot be
+          inventoried by asking.<a class="src" href="#s7">7</a> Financially motivated cryptomining
+          crews were first at scale; state-sponsored groups tracked to China, Iran, North Korea and
+          Turkey followed within days; and access brokers used the flaw to build footholds they then
+          sold on to ransomware affiliates.<a class="src" href="#s6">6</a> CVE-2021-44228 and
+          CVE-2021-45046 are listed in the CISA Known Exploited Vulnerabilities
+          catalog.<a class="src" href="#s13">13</a></p>
+      </div>
+
+      <h3 style="font-size:24px;font-weight:700;margin:30px 0 18px;">Exploitation, oldest first</h3>
+
+      <div class="chrono">
+        <div class="entry key">
+          <div class="when">2021-12-02</div>
+          <h3>Exploitation predates public disclosure</h3>
+          <p>Cisco Talos records attacker activity against the flaw beginning 2 December 2021, with
+            unverified reports of activity from 1 December &mdash; a week before the 9 December public
+            disclosure. Talos advises defenders to backdate compromise hunting by several weeks rather
+            than starting from the disclosure date, because the earliest exploitation was already
+            historical by the time anyone knew to look for it.<a class="src" href="#s5">5</a></p>
+        </div>
+
+        <div class="entry key">
+          <div class="when">2021-12-10</div>
+          <h3>Mass opportunistic scanning and exploitation begins</h3>
+          <p>Mandiant observes mass scanning and exploitation attempts across a large variety of
+            customers beginning the day of disclosure.<a class="src" href="#s7">7</a> Palo Alto Unit 42
+            records <strong>125,894,944 hits</strong> on its Log4j remote code execution signature
+            between 10 December 2021 and 2 February 2022, with the largest spike over 12&ndash;16
+            December. Beyond code execution, attackers use the JNDI lookup itself as an exfiltration
+            channel, crafting strings that interpolate environment variables such as
+            <code>AWS_SECRET_ACCESS_KEY</code> into an LDAP or DNS callback so that credentials leave
+            the host inside the resolver query.<a class="src" href="#s8">8</a></p>
+        </div>
+
+        <div class="entry key">
+          <div class="when">2021-12-11</div>
+          <h3>State-sponsored groups and access brokers adopt the flaw</h3>
+          <p>Microsoft reports that groups tracked to China, Iran, North Korea and Turkey moved from
+            experimentation during development to in-the-wild payload deployment. <strong>PHOSPHORUS</strong>,
+            an Iranian actor known to deploy ransomware, acquired and modified the exploit and
+            operationalised it. <strong>HAFNIUM</strong> used it against virtualization infrastructure,
+            fingerprinting targets by DNS, which extended their usual targeting. Multiple access broker
+            groups used it to gain initial access to Linux and Windows networks for resale to ransomware
+            affiliates. Observed post-exploitation payloads include Cobalt Strike, Meterpreter,
+            HabitsRAT, Bladabindi, Webtoos, Tsunami backdoors on Linux hosts, the Mirai botnet and coin
+            miners. Khonsari ransomware is delivered from compromised Minecraft servers running a
+            vulnerable Log4j version.<a class="src" href="#s6">6</a></p>
+        </div>
+
+        <div class="entry">
+          <div class="when">2021-12-13</div>
+          <h3>AQUATIC PANDA exploits VMware Horizon</h3>
+          <p>CrowdStrike OverWatch observes AQUATIC PANDA, a China-based actor whose documented remit
+            covers intelligence collection and industrial espionage, exploiting a vulnerable VMware
+            Horizon instance. Connectivity checks run as DNS lookups for a subdomain of
+            <code>dns.1433.eu.org</code>, executed under the Apache Tomcat service. The intrusion uses
+            <code>JNDI-Injection-Exploit-1.0.jar</code>, released on a public GitHub project on 13
+            December. The actor then enumerates privilege, system and domain detail using native
+            operating system binaries, attempts to discover and stop a third-party EDR service, and runs
+            a Base64-encoded PowerShell command to retrieve further tooling.<a class="src" href="#s9">9</a></p>
+        </div>
+
+        <div class="entry">
+          <div class="when">2021-12-20</div>
+          <h3>Commodity payloads dominate at volume</h3>
+          <p>Sophos records millions of exploit attempts in customer telemetry, peaking on 15 December
+            and staying elevated through late December. The majority originate from IP addresses in
+            Russia and China, with a single Russian address accounting for 11 percent of identifiable
+            traffic and linked to the Kinsing botnet. Payload families exceed twenty and include XMRig
+            and other Linux coin miners, TellYouThePass ransomware, backdoors, DDoS tools and
+            rootkits.<a class="src" href="#s10">10</a> Unit 42 separately observes the Kinsing
+            coinminer, a password stealer exfiltrating the contents of <code>/etc/passwd</code> and
+            environment variables over HTTP POST and DNS tunnelling, and a Cobalt Strike server standing
+            up on 18 December.<a class="src" href="#s8">8</a></p>
+        </div>
+
+        <div class="entry key">
+          <div class="when">2022-01-04</div>
+          <h3>NightSky ransomware deployed through VMware Horizon</h3>
+          <p>Microsoft reports DEV-0401, a China-based ransomware operator previously associated with the
+            LockFile, AtomSilo and Rook families, exploiting internet-facing VMware Horizon systems to
+            deploy NightSky ransomware. This marks the shift from opportunistic payloads dropped at
+            scanning scale to deliberate use of the flaw against one specific exposed
+            product.<a class="src" href="#s6">6</a></p>
+        </div>
+
+        <div class="entry key">
+          <div class="when">2022-02</div>
+          <h3>Iranian state actors reach a US federal network</h3>
+          <p>Iranian government-sponsored APT actors exploit Log4Shell on an unpatched VMware Horizon
+            server to gain initial access to a federal civilian executive branch network. They install
+            XMRig cryptomining software, move laterally to the domain controller, compromise credentials,
+            and implant Ngrok reverse proxies on several hosts for persistence. CISA and the FBI conduct
+            the incident response engagement between mid-June and mid-July 2022 and publish the findings
+            that November. IRGC-affiliated actors are separately recorded using the same route into a US
+            municipal government network in the same month.<a class="src" href="#s11">11</a></p>
+        </div>
+
+        <div class="entry key">
+          <div class="when">2022-06</div>
+          <h3>Exploitation of unpatched VMware Horizon continues six months on</h3>
+          <p>CISA and United States Coast Guard Cyber Command publish a joint advisory recording that
+            malicious actors are still exploiting Log4Shell in unpatched VMware Horizon and Unified
+            Access Gateway servers, six months after fixed versions shipped. What keeps the vulnerability
+            productive at this point is the gap between an available patch and a patched estate, not any
+            change in attacker capability.<a class="src" href="#s12">12</a></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 4. CONCLUSION =====================
+       History is deliberately omitted. The one origin fact worth reporting - that
+       exploitation preceded disclosure - is already a keyed chronology entry, and the
+       CVE lifecycle it would otherwise carry belongs to the flow report, which owns
+       patch dates and fixed versions. -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Conclusion</p>
+        <h2>Four CVEs, two emergencies</h2>
+      </div>
+
+      <div class="prose">
+        <p>Log4Shell earned its reputation on reach rather than craft. The exploit is a string; the
+          precondition is that something logs it; and the population of things that log attacker-controlled
+          input turned out to be almost everything. That is why the same flaw produced Monero miners,
+          commodity ransomware, four states' intelligence services and a compromised US federal network
+          inside eight weeks, and why the sector table in this report discriminates less than it usually
+          would. The three CVEs that followed are a different kind of problem: they record what it cost to
+          patch under pressure, with two upgrade cycles spent on issues far less severe than the one that
+          started it.</p>
+      </div>
+
+      <div class="takeaways">
+        <div class="takeaway"><span class="n">1</span><p><strong>Only two of the four are the emergency.</strong>
+          CVE-2021-44228 and CVE-2021-45046 are unauthenticated remote code execution. CVE-2021-45105 is a
+          5.9 denial of service, and CVE-2021-44832 needs the attacker to already control the logging
+          configuration. Treating all four as one priority spends the patch window in the wrong place.</p></div>
+        <div class="takeaway"><span class="n">2</span><p><strong>The cascade is a defender's chain, not an
+          attacker's.</strong> Nothing here composes into a multi-step exploit. The sequence describes the
+          versions an estate passed through, so a reader should not infer that an attacker needs more than
+          one of these to get in &mdash; the first one alone was always enough.</p></div>
+        <div class="takeaway"><span class="n">3</span><p><strong>The version number is not the exposure.</strong>
+          What matters is whether a vulnerable Log4j 2 sits on a path that logs attacker-controlled input,
+          which is why appliances and transitive dependencies mattered more than any application inventory
+          an organisation already had.</p></div>
+        <div class="takeaway"><span class="n">4</span><p><strong>Compromise hunting that starts at disclosure
+          starts late.</strong> Talos recorded exploitation roughly a week before 9 December 2021. Any
+          retrospective scoped to the disclosure date has a gap at the front of it.</p></div>
+        <div class="takeaway"><span class="n">5</span><p><strong>The long tail is a patching-gap problem, not a
+          capability problem.</strong> Six months after fixed versions shipped, CISA was still publishing
+          advisories about unpatched VMware Horizon. The vulnerability stayed productive because estates
+          stayed unpatched.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 5. RISK &amp; IMPACT ===================== -->
+  <section class="alt">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Risk &amp; Impact</p>
+        <h2>Exposure follows the runtime, not the industry</h2>
+        <p>Sector is a weaker discriminator here than for almost any other subject, because the flaw is
+          in a library rather than in a product one industry happens to buy. The levels below reflect
+          where exploitation was actually observed and reported, not where it was possible.</p>
+      </div>
+
+      <div class="sectors">
+        <div class="sector critical">
+          <div class="name">Government and public administration</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Critical</div>
+          <div class="why">The only Log4Shell intrusions attributed to state actors in the cited reporting
+            are against government &mdash; a US federal civilian executive branch network and a US
+            municipal government, both entered through an unpatched VMware Horizon server.</div>
+        </div>
+        <div class="sector critical">
+          <div class="name">Technology and cloud services</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Critical</div>
+          <div class="why">The products actually exploited &mdash; VMware Horizon, Apache Tomcat,
+            Elasticsearch &mdash; are this sector's own operating stack, and it carries the largest
+            internet-facing Java estate, which is what the scanning telemetry was finding.</div>
+        </div>
+        <div class="sector high">
+          <div class="name">Manufacturing and industrial</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">High</div>
+          <div class="why">AQUATIC PANDA, whose documented mission includes industrial espionage, was among
+            the first actors observed using Log4Shell, and used it against VMware Horizon rather than at
+            scanning scale.</div>
+        </div>
+        <div class="sector high">
+          <div class="name">Financial services</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">High</div>
+          <div class="why">Fits the observed profile closely &mdash; large internet-facing Java estates and
+            heavy appliance use &mdash; but the cited reporting names no financial victim, so this rests on
+            exposure rather than on observed targeting.</div>
+        </div>
+        <div class="sector moderate">
+          <div class="name">Education and research</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Moderate</div>
+          <div class="why">Plausible on the same exposure reasoning, and the Minecraft server compromises
+            that delivered Khonsari sit adjacent to it, but no education victim appears in the cited
+            reporting.</div>
+        </div>
+        <div class="sector low">
+          <div class="name">Retail and hospitality</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Low</div>
+          <div class="why">No exploitation against retail appears in any of the cited sources. The level
+            reflects that absence of reporting, not structural protection &mdash; a retail estate running a
+            vulnerable Log4j 2 is exactly as exploitable as any other.</div>
+        </div>
+        <div class="sector minimal">
+          <div class="name">Estates with no Java runtime in scope</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Minimal</div>
+          <div class="why">Log4j 2 is a Java library, so an estate that runs none is not exposed regardless
+            of industry. This row exists to make the point the rest of the table cannot: for this subject
+            the discriminator is the runtime, not the sector.</div>
+        </div>
+      </div>
+
+      <div class="risklegend">
+        <div class="item"><span class="sw" style="background:var(--risk-critical)"></span> Critical — actively targeted</div>
+        <div class="item"><span class="sw" style="background:var(--risk-high)"></span> High — fits the victim profile</div>
+        <div class="item"><span class="sw" style="background:var(--risk-moderate)"></span> Moderate — plausible, not observed</div>
+        <div class="item"><span class="sw" style="background:var(--risk-low)"></span> Low — outside the pattern</div>
+        <div class="item"><span class="sw" style="background:var(--risk-minimal)"></span> Minimal — no indication</div>
+      </div>
+
+      <div class="callout">
+        <p><strong>Ask which systems log untrusted input, not which department owns them.</strong> Every
+          sector row above is a summary of where exploitation was reported, and for this subject that is a
+          weaker guide than usual. The estates that were hit are the ones that ran a vulnerable Log4j 2 on
+          something reachable from the internet, and the two that made the advisories ran it inside VMware
+          Horizon.</p>
+        <p>
+          For <em>how</em> a compromise actually unfolds — the techniques, the tooling and the
+          order they run in — see the companion attack-flow report,
+          <code>log4j-cascade-flow.html</code>.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 6. SOURCES ===================== -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Sources</p>
+        <h2>What this analysis is built on</h2>
+      </div>
+      <ol class="sources">
+        <li id="s1">NVD &mdash; CVE-2021-44228 (Log4Shell, CVSS 10.0, CWE-917) &mdash; <a href="https://nvd.nist.gov/vuln/detail/CVE-2021-44228">https://nvd.nist.gov/vuln/detail/CVE-2021-44228</a></li>
+        <li id="s2">NVD &mdash; CVE-2021-45046 (incomplete fix, CVSS 9.0, CWE-917) &mdash; <a href="https://nvd.nist.gov/vuln/detail/CVE-2021-45046">https://nvd.nist.gov/vuln/detail/CVE-2021-45046</a></li>
+        <li id="s3">NVD &mdash; CVE-2021-45105 (uncontrolled recursion, CVSS 5.9, CWE-674) &mdash; <a href="https://nvd.nist.gov/vuln/detail/CVE-2021-45105">https://nvd.nist.gov/vuln/detail/CVE-2021-45105</a></li>
+        <li id="s4">NVD &mdash; CVE-2021-44832 (JDBC Appender RCE, CVSS 6.6, CWE-74) &mdash; <a href="https://nvd.nist.gov/vuln/detail/CVE-2021-44832">https://nvd.nist.gov/vuln/detail/CVE-2021-44832</a></li>
+        <li id="s5">Cisco Talos &mdash; Threat Advisory: critical Apache Log4j vulnerability being exploited in the wild &mdash; <a href="https://blog.talosintelligence.com/apache-log4j-rce-vulnerability/">https://blog.talosintelligence.com/apache-log4j-rce-vulnerability/</a></li>
+        <li id="s6">Microsoft Threat Intelligence &mdash; Guidance for preventing, detecting and hunting for exploitation of the Log4j 2 vulnerability &mdash; <a href="https://www.microsoft.com/en-us/security/blog/2021/12/11/guidance-for-preventing-detecting-and-hunting-for-cve-2021-44228-log4j-2-exploitation/">https://www.microsoft.com/en-us/security/blog/2021/12/11/guidance-for-preventing-detecting-and-hunting-for-cve-2021-44228-log4j-2-exploitation/</a></li>
+        <li id="s7">Mandiant (Google Cloud) &mdash; Log4Shell initial exploitation and mitigation recommendations &mdash; <a href="https://cloud.google.com/blog/topics/threat-intelligence/log4shell-recommendations">https://cloud.google.com/blog/topics/threat-intelligence/log4shell-recommendations</a></li>
+        <li id="s8">Palo Alto Unit 42 &mdash; Another Apache Log4j vulnerability is actively exploited in the wild (CVE-2021-44228) &mdash; <a href="https://unit42.paloaltonetworks.com/apache-log4j-vulnerability-cve-2021-44228/">https://unit42.paloaltonetworks.com/apache-log4j-vulnerability-cve-2021-44228/</a></li>
+        <li id="s9">CrowdStrike &mdash; OverWatch exposes AQUATIC PANDA in possession of Log4Shell exploit tools &mdash; <a href="https://www.crowdstrike.com/en-us/blog/overwatch-exposes-aquatic-panda-in-possession-of-log-4-shell-exploit-tools/">https://www.crowdstrike.com/en-us/blog/overwatch-exposes-aquatic-panda-in-possession-of-log-4-shell-exploit-tools/</a></li>
+        <li id="s10">Sophos X-Ops &mdash; Logjam: Log4j exploit attempts continue in globally distributed scans and attacks &mdash; <a href="https://www.sophos.com/en-us/blog/logjam-log4j-exploit-attempts-continue-in-globally-distributed-scans-attacks">https://www.sophos.com/en-us/blog/logjam-log4j-exploit-attempts-continue-in-globally-distributed-scans-attacks</a></li>
+        <li id="s11">CISA and FBI &mdash; AA22-320A, Iranian government-sponsored APT actors compromise federal network, deploy crypto miner and credential harvester &mdash; <a href="https://www.cisa.gov/news-events/cybersecurity-advisories/aa22-320a">https://www.cisa.gov/news-events/cybersecurity-advisories/aa22-320a</a></li>
+        <li id="s12">CISA and USCG Cyber Command &mdash; AA22-174A, malicious cyber actors continue to exploit Log4Shell in VMware Horizon systems &mdash; <a href="https://www.cisa.gov/news-events/cybersecurity-advisories/aa22-174a">https://www.cisa.gov/news-events/cybersecurity-advisories/aa22-174a</a></li>
+        <li id="s13">CISA &mdash; Known Exploited Vulnerabilities Catalog &mdash; <a href="https://www.cisa.gov/known-exploited-vulnerabilities-catalog">https://www.cisa.gov/known-exploited-vulnerabilities-catalog</a></li>
+        <li id="s14">Tenable &mdash; Frequently asked questions about Log4Shell and associated vulnerabilities &mdash; <a href="https://www.tenable.com/blog/cve-2021-44228-cve-2021-45046-cve-2021-4104-frequently-asked-questions-about-log4shell">https://www.tenable.com/blog/cve-2021-44228-cve-2021-45046-cve-2021-4104-frequently-asked-questions-about-log4shell</a></li>
+      </ol>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+
+    <p class="note">
+      <strong>Confidence and sourcing.</strong> The CVE identifiers, scores, affected ranges and fixed
+      versions are reference data from NVD. The exploitation account is drawn from primary vendor and
+      government reporting, and where a claim rests on one vendor only &mdash; the AQUATIC PANDA intrusion,
+      the DEV-0401 NightSky deployment &mdash; the report names that vendor rather than presenting it as
+      consensus. The actor attributions here are <em>reported</em>, not assessed by this analysis.
+      <strong>The <em>Is active?</em> field needs a caveat:</strong> the most recent documented intrusion
+      in these sources is from 2022, and the <em>Yes</em> rests on continued listing in the CISA KEV
+      catalog and on Mandiant's long-tail assessment rather than on a fresh incident report. Sector risk
+      levels are analyst assessments, not measured values; they deliberately share a colour ramp with CVSS
+      severity but are rendered as meters rather than scores so the two are not confused.
+    </p>
+    <p class="note">
+      <strong>Pipeline.</strong> Step 1 of TI-Reporting. The companion ATT&amp;CK flow report
+      is built from the JSON handoff in <code>subjects/log4j/handoff/</code>, of which this analysis
+      produces <code>analysis.json</code>.
+    </p>
+  </div>
+</footer>

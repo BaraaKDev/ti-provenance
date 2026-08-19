@@ -295,7 +295,7 @@ $bulletinCss = @"
   color: var(--ember); border: 1px solid var(--ember); border-radius: 2px;
   padding: 3px 8px; margin-bottom: 12px;
 }
-.partrule h2 { font-size: 1.5rem; margin: 0; color: var(--ink); }
+.partrule h2 { font-size: 1.7rem; margin: 0; color: var(--ink); }
 .partrule p  { color: var(--muted); margin: 6px 0 0; max-width: 62ch; font-size: 13px; }
 
 .bsummary, .bdefence { border-top: 1px solid var(--hair); background: var(--surface); }

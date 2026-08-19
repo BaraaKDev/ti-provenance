@@ -296,26 +296,29 @@ $bulletinCss = @"
   padding: 3px 8px; margin-bottom: 12px;
 }
 .partrule h2 { font-size: 1.5rem; margin: 0; color: var(--ink); }
-.partrule p  { color: var(--muted); margin: 6px 0 0; max-width: 62ch; }
+.partrule p  { color: var(--muted); margin: 6px 0 0; max-width: 62ch; font-size: 13px; }
 
 .bsummary, .bdefence { border-top: 1px solid var(--hair); background: var(--surface); }
 .bsummary .wrap, .bdefence .wrap { padding: 40px 0; }
-.bslede { color: var(--ink); max-width: 68ch; }
+/* Every one of these carried no font-size, so the editorial regions rendered at the browser
+   default - larger than the report's own body copy, which is why a hand-written summary read
+   as a different document from the analysis beneath it. Sized explicitly, to body copy. */
+.bslede { color: var(--ink); max-width: 68ch; font-size: 13.5px; }
 .bskey { margin: 18px 0 0; padding: 0; list-style: none; }
 .bskey li {
   border-left: 2px solid var(--ember); padding: 4px 0 4px 14px;
-  margin-bottom: 10px; color: var(--ink); max-width: 68ch;
+  margin-bottom: 10px; color: var(--ink); max-width: 68ch; font-size: 13.5px;
 }
-.bsteps { margin: 18px 0 0; padding-left: 20px; color: var(--ink); max-width: 68ch; }
+.bsteps { margin: 18px 0 0; padding-left: 20px; color: var(--ink); max-width: 68ch; font-size: 13.5px; }
 .bsteps li { margin-bottom: 10px; }
 .bwhat { display: block; font-weight: 600; }
-.bwhy  { display: block; color: var(--muted); font-size: .9rem; }
+.bwhy  { display: block; color: var(--muted); font-size: 12.5px; }
 
 /* The flow report carries its own hero. Inside a bulletin the cover already introduced the
    subject, so the hero is demoted rather than repeated at cover scale. */
 $SCOPE > header { padding-top: 0; }
 $SCOPE header h1 { font-size: 1.9rem; }
-$SCOPE header .lede { font-size: 1rem; }
+$SCOPE header .lede { font-size: 14.5px; }
 "@
 
 $title = "$subject - Threat Bulletin"

@@ -81,8 +81,11 @@
     font-weight: 800; margin: 0 0 10px; text-wrap: balance; max-width: 16ch;
   }
   .cover h1 .accent { color: var(--ember); }
+  /* The cover is deliberately left at the original scale - it is the one page that is not
+     dense reading, and the body-copy reduction is not wanted here. The explicit line-height
+     restores what it inherited before body dropped to 1.55. */
   .cover .standfirst {
-    font-size: clamp(14px, 1.7vw, 15.5px); color: var(--muted);
+    font-size: clamp(15px, 2vw, 17.5px); line-height: 1.6; color: var(--muted);
     max-width: 60ch; margin: 20px 0 0;
   }
   /* Six cells. auto-fit leaves the last row short at print width, and the gap lets the

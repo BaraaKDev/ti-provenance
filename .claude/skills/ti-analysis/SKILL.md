@@ -43,6 +43,13 @@ Copy `references/analysis-template.html` and fill it. Order is fixed.
 **1. Cover** — title, subject, TLP marking, cover motif, and a meta strip. The standfirst is
 one sentence and should say what makes this subject *different*, not what makes it a threat.
 
+The meta strip carries six fields — subject type, attribution, first observed, assessed risk,
+report date, and **is active?**. That last one is `Yes` or `No` and nothing else: for an actor
+or campaign it means still operating, for a vulnerability it means still being exploited in
+the wild. Where the honest answer is unknown, say so in the standfirst rather than hedging
+inside the cell, because a qualifier there reads as a finding. Six fields is also what the
+grid is pinned to; adding a seventh means changing `.covermeta` too.
+
 **2. Overview** — the heart of the report.
 - Open with **one or two paragraphs of background**: who they are, where they are assessed to
   operate from, what they are for. A reader who has never heard the name must finish these

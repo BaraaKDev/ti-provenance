@@ -217,17 +217,22 @@ aim for a fixed proportion.
 
 The accent pair in `:root` is the one thing that changes per subject. An espionage actor
 whose objective is quiet collection should not terminate in the same urgent blue as a wiper
-crew; the colour is an assertion about intent, so make it a true one. Neutrals carry a faint
-bias toward the accent, so shift them with it.
+crew; the colour is an assertion about intent, so make it a true one. The neutrals do not
+move with it — every report shares one white ground so the set reads as one body of work.
 
 | Objective | `--ember` (objective) | `--steel` (metadata) | Neutrals |
 |---|---|---|---|
 | Destruction / extortion / disruption | signal blue `#1d4ed8` | slate `#55607a` | white (`--ground: #ffffff`) |
 | Espionage / collection | violet `#7c3aed` | slate `#55607a` | white (`--ground: #ffffff`) |
+| Vulnerability only, no actor | signal blue `#1d4ed8` | slate `#55607a` | white (`--ground: #ffffff`) |
 
 For a **campaign** report, retune to the **actor's** objective, not the CVE severity.
 Everything else — class names, structure, token names — stays identical, so the set still
 reads as one body of work.
+
+There is no red row. On a vulnerability report `--sev-crit` is `#a4161a`, and an accent
+anywhere near it puts severity red on things that are not a severity — which is the one thing
+the severity ramp cannot survive. Keep the accent and the severity ramp in different families.
 
 ## Coverage gaps
 

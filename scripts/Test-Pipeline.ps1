@@ -447,6 +447,31 @@ foreach ($h in ($tpl + @(Get-ChildItem (Join-Path $root '.claude\skills\ti-analy
 }
 Assert 'templates are light-theme only' ($dark.Count -eq 0) $(if ($dark.Count) { $dark -join ', ' } else { 'no dark blocks' })
 
+# The accent is per-objective, but everything under it is not. A template left on an old
+# accent is invisible in review - it renders fine, it just quietly stops matching the rest of
+# the set. That is what happened to the vulnerability template, so pin both halves here.
+$NEUTRALS = 'ground','surface','surface-2','ink','muted','hair','hair-strong','steel','steel-wash','spine'
+$ACCENTS  = @{ '#1d4ed8' = 'signal blue'; '#7c3aed' = 'violet' }
+$palettes = @{}
+$accentOf = [ordered]@{}
+foreach ($h in ($tpl + @(Get-ChildItem (Join-Path $root '.claude\skills\ti-analysis\references') -Filter *.html))) {
+    $rootBlock = [regex]::Match((Read-Text $h.FullName), '(?s):root\s*\{.*?\n  \}').Value
+    $sig = ($NEUTRALS | ForEach-Object {
+        "$_=" + [regex]::Match($rootBlock, "--$_\s*:\s*([^;]+);").Groups[1].Value.Trim()
+    }) -join ' '
+    if (-not $palettes.ContainsKey($sig)) { $palettes[$sig] = @() }
+    $palettes[$sig] += $h.Name
+    $accentOf[$h.Name] = [regex]::Match($rootBlock, '--ember\s*:\s*([^;]+);').Groups[1].Value.Trim()
+}
+Assert 'every template shares one neutral palette' ($palettes.Count -eq 1) $(
+    if ($palettes.Count -eq 1) { "$(@($palettes.Values)[0].Count) templates agree" }
+    else { (@($palettes.Values) | ForEach-Object { $_ -join '+' }) -join '  VS  ' })
+
+$offAccent = @($accentOf.Keys | Where-Object { -not $ACCENTS.ContainsKey($accentOf[$_]) })
+Assert 'every template accent is one flow-craft.md documents' ($offAccent.Count -eq 0) $(
+    if ($offAccent.Count -eq 0) { 'all documented' }
+    else { ($offAccent | ForEach-Object { "$_ uses $($accentOf[$_])" }) -join '; ' })
+
 # ================================================================ 6. export (opt-in)
 if ($IncludeExport) {
     Set-Group '6. PDF export'

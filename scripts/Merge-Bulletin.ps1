@@ -295,7 +295,7 @@ $bulletinCss = @"
   color: var(--ember); border: 1px solid var(--ember); border-radius: 2px;
   padding: 3px 8px; margin-bottom: 12px;
 }
-.partrule h2 { font-size: 2.3rem; margin: 0; color: var(--ink); }
+.partrule h2 { font-size: 28px; margin: 0; color: var(--ink); }
 .partrule p  { color: var(--muted); margin: 6px 0 0; max-width: 62ch; font-size: 13px; }
 
 .bsummary, .bdefence { border-top: 1px solid var(--hair); background: var(--surface); }
@@ -303,7 +303,7 @@ $bulletinCss = @"
    heading's job. Bigger than a section eyebrow and set in ink rather than muted, otherwise
    the executive summary reads as the weakest heading in a document it opens. */
 .bsummary .eyebrow, .bdefence .eyebrow {
-  font-size: 22px; letter-spacing: .12em; color: var(--ink); font-weight: 700;
+  font-size: 32px; letter-spacing: .06em; color: var(--ink); font-weight: 700;
 }
 .bsummary .wrap, .bdefence .wrap { padding: 40px 0; }
 /* Every one of these carried no font-size, so the editorial regions rendered at the browser

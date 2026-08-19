@@ -216,14 +216,14 @@ aim for a fixed proportion.
 ## Accent — retune before writing the phases
 
 The accent pair in `:root` is the one thing that changes per subject. An espionage actor
-whose objective is quiet collection should not terminate in the same alarm red as a wiper
+whose objective is quiet collection should not terminate in the same urgent blue as a wiper
 crew; the colour is an assertion about intent, so make it a true one. Neutrals carry a faint
 bias toward the accent, so shift them with it.
 
 | Objective | `--ember` (objective) | `--steel` (metadata) | Neutrals |
 |---|---|---|---|
-| Destruction / extortion | ember red `#cf4a1f` | steel blue `#346b8f` | warm grey (`--ground: #f6f4f2`) |
-| Espionage / collection | covert violet `#6d3fa3` | slate teal `#2f6b78` | faint cool (`--ground: #f5f4f7`) |
+| Destruction / extortion / disruption | signal blue `#1d4ed8` | slate `#55607a` | white (`--ground: #ffffff`) |
+| Espionage / collection | violet `#7c3aed` | slate `#55607a` | white (`--ground: #ffffff`) |
 
 For a **campaign** report, retune to the **actor's** objective, not the CVE severity.
 Everything else — class names, structure, token names — stays identical, so the set still

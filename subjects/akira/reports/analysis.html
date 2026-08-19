@@ -5,21 +5,21 @@
   :root {
     color-scheme: light;
 
-    --ground: #f6f4f2;
+    --ground: #ffffff;
     --surface: #ffffff;
-    --surface-2: #efece7;
-    --ink: #1b1e24;
-    --muted: #5c6470;
-    --hair: #ddd8d1;
-    --hair-strong: #c8c2b8;
+    --surface-2: #f3f6fc;
+    --ink: #14181f;
+    --muted: #5b6474;
+    --hair: #e3e8f2;
+    --hair-strong: #c6cede;
 
-    /* ACCENT - extortion objective: ember red, same values the flow report uses. */
-    --ember: #cf4a1f;
-    --ember-ink: #a8380f;
-    --ember-wash: rgba(207, 74, 31, 0.10);
-    --steel: #346b8f;
-    --steel-wash: rgba(52, 107, 143, 0.10);
-    --spine: #b9b2a8;
+    /* ACCENT - extortion objective: signal blue, same values the flow report uses. */
+    --ember: #1d4ed8;
+    --ember-ink: #1e40af;
+    --ember-wash: rgba(29, 78, 216, 0.09);
+    --steel: #55607a;
+    --steel-wash: rgba(85, 96, 122, 0.10);
+    --spine: #c2cadb;
 
     /* SECTOR RISK - shares the CVSS ramp, separate tokens, different form. */
     --risk-critical: #a4161a;  --risk-critical-wash: rgba(164, 22, 26, 0.10);
@@ -35,7 +35,7 @@
   body {
     margin: 0; background: var(--ground); color: var(--ink);
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    line-height: 1.65; -webkit-font-smoothing: antialiased;
+    line-height: 1.6; -webkit-font-smoothing: antialiased;
   }
   .wrap { max-width: 940px; margin: 0 auto; padding: 0 24px; }
 
@@ -59,7 +59,7 @@
 
   .tlp {
     display: inline-block; font-family: ui-monospace, Consolas, monospace;
-    font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
+    font-size: 10.5px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
     padding: 4px 10px; border-radius: 4px; margin-bottom: 26px;
     background: var(--surface-2); border: 1px solid var(--hair-strong); color: var(--muted);
   }
@@ -70,19 +70,19 @@
 
   .eyebrow {
     font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
-    font-size: 12px; letter-spacing: .22em; text-transform: uppercase;
+    font-size: 11.5px; letter-spacing: .22em; text-transform: uppercase;
     color: var(--muted); margin: 0 0 18px; display: flex; align-items: center; gap: 12px;
   }
   .eyebrow::after { content: ""; flex: 1; height: 1px; background: var(--hair-strong); }
   .idtag { color: var(--ember-ink); font-weight: 600; }
 
   .cover h1 {
-    font-size: clamp(44px, 8vw, 78px); line-height: .96; letter-spacing: -.025em;
+    font-size: clamp(34px, 5.6vw, 54px); line-height: .96; letter-spacing: -.025em;
     font-weight: 800; margin: 0 0 10px; text-wrap: balance; max-width: 16ch;
   }
   .cover h1 .accent { color: var(--ember); }
   .cover .standfirst {
-    font-size: clamp(17px, 2.4vw, 21px); color: var(--muted);
+    font-size: clamp(15px, 2vw, 17.5px); color: var(--muted);
     max-width: 60ch; margin: 20px 0 0;
   }
   .covermeta {
@@ -91,8 +91,8 @@
     background: var(--hair); border: 1px solid var(--hair); border-radius: 12px; overflow: hidden;
   }
   .covermeta div { background: var(--surface); padding: 15px 18px; }
-  .covermeta .k { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0 0 5px; }
-  .covermeta .v { font-size: 15px; font-weight: 600; margin: 0; }
+  .covermeta .k { font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0 0 5px; }
+  .covermeta .v { font-size: 13.5px; font-weight: 600; margin: 0; }
 
   /* ================= Sections ================= */
   section { padding: 62px 0; }
@@ -100,22 +100,22 @@
   .section-head { margin-bottom: 38px; }
   .section-head .eyebrow { margin-bottom: 10px; }
   .section-head h2 {
-    font-size: clamp(27px, 4vw, 35px); letter-spacing: -.015em;
+    font-size: clamp(22px, 3.1vw, 28px); letter-spacing: -.015em;
     font-weight: 800; margin: 0; text-wrap: balance;
   }
-  .section-head p { color: var(--muted); max-width: 64ch; margin: 12px 0 0; font-size: 16px; }
+  .section-head p { color: var(--muted); max-width: 64ch; margin: 12px 0 0; font-size: 14.5px; }
 
   .prose { max-width: 68ch; }
-  .prose p { margin: 0 0 18px; font-size: 16.5px; }
+  .prose p { margin: 0 0 18px; font-size: 15px; }
   .prose p:last-child { margin-bottom: 0; }
   .prose strong { font-weight: 700; }
   .prose h3 {
-    font-size: 20px; font-weight: 700; letter-spacing: -.01em;
+    font-size: 18px; font-weight: 700; letter-spacing: -.01em;
     margin: 34px 0 12px; text-wrap: balance;
   }
 
   .src {
-    font-family: ui-monospace, Consolas, monospace; font-size: 11px; font-weight: 700;
+    font-family: ui-monospace, Consolas, monospace; font-size: 10.5px; font-weight: 700;
     color: var(--steel); background: var(--steel-wash);
     border: 1px solid color-mix(in srgb, var(--steel) 24%, transparent);
     padding: 0 5px; border-radius: 4px; vertical-align: 1px; margin-left: 3px;
@@ -133,7 +133,7 @@
   .entry:last-child { margin-bottom: 0; }
   .entry .when {
     position: absolute; left: -116px; top: 1px; width: 76px; text-align: right;
-    font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; font-weight: 700;
+    font-family: ui-monospace, Consolas, monospace; font-size: 12px; font-weight: 700;
     color: var(--ember-ink); letter-spacing: .02em;
   }
   .entry::after {
@@ -142,15 +142,15 @@
     background: var(--surface); border: 3px solid var(--spine); z-index: 2;
   }
   .entry.key::after { border-color: var(--ember); background: var(--ember); }
-  .entry h3 { margin: 0 0 8px; font-size: 18.5px; font-weight: 700; letter-spacing: -.01em; }
-  .entry p { margin: 0 0 12px; font-size: 16px; max-width: 62ch; }
+  .entry h3 { margin: 0 0 8px; font-size: 16.5px; font-weight: 700; letter-spacing: -.01em; }
+  .entry p { margin: 0 0 12px; font-size: 14.5px; max-width: 62ch; }
   .entry p:last-child { margin-bottom: 0; }
 
   /* ================= 4. CONCLUSION ================= */
   .callout {
     margin-top: 28px; padding: 20px 22px;
     background: var(--surface); border: 1px solid var(--ember);
-    border-left: 4px solid var(--ember); border-radius: 12px; font-size: 16.5px;
+    border-left: 4px solid var(--ember); border-radius: 12px; font-size: 15px;
   }
   section.alt .callout { background: var(--ground); }
   .callout strong { color: var(--ember-ink); }
@@ -169,9 +169,9 @@
     width: 26px; height: 26px; border-radius: 50%;
     background: var(--ember-wash); color: var(--ember-ink);
     border: 1px solid color-mix(in srgb, var(--ember) 28%, transparent);
-    font-family: ui-monospace, Consolas, monospace; font-size: 12px; font-weight: 700;
+    font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; font-weight: 700;
   }
-  .takeaway p { margin: 0; font-size: 15.5px; }
+  .takeaway p { margin: 0; font-size: 14px; }
 
   /* ================= 5. RISK & IMPACT ================= */
   .sectors {
@@ -185,8 +185,8 @@
     padding: 15px 20px; border-bottom: 1px solid var(--hair);
   }
   .sector:last-child { border-bottom: none; }
-  .sector .name { font-weight: 700; font-size: 15.5px; }
-  .sector .why { font-size: 14px; color: var(--muted); }
+  .sector .name { font-weight: 700; font-size: 14px; }
+  .sector .why { font-size: 13px; color: var(--muted); }
 
   .meter { display: flex; gap: 3px; }
   .meter i {
@@ -194,7 +194,7 @@
     background: var(--hair-strong); opacity: .5;
   }
   .level {
-    font-family: ui-monospace, Consolas, monospace; font-size: 10.5px; font-weight: 700;
+    font-family: ui-monospace, Consolas, monospace; font-size: 10px; font-weight: 700;
     letter-spacing: .1em; text-transform: uppercase; text-align: center;
     padding: 3px 8px; border-radius: 100px; white-space: nowrap;
   }
@@ -215,14 +215,14 @@
     display: flex; flex-wrap: wrap; gap: 18px; margin-top: 20px;
     padding: 14px 18px; background: var(--surface-2);
     border: 1px solid var(--hair); border-radius: 12px;
-    font-size: 13px; color: var(--muted);
+    font-size: 12.5px; color: var(--muted);
   }
   .risklegend .item { display: flex; align-items: center; gap: 8px; }
   .risklegend .sw { width: 22px; height: 8px; border-radius: 2px; }
 
   /* ================= Footer ================= */
-  footer { border-top: 1px solid var(--hair); padding: 40px 0 64px; color: var(--muted); font-size: 14px; }
-  footer h3 { font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin: 0 0 14px; }
+  footer { border-top: 1px solid var(--hair); padding: 40px 0 64px; color: var(--muted); font-size: 13px; }
+  footer h3 { font-size: 11.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin: 0 0 14px; }
   footer a { color: var(--ember-ink); }
   .sources { counter-reset: s; display: grid; gap: 8px; margin: 0 0 26px; padding: 0; list-style: none; }
   /* Counter absolutely positioned, not a grid column: an <li> holding a text node AND an
@@ -230,11 +230,11 @@
      the URL rendered about four characters wide. */
   .sources li {
     counter-increment: s; position: relative; padding-left: 40px;
-    font-size: 13.5px; overflow-wrap: anywhere;
+    font-size: 12.5px; overflow-wrap: anywhere;
   }
   .sources li::before {
     content: counter(s); position: absolute; left: 0; top: 2px;
-    font-family: ui-monospace, Consolas, monospace; font-size: 11px;
+    font-family: ui-monospace, Consolas, monospace; font-size: 10.5px;
     font-weight: 700; color: var(--steel); background: var(--steel-wash);
     border: 1px solid color-mix(in srgb, var(--steel) 24%, transparent);
     border-radius: 4px; text-align: center; width: 30px; height: 20px; line-height: 18px;
@@ -242,7 +242,7 @@
   .note {
     margin-top: 12px; padding: 14px 16px; background: var(--surface-2);
     border: 1px dashed var(--hair-strong); border-radius: 10px; color: var(--muted);
-    font-size: 13.5px;
+    font-size: 12.5px;
   }
   code { font-family: ui-monospace, Consolas, monospace; font-size: .9em; background: var(--surface-2); padding: 1px 5px; border-radius: 3px; }
 </style>
@@ -339,7 +339,7 @@
         </p>
       </div>
 
-      <h3 style="font-size:20px;font-weight:700;margin:38px 0 22px;">Activity, oldest first</h3>
+      <h3 style="font-size:18px;font-weight:700;margin:38px 0 22px;">Activity, oldest first</h3>
 
       <div class="chrono">
         <div class="entry key">
@@ -610,23 +610,34 @@
       </div>
     </div>
   </section>
+
+  <!-- ===================== 6. SOURCES =====================
+       A real section, headed like every other one - not a footer afterthought.
+       Every .src marker in the body must resolve to an entry here. -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Sources</p>
+        <h2>What this analysis is built on</h2>
+      </div>
+      <ol class="sources">
+        <li id="s1">MITRE ATT&amp;CK — Groups: Akira (G1024) — <a href="https://attack.mitre.org/groups/G1024/">https://attack.mitre.org/groups/G1024/</a></li>
+        <li id="s2">CISA — #StopRansomware: Akira Ransomware (AA24-109A), updated 13 November 2025 — <a href="https://www.cisa.gov/news-events/cybersecurity-advisories/aa24-109a">https://www.cisa.gov/news-events/cybersecurity-advisories/aa24-109a</a></li>
+        <li id="s3">Sophos X-Ops — Akira, again: the ransomware that keeps on taking — <a href="https://www.sophos.com/en-us/blog/akira-again-the-ransomware-that-keeps-on-taking/">https://www.sophos.com/en-us/blog/akira-again-the-ransomware-that-keeps-on-taking/</a></li>
+        <li id="s4">Palo Alto Unit 42 — Threat Assessment: Howling Scorpius (Akira Ransomware) — <a href="https://unit42.paloaltonetworks.com/threat-assessment-howling-scorpius-akira-ransomware/">https://unit42.paloaltonetworks.com/threat-assessment-howling-scorpius-akira-ransomware/</a></li>
+        <li id="s5">Rapid7 — Akira Ransomware Group Utilizing SonicWall Devices for Initial Access — <a href="https://www.rapid7.com/blog/post/dr-akira-ransomware-group-utilizing-sonicwall-devices-for-initial-access/">https://www.rapid7.com/blog/post/dr-akira-ransomware-group-utilizing-sonicwall-devices-for-initial-access/</a></li>
+        <li id="s6">Cisco Talos — Talos IR trends: BEC attacks surge, while weaknesses in MFA persist (Q1 2024) — <a href="https://blog.talosintelligence.com/talos-ir-quarterly-trends-q1-2024/">https://blog.talosintelligence.com/talos-ir-quarterly-trends-q1-2024/</a></li>
+        <li id="s7">Trend Micro — Ransomware Spotlight: Akira — <a href="https://www.trendmicro.com/vinfo/us/security/news/ransomware-spotlight/ransomware-spotlight-akira">https://www.trendmicro.com/vinfo/us/security/news/ransomware-spotlight/ransomware-spotlight-akira</a></li>
+        <li id="s8">NVD — CVE-2020-3259 (Cisco ASA/FTD information disclosure, CVSS 7.5, CWE-200, in CISA KEV) — <a href="https://nvd.nist.gov/vuln/detail/CVE-2020-3259">https://nvd.nist.gov/vuln/detail/CVE-2020-3259</a></li>
+        <li id="s9">NVD — CVE-2023-20269 (Cisco ASA/FTD VPN AAA separation, CVSS 9.1, CWE-863/CWE-288) — <a href="https://nvd.nist.gov/vuln/detail/CVE-2023-20269">https://nvd.nist.gov/vuln/detail/CVE-2023-20269</a></li>
+        <li id="s10">NVD — CVE-2024-40766 (SonicWall SonicOS improper access control, CVSS 9.8, CWE-284, in CISA KEV) — <a href="https://nvd.nist.gov/vuln/detail/CVE-2024-40766">https://nvd.nist.gov/vuln/detail/CVE-2024-40766</a></li>
+      </ol>
+    </div>
+  </section>
 </main>
 
 <footer>
   <div class="wrap">
-    <h3>Sources</h3>
-    <ol class="sources">
-      <li id="s1">MITRE ATT&amp;CK — Groups: Akira (G1024) — <a href="https://attack.mitre.org/groups/G1024/">https://attack.mitre.org/groups/G1024/</a></li>
-      <li id="s2">CISA — #StopRansomware: Akira Ransomware (AA24-109A), updated 13 November 2025 — <a href="https://www.cisa.gov/news-events/cybersecurity-advisories/aa24-109a">https://www.cisa.gov/news-events/cybersecurity-advisories/aa24-109a</a></li>
-      <li id="s3">Sophos X-Ops — Akira, again: the ransomware that keeps on taking — <a href="https://www.sophos.com/en-us/blog/akira-again-the-ransomware-that-keeps-on-taking/">https://www.sophos.com/en-us/blog/akira-again-the-ransomware-that-keeps-on-taking/</a></li>
-      <li id="s4">Palo Alto Unit 42 — Threat Assessment: Howling Scorpius (Akira Ransomware) — <a href="https://unit42.paloaltonetworks.com/threat-assessment-howling-scorpius-akira-ransomware/">https://unit42.paloaltonetworks.com/threat-assessment-howling-scorpius-akira-ransomware/</a></li>
-      <li id="s5">Rapid7 — Akira Ransomware Group Utilizing SonicWall Devices for Initial Access — <a href="https://www.rapid7.com/blog/post/dr-akira-ransomware-group-utilizing-sonicwall-devices-for-initial-access/">https://www.rapid7.com/blog/post/dr-akira-ransomware-group-utilizing-sonicwall-devices-for-initial-access/</a></li>
-      <li id="s6">Cisco Talos — Talos IR trends: BEC attacks surge, while weaknesses in MFA persist (Q1 2024) — <a href="https://blog.talosintelligence.com/talos-ir-quarterly-trends-q1-2024/">https://blog.talosintelligence.com/talos-ir-quarterly-trends-q1-2024/</a></li>
-      <li id="s7">Trend Micro — Ransomware Spotlight: Akira — <a href="https://www.trendmicro.com/vinfo/us/security/news/ransomware-spotlight/ransomware-spotlight-akira">https://www.trendmicro.com/vinfo/us/security/news/ransomware-spotlight/ransomware-spotlight-akira</a></li>
-      <li id="s8">NVD — CVE-2020-3259 (Cisco ASA/FTD information disclosure, CVSS 7.5, CWE-200, in CISA KEV) — <a href="https://nvd.nist.gov/vuln/detail/CVE-2020-3259">https://nvd.nist.gov/vuln/detail/CVE-2020-3259</a></li>
-      <li id="s9">NVD — CVE-2023-20269 (Cisco ASA/FTD VPN AAA separation, CVSS 9.1, CWE-863/CWE-288) — <a href="https://nvd.nist.gov/vuln/detail/CVE-2023-20269">https://nvd.nist.gov/vuln/detail/CVE-2023-20269</a></li>
-      <li id="s10">NVD — CVE-2024-40766 (SonicWall SonicOS improper access control, CVSS 9.8, CWE-284, in CISA KEV) — <a href="https://nvd.nist.gov/vuln/detail/CVE-2024-40766">https://nvd.nist.gov/vuln/detail/CVE-2024-40766</a></li>
-    </ol>
 
     <p class="note">
       <strong>Confidence and sourcing.</strong> The chronology, tooling and victimology are drawn

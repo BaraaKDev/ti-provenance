@@ -89,9 +89,9 @@ combined report is called for.
 
 | The subject is… | Read this guide | Sections |
 |---|---|---|
-| A threat actor, no specific CVE | `guides/threat-actor-report.md` | The Intrusion · The Arsenal |
-| Vulnerabilities, no specific actor — one CVE, several, or a chain | `guides/vulnerability-report.md` | Vulnerabilities · The Intrusion · Remediation |
-| **A named actor exploiting named CVEs** | `guides/campaign-report.md` | Vulnerabilities · The Intrusion · The Arsenal · Remediation |
+| A threat actor, no specific CVE | `guides/threat-actor-report.md` | The Intrusion · The Arsenal · Sources |
+| Vulnerabilities, no specific actor — one CVE, several, or a chain | `guides/vulnerability-report.md` | Vulnerabilities · The Intrusion · Remediation · Sources |
+| **A named actor exploiting named CVEs** | `guides/campaign-report.md` | Vulnerabilities · The Intrusion · The Arsenal · Remediation · Sources |
 
 If the subject names **both** an actor and the vulnerabilities they exploit, it is a campaign
 report — not an actor report with a CVE mentioned in passing.

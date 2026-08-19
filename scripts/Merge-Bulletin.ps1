@@ -224,9 +224,22 @@ $scopedFlowCss = ConvertTo-ScopedCss -Css $F.Css -Prefix $SCOPE -Warnings $warni
 # source report to be bulletin-aware would break its standalone use.
 $aBodyRaw = $A.Body
 $fBodyRaw = $F.Body
-$aBodyRaw = [regex]::Replace($aBodyRaw, '(?i)(<h3[^>]*>)\s*Sources\s*(</h3>)', '${1}Part 1 sources${2}')
+# Sources is a real section headed by an .eyebrow label in the current templates; older
+# reports carried it as a plain <h3>. Handle both so a bulletin can still be re-merged from
+# a report generated before the templates changed.
+$srcEyebrow = '(?i)(<p[^>]*class="[^"]*\beyebrow\b[^"]*"[^>]*>)\s*Sources\s*(</p>)'
+$srcHeading = '(?i)(<h3[^>]*>)\s*Sources\s*(</h3>)'
+$aBodyRaw = [regex]::Replace($aBodyRaw, $srcEyebrow, '${1}Part 1 sources${2}')
+$aBodyRaw = [regex]::Replace($aBodyRaw, $srcHeading, '${1}Part 1 sources${2}')
+$fBodyRaw = [regex]::Replace($fBodyRaw, $srcEyebrow, '${1}Part 2 sources${2}')
+$fBodyRaw = [regex]::Replace($fBodyRaw, $srcHeading, '${1}Part 2 sources${2}')
 $fBodyRaw = [regex]::Replace($fBodyRaw, '(?i)(>)(\s*)Sources:', '${1}${2}Part 2 sources:')
-$fBodyRaw = [regex]::Replace($fBodyRaw, '(?i)(<h3[^>]*>)\s*Sources\s*(</h3>)', '${1}Part 2 sources${2}')
+
+# Both halves number their own sources from 1, so the merged page would carry two id="s1".
+# Namespace part 2's, and any in-page reference to them, so the ids stay unique and every
+# marker still lands on the right entry.
+$fBodyRaw = [regex]::Replace($fBodyRaw, '(?i)\bid="s(\d+)"', 'id="fs${1}"')
+$fBodyRaw = [regex]::Replace($fBodyRaw, '(?i)href="#s(\d+)"', 'href="#fs${1}"')
 $A.Body = $aBodyRaw
 $F.Body = $fBodyRaw
 

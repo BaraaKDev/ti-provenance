@@ -15,22 +15,22 @@
     color-scheme: light;
 
     /* Neutrals carry a faint cool bias to sit with the violet accent. */
-    --ground: #f5f4f7;
+    --ground: #ffffff;
     --surface: #ffffff;
-    --surface-2: #eceaf0;
-    --ink: #1b1e24;
-    --muted: #5c6470;
-    --hair: #dad7e0;
-    --hair-strong: #c3bfcc;
+    --surface-2: #f3f6fc;
+    --ink: #14181f;
+    --muted: #5b6474;
+    --hair: #e3e8f2;
+    --hair-strong: #c6cede;
 
-    /* ACCENT - espionage objective: covert violet, NOT the ember red used for
+    /* ACCENT - espionage objective: violet, NOT the signal blue used for
        destruction and extortion. The colour is an assertion about intent. */
-    --ember: #6d3fa3;
-    --ember-ink: #57318a;
-    --ember-wash: rgba(109, 63, 163, 0.10);
-    --steel: #2f6b78;
-    --steel-wash: rgba(47, 107, 120, 0.10);
-    --spine: #b4aec2;
+    --ember: #7c3aed;
+    --ember-ink: #6d28d9;
+    --ember-wash: rgba(124, 58, 237, 0.09);
+    --steel: #55607a;
+    --steel-wash: rgba(85, 96, 122, 0.10);
+    --spine: #c2cadb;
 
     /* SECTOR RISK - shares the CVSS ramp, separate tokens, different form. */
     --risk-critical: #a4161a;  --risk-critical-wash: rgba(164, 22, 26, 0.10);
@@ -46,7 +46,7 @@
   body {
     margin: 0; background: var(--ground); color: var(--ink);
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    line-height: 1.65; -webkit-font-smoothing: antialiased;
+    line-height: 1.6; -webkit-font-smoothing: antialiased;
   }
   .wrap { max-width: 940px; margin: 0 auto; padding: 0 24px; }
 
@@ -70,7 +70,7 @@
 
   .tlp {
     display: inline-block; font-family: ui-monospace, Consolas, monospace;
-    font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
+    font-size: 10.5px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
     padding: 4px 10px; border-radius: 4px; margin-bottom: 26px;
     background: var(--surface-2); border: 1px solid var(--hair-strong); color: var(--muted);
   }
@@ -81,19 +81,19 @@
 
   .eyebrow {
     font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
-    font-size: 12px; letter-spacing: .22em; text-transform: uppercase;
+    font-size: 11.5px; letter-spacing: .22em; text-transform: uppercase;
     color: var(--muted); margin: 0 0 18px; display: flex; align-items: center; gap: 12px;
   }
   .eyebrow::after { content: ""; flex: 1; height: 1px; background: var(--hair-strong); }
   .idtag { color: var(--ember-ink); font-weight: 600; }
 
   .cover h1 {
-    font-size: clamp(44px, 8vw, 78px); line-height: .96; letter-spacing: -.025em;
+    font-size: clamp(34px, 5.6vw, 54px); line-height: .96; letter-spacing: -.025em;
     font-weight: 800; margin: 0 0 10px; text-wrap: balance; max-width: 16ch;
   }
   .cover h1 .accent { color: var(--ember); }
   .cover .standfirst {
-    font-size: clamp(17px, 2.4vw, 21px); color: var(--muted);
+    font-size: clamp(15px, 2vw, 17.5px); color: var(--muted);
     max-width: 60ch; margin: 20px 0 0;
   }
   .covermeta {
@@ -102,8 +102,8 @@
     background: var(--hair); border: 1px solid var(--hair); border-radius: 12px; overflow: hidden;
   }
   .covermeta div { background: var(--surface); padding: 15px 18px; }
-  .covermeta .k { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0 0 5px; }
-  .covermeta .v { font-size: 15px; font-weight: 600; margin: 0; }
+  .covermeta .k { font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0 0 5px; }
+  .covermeta .v { font-size: 13.5px; font-weight: 600; margin: 0; }
 
   /* ================= Sections ================= */
   section { padding: 62px 0; }
@@ -111,22 +111,22 @@
   .section-head { margin-bottom: 38px; }
   .section-head .eyebrow { margin-bottom: 10px; }
   .section-head h2 {
-    font-size: clamp(27px, 4vw, 35px); letter-spacing: -.015em;
+    font-size: clamp(22px, 3.1vw, 28px); letter-spacing: -.015em;
     font-weight: 800; margin: 0; text-wrap: balance;
   }
-  .section-head p { color: var(--muted); max-width: 64ch; margin: 12px 0 0; font-size: 16px; }
+  .section-head p { color: var(--muted); max-width: 64ch; margin: 12px 0 0; font-size: 14.5px; }
 
   .prose { max-width: 68ch; }
-  .prose p { margin: 0 0 18px; font-size: 16.5px; }
+  .prose p { margin: 0 0 18px; font-size: 15px; }
   .prose p:last-child { margin-bottom: 0; }
   .prose strong { font-weight: 700; }
   .prose h3 {
-    font-size: 20px; font-weight: 700; letter-spacing: -.01em;
+    font-size: 18px; font-weight: 700; letter-spacing: -.01em;
     margin: 34px 0 12px; text-wrap: balance;
   }
 
   .src {
-    font-family: ui-monospace, Consolas, monospace; font-size: 11px; font-weight: 700;
+    font-family: ui-monospace, Consolas, monospace; font-size: 10.5px; font-weight: 700;
     color: var(--steel); background: var(--steel-wash);
     border: 1px solid color-mix(in srgb, var(--steel) 24%, transparent);
     padding: 0 5px; border-radius: 4px; vertical-align: 1px; margin-left: 3px;
@@ -144,7 +144,7 @@
   .entry:last-child { margin-bottom: 0; }
   .entry .when {
     position: absolute; left: -116px; top: 1px; width: 76px; text-align: right;
-    font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; font-weight: 700;
+    font-family: ui-monospace, Consolas, monospace; font-size: 12px; font-weight: 700;
     color: var(--ember-ink); letter-spacing: .02em;
   }
   .entry::after {
@@ -153,15 +153,15 @@
     background: var(--surface); border: 3px solid var(--spine); z-index: 2;
   }
   .entry.key::after { border-color: var(--ember); background: var(--ember); }
-  .entry h3 { margin: 0 0 8px; font-size: 18.5px; font-weight: 700; letter-spacing: -.01em; }
-  .entry p { margin: 0 0 12px; font-size: 16px; max-width: 62ch; }
+  .entry h3 { margin: 0 0 8px; font-size: 16.5px; font-weight: 700; letter-spacing: -.01em; }
+  .entry p { margin: 0 0 12px; font-size: 14.5px; max-width: 62ch; }
   .entry p:last-child { margin-bottom: 0; }
 
   /* ================= 4. CONCLUSION ================= */
   .callout {
     margin-top: 28px; padding: 20px 22px;
     background: var(--surface); border: 1px solid var(--ember);
-    border-left: 4px solid var(--ember); border-radius: 12px; font-size: 16.5px;
+    border-left: 4px solid var(--ember); border-radius: 12px; font-size: 15px;
   }
   section.alt .callout { background: var(--ground); }
   .callout strong { color: var(--ember-ink); }
@@ -180,9 +180,9 @@
     width: 26px; height: 26px; border-radius: 50%;
     background: var(--ember-wash); color: var(--ember-ink);
     border: 1px solid color-mix(in srgb, var(--ember) 28%, transparent);
-    font-family: ui-monospace, Consolas, monospace; font-size: 12px; font-weight: 700;
+    font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; font-weight: 700;
   }
-  .takeaway p { margin: 0; font-size: 15.5px; }
+  .takeaway p { margin: 0; font-size: 14px; }
 
   /* ================= 5. RISK & IMPACT ================= */
   .sectors {
@@ -196,8 +196,8 @@
     padding: 15px 20px; border-bottom: 1px solid var(--hair);
   }
   .sector:last-child { border-bottom: none; }
-  .sector .name { font-weight: 700; font-size: 15.5px; }
-  .sector .why { font-size: 14px; color: var(--muted); }
+  .sector .name { font-weight: 700; font-size: 14px; }
+  .sector .why { font-size: 13px; color: var(--muted); }
 
   .meter { display: flex; gap: 3px; }
   .meter i {
@@ -205,7 +205,7 @@
     background: var(--hair-strong); opacity: .5;
   }
   .level {
-    font-family: ui-monospace, Consolas, monospace; font-size: 10.5px; font-weight: 700;
+    font-family: ui-monospace, Consolas, monospace; font-size: 10px; font-weight: 700;
     letter-spacing: .1em; text-transform: uppercase; text-align: center;
     padding: 3px 8px; border-radius: 100px; white-space: nowrap;
   }
@@ -226,14 +226,14 @@
     display: flex; flex-wrap: wrap; gap: 18px; margin-top: 20px;
     padding: 14px 18px; background: var(--surface-2);
     border: 1px solid var(--hair); border-radius: 12px;
-    font-size: 13px; color: var(--muted);
+    font-size: 12.5px; color: var(--muted);
   }
   .risklegend .item { display: flex; align-items: center; gap: 8px; }
   .risklegend .sw { width: 22px; height: 8px; border-radius: 2px; }
 
   /* ================= Footer ================= */
-  footer { border-top: 1px solid var(--hair); padding: 40px 0 64px; color: var(--muted); font-size: 14px; }
-  footer h3 { font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin: 0 0 14px; }
+  footer { border-top: 1px solid var(--hair); padding: 40px 0 64px; color: var(--muted); font-size: 13px; }
+  footer h3 { font-size: 11.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin: 0 0 14px; }
   footer a { color: var(--ember-ink); }
   .sources { counter-reset: s; display: grid; gap: 8px; margin: 0 0 26px; padding: 0; list-style: none; }
   /* Counter absolutely positioned, not a grid column: a list item holding a text node AND
@@ -241,11 +241,11 @@
      and the URL rendered about four characters wide. */
   .sources li {
     counter-increment: s; position: relative; padding-left: 40px;
-    font-size: 13.5px; overflow-wrap: anywhere;
+    font-size: 12.5px; overflow-wrap: anywhere;
   }
   .sources li::before {
     content: counter(s); position: absolute; left: 0; top: 2px;
-    font-family: ui-monospace, Consolas, monospace; font-size: 11px;
+    font-family: ui-monospace, Consolas, monospace; font-size: 10.5px;
     font-weight: 700; color: var(--steel); background: var(--steel-wash);
     border: 1px solid color-mix(in srgb, var(--steel) 24%, transparent);
     border-radius: 4px; text-align: center; width: 30px; height: 20px; line-height: 18px;
@@ -253,7 +253,7 @@
   .note {
     margin-top: 12px; padding: 14px 16px; background: var(--surface-2);
     border: 1px dashed var(--hair-strong); border-radius: 10px; color: var(--muted);
-    font-size: 13.5px;
+    font-size: 12.5px;
   }
   code { font-family: ui-monospace, Consolas, monospace; font-size: .9em; background: var(--surface-2); padding: 1px 5px; border-radius: 3px; }
 
@@ -263,27 +263,27 @@
     color-scheme: light;
 
     
-    --ground: #f5f4f7;
+    --ground: #ffffff;
     --surface: #ffffff;
-    --surface-2: #eceaf0;
-    --ink: #1b1e24;
-    --muted: #5c6470;
-    --hair: #dad7e0;
-    --hair-strong: #c3bfcc;
+    --surface-2: #f3f6fc;
+    --ink: #14181f;
+    --muted: #5b6474;
+    --hair: #e3e8f2;
+    --hair-strong: #c6cede;
     
-    --ember: #6d3fa3;
-    --ember-ink: #57318a;
-    --ember-wash: rgba(109, 63, 163, 0.10);
-    --steel: #2f6b78;
-    --steel-wash: rgba(47, 107, 120, 0.10);
-    --spine: #b4aec2;
+    --ember: #7c3aed;
+    --ember-ink: #6d28d9;
+    --ember-wash: rgba(124, 58, 237, 0.09);
+    --steel: #55607a;
+    --steel-wash: rgba(85, 96, 122, 0.10);
+    --spine: #c2cadb;
     --shadow: 0 1px 2px rgba(20,22,26,.06), 0 8px 24px rgba(20,22,26,.05);
   }
 .flowpart * { box-sizing: border-box; }
 .flowpart {
     margin: 0; background: var(--ground); color: var(--ink);
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    line-height: 1.55; -webkit-font-smoothing: antialiased;
+    line-height: 1.5; -webkit-font-smoothing: antialiased;
   }
 .flowpart .wrap { max-width: 940px; margin: 0 auto; padding: 0 24px; }
 .flowpart header {
@@ -293,21 +293,21 @@
 .flowpart .hero { padding: 64px 0 52px; }
 .flowpart .eyebrow {
     font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
-    font-size: 12px; letter-spacing: .22em; text-transform: uppercase;
+    font-size: 11.5px; letter-spacing: .22em; text-transform: uppercase;
     color: var(--muted); margin: 0 0 18px; display: flex; align-items: center; gap: 12px;
   }
 .flowpart .eyebrow::after { content: ""; flex: 1; height: 1px; background: var(--hair-strong); }
 .flowpart .idtag { color: var(--ember-ink); font-weight: 600; }
 .flowpart h1 {
-    font-size: clamp(40px, 7vw, 68px); line-height: .98; letter-spacing: -.02em;
+    font-size: clamp(32px, 5vw, 48px); line-height: .98; letter-spacing: -.02em;
     font-weight: 800; margin: 0 0 8px; text-wrap: balance;
   }
 .flowpart h1 .destruct { color: var(--ember); }
-.flowpart .lede { font-size: clamp(17px, 2.4vw, 20px); color: var(--muted); max-width: 62ch; margin: 18px 0 0; }
+.flowpart .lede { font-size: clamp(15px, 2vw, 17px); color: var(--muted); max-width: 62ch; margin: 18px 0 0; }
 .flowpart .aliases { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.flowpart .aliases .label { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-right: 4px; }
+.flowpart .aliases .label { font-size: 11.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-right: 4px; }
 .flowpart .chip {
-    font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; padding: 4px 10px;
+    font-family: ui-monospace, Consolas, monospace; font-size: 12px; padding: 4px 10px;
     border: 1px solid var(--hair-strong); border-radius: 100px; color: var(--ink); background: var(--surface-2);
   }
 .flowpart .facts {
@@ -315,14 +315,14 @@
     gap: 1px; background: var(--hair); border: 1px solid var(--hair); border-radius: 12px; overflow: hidden;
   }
 .flowpart .fact { background: var(--surface); padding: 16px 18px; }
-.flowpart .fact .k { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0 0 6px; }
-.flowpart .fact .v { font-size: 15px; font-weight: 600; margin: 0; }
+.flowpart .fact .k { font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0 0 6px; }
+.flowpart .fact .v { font-size: 13.5px; font-weight: 600; margin: 0; }
 .flowpart .fact .v.bad { color: var(--ember-ink); }
 .flowpart section { padding: 60px 0; }
 .flowpart .section-head { margin-bottom: 40px; }
 .flowpart .section-head .eyebrow { margin-bottom: 10px; }
-.flowpart .section-head h2 { font-size: clamp(26px, 4vw, 34px); letter-spacing: -.01em; font-weight: 800; margin: 0; text-wrap: balance; }
-.flowpart .section-head p { color: var(--muted); max-width: 64ch; margin: 12px 0 0; font-size: 15.5px; }
+.flowpart .section-head h2 { font-size: clamp(21px, 3vw, 27px); letter-spacing: -.01em; font-weight: 800; margin: 0; text-wrap: balance; }
+.flowpart .section-head p { color: var(--muted); max-width: 64ch; margin: 12px 0 0; font-size: 14px; }
 .flowpart .flow { position: relative; padding-left: 34px; }
 .flowpart .flow::before {
     content: ""; position: absolute; left: 11px; top: 6px; bottom: 40px; width: 3px; border-radius: 3px;
@@ -333,7 +333,7 @@
     position: absolute; left: -34px; top: 22px; width: 25px; height: 25px; border-radius: 50%;
     background: var(--surface); border: 3px solid var(--spine);
     display: flex; align-items: center; justify-content: center;
-    font-family: ui-monospace, Consolas, monospace; font-size: 11px; font-weight: 700;
+    font-family: ui-monospace, Consolas, monospace; font-size: 10.5px; font-weight: 700;
     color: var(--muted); z-index: 2;
   }
 .flowpart .phase.impact .node { border-color: var(--ember); background: var(--ember); color: #fff; }
@@ -354,7 +354,7 @@
     background: var(--ember-wash); color: var(--ember);
     border-color: color-mix(in srgb, var(--ember) 34%, transparent);
   }
-.flowpart .tactic { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--steel); font-weight: 700; }
+.flowpart .tactic { font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--steel); font-weight: 700; }
 .flowpart .phase.heat .ticon {
     background: color-mix(in srgb, var(--ember-wash) 70%, var(--steel-wash));
     color: color-mix(in srgb, var(--ember) 62%, var(--steel));
@@ -362,13 +362,13 @@
   }
 .flowpart .phase.heat .tactic { color: color-mix(in srgb, var(--ember-ink) 72%, var(--steel)); }
 .flowpart .phase.impact .tactic { color: var(--ember-ink); }
-.flowpart .card h3 { font-size: 19px; margin: 2px 0 10px; font-weight: 700; letter-spacing: -.01em; width: 100%; }
-.flowpart .card p { margin: 0 0 14px; color: var(--muted); font-size: 14.5px; }
+.flowpart .card h3 { font-size: 17px; margin: 2px 0 10px; font-weight: 700; letter-spacing: -.01em; width: 100%; }
+.flowpart .card p { margin: 0 0 14px; color: var(--muted); font-size: 13.5px; }
 .flowpart .card p:last-child { margin-bottom: 0; }
 .flowpart .ttps { display: flex; flex-direction: column; gap: 8px; }
-.flowpart .ttp { display: flex; gap: 12px; align-items: baseline; font-size: 14px; }
+.flowpart .ttp { display: flex; gap: 12px; align-items: baseline; font-size: 13px; }
 .flowpart .tid {
-    font-family: ui-monospace, Consolas, monospace; font-size: 12px; font-weight: 600;
+    font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; font-weight: 600;
     color: var(--steel); background: var(--steel-wash); padding: 2px 7px; border-radius: 5px;
     white-space: nowrap; flex-shrink: 0; min-width: 78px; text-align: center;
   }
@@ -378,7 +378,7 @@
     color: var(--ember-ink); background: var(--ember-wash); padding: 1px 5px; border-radius: 4px;
   }
 .flowpart .transition {
-    padding: 6px 0 6px 6px; font-size: 12.5px; color: var(--muted); font-style: italic;
+    padding: 6px 0 6px 6px; font-size: 12px; color: var(--muted); font-style: italic;
     display: flex; align-items: center; gap: 8px;
   }
 .flowpart .transition svg { flex-shrink: 0; color: var(--spine); }
@@ -389,17 +389,17 @@
   }
 .flowpart .weapon.destruct { border-left-color: var(--ember); }
 .flowpart .weapon .wname {
-    font-family: ui-monospace, Consolas, monospace; font-weight: 700; font-size: 15px; margin: 0 0 2px;
+    font-family: ui-monospace, Consolas, monospace; font-weight: 700; font-size: 13.5px; margin: 0 0 2px;
     display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
   }
-.flowpart .weapon .sid { font-size: 11px; color: var(--muted); font-weight: 500; }
-.flowpart .weapon .role { font-size: 13px; color: var(--muted); margin: 6px 0 0; }
-.flowpart .weapon .kind { display: inline-block; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; font-weight: 700; margin-top: 10px; color: var(--steel); }
+.flowpart .weapon .sid { font-size: 10.5px; color: var(--muted); font-weight: 500; }
+.flowpart .weapon .role { font-size: 12.5px; color: var(--muted); margin: 6px 0 0; }
+.flowpart .weapon .kind { display: inline-block; font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; font-weight: 700; margin-top: 10px; color: var(--steel); }
 .flowpart .weapon.destruct .kind { color: var(--ember); }
 .flowpart .legend {
     display: flex; flex-wrap: wrap; gap: 20px; margin-top: 28px; padding: 16px 20px;
     background: var(--surface-2); border: 1px solid var(--hair); border-radius: 12px;
-    font-size: 13px; color: var(--muted);
+    font-size: 12.5px; color: var(--muted);
   }
 .flowpart .legend .item { display: flex; align-items: center; gap: 9px; }
 .flowpart .legend .keys { display: flex; gap: 5px; }
@@ -418,13 +418,26 @@
     width: 26px; height: 8px; border-radius: 4px; flex-shrink: 0;
     background: linear-gradient(90deg, var(--spine), var(--ember));
   }
-.flowpart footer { border-top: 1px solid var(--hair); padding: 34px 0 56px; color: var(--muted); font-size: 13.5px; }
+.flowpart footer { border-top: 1px solid var(--hair); padding: 34px 0 56px; color: var(--muted); font-size: 12.5px; }
 .flowpart footer a { color: var(--ember-ink); }
 .flowpart footer .note {
     margin-top: 10px; padding: 14px 16px; background: var(--surface-2);
     border: 1px dashed var(--hair-strong); border-radius: 10px; color: var(--muted);
   }
 .flowpart code.path { font-family: ui-monospace, Consolas, monospace; font-size: .92em; color: var(--ink); }
+.flowpart .sources { counter-reset: s; display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.flowpart .sources li {
+    counter-increment: s; position: relative; padding-left: 40px;
+    font-size: 12.5px; overflow-wrap: anywhere;
+  }
+.flowpart .sources li::before {
+    content: counter(s); position: absolute; left: 0; top: 2px;
+    font-family: ui-monospace, Consolas, monospace; font-size: 10.5px;
+    font-weight: 700; color: var(--steel); background: var(--steel-wash);
+    border: 1px solid color-mix(in srgb, var(--steel) 24%, transparent);
+    border-radius: 4px; text-align: center; width: 30px; height: 20px; line-height: 18px;
+  }
+.flowpart .sources a { color: var(--ember-ink); }
 
 
 
@@ -606,7 +619,7 @@
         </p>
       </div>
 
-      <h3 style="font-size:20px;font-weight:700;margin:38px 0 22px;">Activity, oldest first</h3>
+      <h3 style="font-size:18px;font-weight:700;margin:38px 0 22px;">Activity, oldest first</h3>
 
       <div class="chrono">
         <div class="entry key">
@@ -863,17 +876,28 @@
       </div>
     </div>
   </section>
+
+  <!-- ===================== 6. SOURCES =====================
+       A real section, headed like every other one - not a footer afterthought.
+       Every .src marker in the body must resolve to an entry here. -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Part 1 sources</p>
+        <h2>What this analysis is built on</h2>
+      </div>
+      <ol class="sources">
+        <li id="s1">MITRE ATT&amp;CK — Groups: Andariel (G0138) — <a href="https://attack.mitre.org/groups/G0138/">https://attack.mitre.org/groups/G0138/</a></li>
+        <li id="s2">CISA / FBI / CNMF / DC3 / NSA / ROK NIS / ROK NPA / UK NCSC — AA24-207A, North Korea Cyber Group Conducts Global Espionage Campaign to Advance Regime's Military and Nuclear Programs, 25 July 2024 — <a href="https://www.cisa.gov/news-events/cybersecurity-advisories/aa24-207a">https://www.cisa.gov/news-events/cybersecurity-advisories/aa24-207a</a></li>
+        <li id="s3">Microsoft Threat Intelligence — Onyx Sleet uses array of malware to gather intelligence for North Korea, 25 July 2024 — <a href="https://www.microsoft.com/en-us/security/blog/2024/07/25/onyx-sleet-uses-array-of-malware-to-gather-intelligence-for-north-korea/">https://www.microsoft.com/en-us/security/blog/2024/07/25/onyx-sleet-uses-array-of-malware-to-gather-intelligence-for-north-korea/</a></li>
+        <li id="s4">CISA / FBI / Treasury — AA22-187A, North Korean State-Sponsored Cyber Actors Use Maui Ransomware to Target the Healthcare and Public Health Sector — <a href="https://www.cisa.gov/news-events/cybersecurity-advisories/aa22-187a">https://www.cisa.gov/news-events/cybersecurity-advisories/aa22-187a</a></li>
+      </ol>
+    </div>
+  </section>
 </main>
 
 <footer>
   <div class="wrap">
-    <h3>Part 1 sources</h3>
-    <ol class="sources">
-      <li id="s1">MITRE ATT&amp;CK — Groups: Andariel (G0138) — <a href="https://attack.mitre.org/groups/G0138/">https://attack.mitre.org/groups/G0138/</a></li>
-      <li id="s2">CISA / FBI / CNMF / DC3 / NSA / ROK NIS / ROK NPA / UK NCSC — AA24-207A, North Korea Cyber Group Conducts Global Espionage Campaign to Advance Regime's Military and Nuclear Programs, 25 July 2024 — <a href="https://www.cisa.gov/news-events/cybersecurity-advisories/aa24-207a">https://www.cisa.gov/news-events/cybersecurity-advisories/aa24-207a</a></li>
-      <li id="s3">Microsoft Threat Intelligence — Onyx Sleet uses array of malware to gather intelligence for North Korea, 25 July 2024 — <a href="https://www.microsoft.com/en-us/security/blog/2024/07/25/onyx-sleet-uses-array-of-malware-to-gather-intelligence-for-north-korea/">https://www.microsoft.com/en-us/security/blog/2024/07/25/onyx-sleet-uses-array-of-malware-to-gather-intelligence-for-north-korea/</a></li>
-      <li id="s4">CISA / FBI / Treasury — AA22-187A, North Korean State-Sponsored Cyber Actors Use Maui Ransomware to Target the Healthcare and Public Health Sector — <a href="https://www.cisa.gov/news-events/cybersecurity-advisories/aa22-187a">https://www.cisa.gov/news-events/cybersecurity-advisories/aa22-187a</a></li>
-    </ol>
 
     <p class="note">
       <strong>Confidence and sourcing.</strong> Attribution to the DPRK Reconnaissance General
@@ -1254,17 +1278,26 @@
       </div>
     </div>
   </section>
+  <!-- ---------------- Sources ----------------
+       A real section, headed like every other one - not a footer afterthought. -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Part 2 sources</p>
+        <h2>What this mapping is built on</h2>
+      </div>
+      <ol class="sources">
+        <li id="fs1">MITRE ATT&amp;CK &mdash; Groups: Andariel (G0138) &mdash; <a href="https://attack.mitre.org/groups/G0138/">https://attack.mitre.org/groups/G0138/</a></li>
+        <li id="fs2">CISA, FBI and partners &mdash; AA24-207A, 25 July 2024 &mdash; <a href="https://www.cisa.gov/news-events/cybersecurity-advisories/aa24-207a">https://www.cisa.gov/news-events/cybersecurity-advisories/aa24-207a</a></li>
+        <li id="fs3">Microsoft Threat Intelligence &mdash; Onyx Sleet uses array of malware to gather intelligence for North Korea &mdash; <a href="https://www.microsoft.com/en-us/security/blog/2024/07/25/onyx-sleet-uses-array-of-malware-to-gather-intelligence-for-north-korea/">https://www.microsoft.com/en-us/security/blog/2024/07/25/onyx-sleet-uses-array-of-malware-to-gather-intelligence-for-north-korea/</a></li>
+        <li id="fs4">CISA &mdash; AA22-187A, Maui ransomware &mdash; <a href="https://www.cisa.gov/news-events/cybersecurity-advisories/aa22-187a">https://www.cisa.gov/news-events/cybersecurity-advisories/aa22-187a</a></li>
+      </ol>
+    </div>
+  </section>
 </main>
 
 <footer>
   <div class="wrap">
-    <p>
-      Part 2 sources:
-      <a href="https://attack.mitre.org/groups/G0138/">MITRE ATT&amp;CK G0138</a>;
-      <a href="https://www.cisa.gov/news-events/cybersecurity-advisories/aa24-207a">CISA / FBI and partners, AA24-207A</a> (25 July 2024);
-      <a href="https://www.microsoft.com/en-us/security/blog/2024/07/25/onyx-sleet-uses-array-of-malware-to-gather-intelligence-for-north-korea/">Microsoft Threat Intelligence, Onyx Sleet</a>;
-      <a href="https://www.cisa.gov/news-events/cybersecurity-advisories/aa22-187a">CISA AA22-187A</a> (Maui ransomware).
-    </p>
     <p class="note">
       <strong>Coverage caveat &mdash; read before using this for gap analysis.</strong> Six
       tactics carry no techniques: <strong>Reconnaissance</strong>,

@@ -5,20 +5,20 @@
   :root {
     color-scheme: light;
 
-    --ground: #f6f4f2;
+    --ground: #ffffff;
     --surface: #ffffff;
-    --surface-2: #efece7;
-    --ink: #1b1e24;
-    --muted: #5c6470;
-    --hair: #ddd8d1;
-    --hair-strong: #c8c2b8;
+    --surface-2: #f3f6fc;
+    --ink: #14181f;
+    --muted: #5b6474;
+    --hair: #e3e8f2;
+    --hair-strong: #c6cede;
 
-    --ember: #b3241d;
-    --ember-ink: #8d1a15;
-    --ember-wash: rgba(179, 36, 29, 0.10);
-    --steel: #346b8f;
-    --steel-wash: rgba(52, 107, 143, 0.10);
-    --spine: #b9b2a8;
+    --ember: #1d4ed8;
+    --ember-ink: #1e40af;
+    --ember-wash: rgba(29, 78, 216, 0.09);
+    --steel: #55607a;
+    --steel-wash: rgba(85, 96, 122, 0.10);
+    --spine: #c2cadb;
 
     /* Semantic severity - CVSS only, never decoration. */
     --sev-crit: #a4161a;  --sev-crit-wash: rgba(164, 22, 26, 0.10);
@@ -33,7 +33,7 @@
   body {
     margin: 0; background: var(--ground); color: var(--ink);
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    line-height: 1.55; -webkit-font-smoothing: antialiased;
+    line-height: 1.5; -webkit-font-smoothing: antialiased;
   }
   .wrap { max-width: 940px; margin: 0 auto; padding: 0 24px; }
 
@@ -44,25 +44,25 @@
   .hero { padding: 64px 0 52px; }
   .eyebrow {
     font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
-    font-size: 12px; letter-spacing: .22em; text-transform: uppercase;
+    font-size: 11.5px; letter-spacing: .22em; text-transform: uppercase;
     color: var(--muted); margin: 0 0 18px; display: flex; align-items: center; gap: 12px;
   }
   .eyebrow::after { content: ""; flex: 1; height: 1px; background: var(--hair-strong); }
   .idtag { color: var(--ember-ink); font-weight: 600; }
   h1 {
-    font-size: clamp(40px, 7vw, 68px); line-height: .98; letter-spacing: -.02em;
+    font-size: clamp(32px, 5vw, 48px); line-height: .98; letter-spacing: -.02em;
     font-weight: 800; margin: 0 0 8px; text-wrap: balance;
   }
   h1 .destruct { color: var(--ember); }
-  .lede { font-size: clamp(17px, 2.4vw, 20px); color: var(--muted); max-width: 62ch; margin: 18px 0 0; }
+  .lede { font-size: clamp(15px, 2vw, 17px); color: var(--muted); max-width: 62ch; margin: 18px 0 0; }
 
   .cverow { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
   .cverow .label {
-    font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
+    font-size: 11.5px; letter-spacing: .14em; text-transform: uppercase;
     color: var(--muted); margin-right: 4px;
   }
   .cve {
-    font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; font-weight: 600;
+    font-family: ui-monospace, Consolas, monospace; font-size: 12px; font-weight: 600;
     padding: 4px 10px; border: 1px solid var(--hair-strong); border-radius: 100px;
     color: var(--ink); background: var(--surface-2); white-space: nowrap;
   }
@@ -72,18 +72,18 @@
     gap: 1px; background: var(--hair); border: 1px solid var(--hair); border-radius: 12px; overflow: hidden;
   }
   .fact { background: var(--surface); padding: 16px 18px; }
-  .fact .k { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0 0 6px; }
-  .fact .v { font-size: 15px; font-weight: 600; margin: 0; font-variant-numeric: tabular-nums; }
+  .fact .k { font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0 0 6px; }
+  .fact .v { font-size: 13.5px; font-weight: 600; margin: 0; font-variant-numeric: tabular-nums; }
   .fact .v.bad { color: var(--ember-ink); }
 
   section { padding: 60px 0; }
   .section-head { margin-bottom: 40px; }
   .section-head .eyebrow { margin-bottom: 10px; }
-  .section-head h2 { font-size: clamp(26px, 4vw, 34px); letter-spacing: -.01em; font-weight: 800; margin: 0; text-wrap: balance; }
-  .section-head p { color: var(--muted); max-width: 64ch; margin: 12px 0 0; font-size: 15.5px; }
+  .section-head h2 { font-size: clamp(21px, 3vw, 27px); letter-spacing: -.01em; font-weight: 800; margin: 0; text-wrap: balance; }
+  .section-head p { color: var(--muted); max-width: 64ch; margin: 12px 0 0; font-size: 14px; }
 
   .sev {
-    font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; font-weight: 700;
+    font-family: ui-monospace, Consolas, monospace; font-size: 11px; font-weight: 700;
     letter-spacing: .04em; padding: 2px 8px; border-radius: 5px; white-space: nowrap;
     font-variant-numeric: tabular-nums;
   }
@@ -93,7 +93,7 @@
   .sev.low  { color: var(--sev-low);  background: var(--sev-low-wash);  border: 1px solid color-mix(in srgb, var(--sev-low) 26%, transparent); }
 
   .exp {
-    font-family: ui-monospace, Consolas, monospace; font-size: 10.5px; font-weight: 700;
+    font-family: ui-monospace, Consolas, monospace; font-size: 10px; font-weight: 700;
     letter-spacing: .09em; text-transform: uppercase; padding: 3px 9px;
     border-radius: 100px; white-space: nowrap;
   }
@@ -102,32 +102,32 @@
   .exp.none { background: transparent; color: var(--muted); border: 1px solid var(--hair-strong); }
 
   .cwe {
-    font-family: ui-monospace, Consolas, monospace; font-size: 11.5px;
+    font-family: ui-monospace, Consolas, monospace; font-size: 11px;
     color: var(--steel); background: var(--steel-wash); padding: 2px 7px; border-radius: 5px; white-space: nowrap;
   }
 
   .table-wrap { overflow-x: auto; }
-  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
   thead th {
-    text-align: left; font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+    text-align: left; font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase;
     color: var(--muted); font-weight: 700; padding: 0 14px 10px 0;
     border-bottom: 1px solid var(--hair-strong); white-space: nowrap;
   }
   tbody td { padding: 12px 14px 12px 0; border-bottom: 1px solid var(--hair); vertical-align: middle; }
   tbody tr:last-child td { border-bottom: none; }
-  td.mono { font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+  td.mono { font-family: ui-monospace, Consolas, monospace; font-size: 12px; font-variant-numeric: tabular-nums; }
   .rank {
     display: inline-flex; align-items: center; justify-content: center;
     width: 24px; height: 24px; border-radius: 50%;
     background: var(--ember); color: #fff;
-    font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; font-weight: 700;
+    font-family: ui-monospace, Consolas, monospace; font-size: 11px; font-weight: 700;
   }
   .rank.lower { background: var(--surface-2); color: var(--muted); border: 1px solid var(--hair-strong); }
 
   .callout {
     margin-top: 26px; padding: 18px 20px;
     background: var(--surface); border: 1px solid var(--ember);
-    border-left: 4px solid var(--ember); border-radius: 12px; font-size: 15px;
+    border-left: 4px solid var(--ember); border-radius: 12px; font-size: 13.5px;
   }
   .callout strong { color: var(--ember-ink); }
   .callout p { margin: 0 0 12px; }
@@ -147,14 +147,14 @@
     padding: 18px 24px; background: var(--surface-2); border-bottom: 1px solid var(--hair);
     display: flex; flex-wrap: wrap; gap: 9px; align-items: center;
   }
-  .vulnhead .cve { background: var(--surface); font-size: 13px; }
-  .vulnhead .component { font-size: 12.5px; color: var(--muted); margin-left: auto; text-align: right; }
+  .vulnhead .cve { background: var(--surface); font-size: 12.5px; }
+  .vulnhead .component { font-size: 12px; color: var(--muted); margin-left: auto; text-align: right; }
   .vulnbody { padding: 24px; }
-  .vulnbody h3 { font-size: 20px; margin: 0 0 10px; font-weight: 800; letter-spacing: -.01em; text-wrap: balance; }
-  .sowhat { font-size: 15px; color: var(--ink); margin: 0 0 20px; max-width: 68ch; }
+  .vulnbody h3 { font-size: 18px; margin: 0 0 10px; font-weight: 800; letter-spacing: -.01em; text-wrap: balance; }
+  .sowhat { font-size: 13.5px; color: var(--ink); margin: 0 0 20px; max-width: 68ch; }
 
   .reachlabel {
-    font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase;
+    font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
     color: var(--muted); font-weight: 700; margin: 0 0 10px;
   }
   .reach { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; }
@@ -169,7 +169,7 @@
     border-color: color-mix(in srgb, var(--ember) 32%, transparent);
   }
   .reachitem.off .reachnode { background: transparent; color: var(--hair-strong); border-color: var(--hair); }
-  .reachlbl { font-size: 9.5px; line-height: 1.25; text-align: center; }
+  .reachlbl { font-size: 9px; line-height: 1.25; text-align: center; }
   .reachitem.on .reachlbl { color: var(--ink); font-weight: 700; }
   .reachitem.off .reachlbl { color: var(--hair-strong); }
 
@@ -179,7 +179,7 @@
     background: linear-gradient(to bottom, var(--spine) 0%, var(--spine) 40%, var(--ember) 100%);
   }
   .flowlabel {
-    font-size: 11px; letter-spacing: .16em; text-transform: uppercase;
+    font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase;
     color: var(--ember-ink); font-weight: 700; margin: 0 0 14px;
   }
   .phase { position: relative; margin-bottom: 12px; }
@@ -187,7 +187,7 @@
     position: absolute; left: -34px; top: 20px; width: 25px; height: 25px; border-radius: 50%;
     background: var(--surface); border: 3px solid var(--spine);
     display: flex; align-items: center; justify-content: center;
-    font-family: ui-monospace, Consolas, monospace; font-size: 11px; font-weight: 700;
+    font-family: ui-monospace, Consolas, monospace; font-size: 10.5px; font-weight: 700;
     color: var(--muted); z-index: 2;
   }
   .phase.impact .node { border-color: var(--ember); background: var(--ember); color: #fff; }
@@ -208,7 +208,7 @@
     background: var(--ember-wash); color: var(--ember);
     border-color: color-mix(in srgb, var(--ember) 34%, transparent);
   }
-  .tactic { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--steel); font-weight: 700; }
+  .tactic { font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--steel); font-weight: 700; }
   .phase.heat .ticon {
     background: color-mix(in srgb, var(--ember-wash) 70%, var(--steel-wash));
     color: color-mix(in srgb, var(--ember) 62%, var(--steel));
@@ -217,14 +217,14 @@
   .phase.heat .tactic { color: color-mix(in srgb, var(--ember-ink) 72%, var(--steel)); }
   .phase.impact .tactic { color: var(--ember-ink); }
 
-  .card h4 { font-size: 17px; margin: 2px 0 10px; font-weight: 700; letter-spacing: -.01em; width: 100%; }
-  .card p { margin: 0 0 12px; color: var(--muted); font-size: 14px; }
+  .card h4 { font-size: 15.5px; margin: 2px 0 10px; font-weight: 700; letter-spacing: -.01em; width: 100%; }
+  .card p { margin: 0 0 12px; color: var(--muted); font-size: 13px; }
   .card p:last-child { margin-bottom: 0; }
 
   .ttps { display: flex; flex-direction: column; gap: 8px; }
-  .ttp { display: flex; gap: 12px; align-items: baseline; font-size: 13.5px; }
+  .ttp { display: flex; gap: 12px; align-items: baseline; font-size: 12.5px; }
   .tid {
-    font-family: ui-monospace, Consolas, monospace; font-size: 12px; font-weight: 600;
+    font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; font-weight: 600;
     color: var(--steel); background: var(--steel-wash); padding: 2px 7px; border-radius: 5px;
     white-space: nowrap; flex-shrink: 0; min-width: 78px; text-align: center;
   }
@@ -240,10 +240,10 @@
     border-left: 3px solid var(--steel); border-radius: 10px; padding: 16px 18px;
   }
   .fix.urgent { border-left-color: var(--ember); }
-  .fix h3 { margin: 0 0 6px; font-size: 14.5px; font-weight: 700; }
-  .fix p { margin: 0; font-size: 13.5px; color: var(--muted); }
+  .fix h3 { margin: 0 0 6px; font-size: 13.5px; font-weight: 700; }
+  .fix p { margin: 0; font-size: 12.5px; color: var(--muted); }
   .fix .tagline {
-    display: inline-block; font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+    display: inline-block; font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase;
     font-weight: 700; margin-top: 10px; color: var(--steel);
   }
   .fix.urgent .tagline { color: var(--ember); }
@@ -256,7 +256,7 @@
   .legend {
     display: flex; flex-wrap: wrap; gap: 20px; margin-top: 28px; padding: 16px 20px;
     background: var(--surface-2); border: 1px solid var(--hair); border-radius: 12px;
-    font-size: 13px; color: var(--muted);
+    font-size: 12.5px; color: var(--muted);
   }
   .legend .item { display: flex; align-items: center; gap: 9px; }
   .legend .keys { display: flex; gap: 5px; }
@@ -267,13 +267,32 @@
     border-color: color-mix(in srgb, var(--ember) 34%, transparent);
   }
 
-  footer { border-top: 1px solid var(--hair); padding: 34px 0 56px; color: var(--muted); font-size: 13.5px; }
+  footer { border-top: 1px solid var(--hair); padding: 34px 0 56px; color: var(--muted); font-size: 12.5px; }
   footer a { color: var(--ember-ink); }
   footer .note {
     margin-top: 10px; padding: 14px 16px; background: var(--surface-2);
     border: 1px dashed var(--hair-strong); border-radius: 10px; color: var(--muted);
   }
   code.path { font-family: ui-monospace, Consolas, monospace; font-size: .92em; color: var(--ink); }
+  /* ---------------- Sources ----------------
+     Same header treatment as every other section: eyebrow + h2 in .section-head.
+     Every .src / [n] marker in the body must resolve to an entry here. */
+  .sources { counter-reset: s; display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+  /* The counter is absolutely positioned rather than a grid column. A grid breaks here: a
+     list item holding a text node AND an anchor produces THREE grid items, so the anchor
+     wraps into the counter column and the URL renders about four characters wide. */
+  .sources li {
+    counter-increment: s; position: relative; padding-left: 40px;
+    font-size: 12.5px; overflow-wrap: anywhere;
+  }
+  .sources li::before {
+    content: counter(s); position: absolute; left: 0; top: 2px;
+    font-family: ui-monospace, Consolas, monospace; font-size: 10.5px;
+    font-weight: 700; color: var(--steel); background: var(--steel-wash);
+    border: 1px solid color-mix(in srgb, var(--steel) 24%, transparent);
+    border-radius: 4px; text-align: center; width: 30px; height: 20px; line-height: 18px;
+  }
+  .sources a { color: var(--ember-ink); }
 </style>
 
 <header>
@@ -625,19 +644,26 @@
       </div>
     </div>
   </section>
+  <!-- ---------------- Sources ----------------
+       A real section, headed like every other one - not a footer afterthought. -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Sources</p>
+        <h2>What this mapping is built on</h2>
+      </div>
+      <ol class="sources">
+        <li id="s1">NVD &mdash; CVE-2026-68820 &mdash; <a href="https://nvd.nist.gov/vuln/detail/CVE-2026-68820">https://nvd.nist.gov/vuln/detail/CVE-2026-68820</a></li>
+        <li id="s2">NVD &mdash; CVE-2026-62815 &mdash; <a href="https://nvd.nist.gov/vuln/detail/CVE-2026-62815">https://nvd.nist.gov/vuln/detail/CVE-2026-62815</a></li>
+        <li id="s3">NVD &mdash; CVE-2026-62816 &mdash; <a href="https://nvd.nist.gov/vuln/detail/CVE-2026-62816">https://nvd.nist.gov/vuln/detail/CVE-2026-62816</a></li>
+      </ol>
+    </div>
+  </section>
 </main>
 
 <footer>
   <div class="wrap">
-    <p>
-      Sources: NVD —
-      <a href="https://nvd.nist.gov/vuln/detail/CVE-2026-68820">CVE-2026-68820</a>,
-      <a href="https://nvd.nist.gov/vuln/detail/CVE-2026-62815">CVE-2026-62815</a>,
-      <a href="https://nvd.nist.gov/vuln/detail/CVE-2026-62816">CVE-2026-62816</a>.
-      CVSS scores, vectors, CWE assignments, affected products and KEV status verified against NVD.
-      Build numbers are examples drawn from the NVD CPE data; confirm the exact fixed build for each
-      SKU in your estate against the vendor advisory.
-    </p>
+    <p class="note">CVSS scores, vectors, CWE assignments, affected products and KEV status verified against NVD. Build numbers are examples drawn from the NVD CPE data; confirm the exact fixed build for each SKU in your estate against the vendor advisory.</p>
     <p class="note">
       <strong>These three are independent, and that is the finding.</strong> They share a vendor and a
       release date. They do not compose: exploiting one gives you nothing you need to exploit another,

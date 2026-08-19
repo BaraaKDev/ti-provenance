@@ -12,7 +12,7 @@ the hand checks. This file only covers what is specific to an actor report.
 
 Two, in this order:
 
-**The Intrusion** → **The Arsenal**
+**The Intrusion** → **The Arsenal** → **Sources**
 
 ## The Intrusion
 
@@ -52,7 +52,7 @@ its development budget goes.
 `subjects/andariel/reports/andariel-G0138-attack-flow.html` — state espionage, and the
 reference for this report type. Four things it shows that a destruction crew cannot:
 
-- **A retuned accent.** Covert violet rather than alarm red, because the objective is quiet
+- **A retuned accent.** Violet rather than signal blue, because the objective is quiet
   collection. The colour is an assertion about intent.
 - **An objective phase that is Collection, not Impact**, carrying the **Exfiltration icon** —
   data leaving the container — because the goal is theft rather than destruction. The struck-

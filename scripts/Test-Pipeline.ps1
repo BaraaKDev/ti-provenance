@@ -287,6 +287,30 @@ $r = Invoke-Target $MERGE @{ Path = $f; Force = $true }
 $kept = (Read-Text $bp) -match $marker
 Assert 'forced re-merge preserves the editorial regions' ($r.Code -eq 0 -and $kept) $(if ($kept) { 'sentinel survived' } else { 'SENTINEL LOST' })
 
+# Sources moved out of the footer into a real section headed by an .eyebrow label. The merge
+# relabels both halves so a reader can tell which part cited what, and Verify-Bulletin fails
+# any bare "Sources" heading. The old <h3> shape is covered by the real reports above; this
+# proves the current template shape is handled too, so the two cannot drift apart silently.
+$ey = New-Fixture 'sources-eyebrow' -WithReports
+$eySec = '<section><div class="wrap"><div class="section-head">' +
+         '<p class="eyebrow">Sources</p><h2>What this is built on</h2></div>' +
+         '<ol class="sources"><li id="s1">A vendor writeup</li></ol></div></section>'
+foreach ($p in @(Get-ChildItem (Join-Path $ey 'reports') -File)) {
+    $t = Read-Text $p.FullName
+    $t = [regex]::Replace($t, '(?i)<h3[^>]*>\s*Sources\s*</h3>', '<p class="eyebrow">Sources</p>')
+    if ($t -notmatch '(?i)eyebrow[^>]*>\s*Sources\s*<') { $t = $t -replace '</main>', "$eySec</main>" }
+    Write-Text $p.FullName $t
+}
+$r = Invoke-Target $MERGE @{ Path = $ey }
+$mb = Read-Text (Join-Path $ey 'bulletin\sources-eyebrow-threat-bulletin.html')
+$bare = ([regex]::Matches($mb, '(?i)>\s*Sources\s*[<:]')).Count
+$ok = ($mb -match '(?i)>\s*Part 1 sources\s*<') -and ($mb -match '(?i)>\s*Part 2 sources\s*<') -and $bare -eq 0
+Assert 'eyebrow-headed Sources are attributed to their part' ($r.Code -eq 0 -and $ok) $(
+    if ($ok) { 'both halves labelled, 0 bare' } else { "exit $($r.Code), $bare bare heading(s)" })
+$dupIds = ([regex]::Matches($mb, 'id="(s\d+)"') | ForEach-Object { $_.Groups[1].Value } |
+           Group-Object | Where-Object Count -gt 1).Count
+Assert 'both halves numbering sources from 1 does not collide' ($dupIds -eq 0) "$dupIds duplicate id(s)"
+
 $two = New-Fixture 'two-bulletins' -WithReports
 Invoke-Target $MERGE @{ Path = $two } | Out-Null
 Copy-Item (Join-Path $two 'bulletin\two-bulletins-threat-bulletin.html') (Join-Path $two 'bulletin\extra-threat-bulletin.html')

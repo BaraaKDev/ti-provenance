@@ -36,7 +36,7 @@ as authoritative while resting on nothing is worse than no report.
 **Do not build the ATT&CK mapping here.** It belongs in a separate file this skill never writes.
 Techniques named in passing in your prose are fine; a mapping is not.
 
-## The five sections
+## The six sections
 
 Copy `references/analysis-template.html` and fill it. Order is fixed.
 
@@ -64,6 +64,10 @@ section** when the subject is recent or nothing is documented. An empty History 
 items. A takeaway is a *finding*, not a summary of a paragraph.
 
 **5. Risk & Impact** — see below.
+
+**6. Sources** — the citation list, in a real section headed like every other one rather than
+tucked into the footer. Every `.src` marker in the body must resolve to an entry here. The
+confidence and pipeline notes stay in the footer beneath it.
 
 ## The risk assessment
 
@@ -137,14 +141,14 @@ these sources, say so and stop — that is a finding, not a reason to reach furt
 
 **Retune the accent to the subject's objective.** The accent pair in `:root` is the one
 thing that changes per subject. An espionage subject whose purpose is quiet collection should
-not be presented in the same alarm red as a wiper crew — the colour is an assertion about
+not carry the same urgent blue as a destruction crew — the colour is an assertion about
 intent, so make it a true one. Neutrals carry a faint bias toward the accent, so shift them
 with it.
 
 | Objective | `--ember` (accent) | `--steel` (metadata) | Neutrals |
 |---|---|---|---|
-| Destruction / extortion | ember red `#cf4a1f` | steel blue `#346b8f` | warm grey (`--ground: #f6f4f2`) |
-| Espionage / collection | covert violet `#6d3fa3` | slate teal `#2f6b78` | faint cool (`--ground: #f5f4f7`) |
+| Destruction / extortion / disruption | signal blue `#1d4ed8` | slate `#55607a` | white (`--ground: #ffffff`) |
+| Espionage / collection | violet `#7c3aed` | slate `#55607a` | white (`--ground: #ffffff`) |
 
 These values are shared across the TI-Reporting project so that separate reports on one
 subject read as one body of work. `CLAUDE.md` records the convention.

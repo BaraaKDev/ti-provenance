@@ -12,7 +12,7 @@ the hand checks. This file only covers what is specific to a campaign report.
 
 Four, in this order:
 
-**Vulnerabilities** → **The Intrusion** → **The Arsenal** → **Remediation**
+**Vulnerabilities** → **The Intrusion** → **The Arsenal** → **Remediation** → **Sources**
 
 Use the **singular** heading *Vulnerability* when there is only one CVE.
 
@@ -84,7 +84,7 @@ leaked.
 # Two things to keep honest
 
 **Retune the accent to the actor's objective, not the CVE severity.** A critical CVE used by
-a quiet espionage actor should not terminate in alarm red. See the accent table in
+a quiet espionage actor should not terminate in the same urgent blue. See the accent table in
 `references/flow-craft.md`.
 
 **State attribution confidence in the footer.** Whether the actor is confirmed to have

@@ -46,7 +46,7 @@
   body {
     margin: 0; background: var(--ground); color: var(--ink);
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    line-height: 1.6; -webkit-font-smoothing: antialiased;
+    line-height: 1.55; -webkit-font-smoothing: antialiased;
   }
   .wrap { max-width: 940px; margin: 0 auto; padding: 0 24px; }
 
@@ -92,8 +92,11 @@
     font-weight: 800; margin: 0 0 10px; text-wrap: balance; max-width: 16ch;
   }
   .cover h1 .accent { color: var(--ember); }
+  /* The cover is deliberately left at the original scale - it is the one page that is not
+     dense reading, and the body-copy reduction is not wanted here. The explicit line-height
+     restores what it inherited before body dropped to 1.55. */
   .cover .standfirst {
-    font-size: clamp(15px, 2vw, 17.5px); color: var(--muted);
+    font-size: clamp(15px, 2vw, 17.5px); line-height: 1.6; color: var(--muted);
     max-width: 60ch; margin: 20px 0 0;
   }
   /* Six cells. auto-fit leaves the last row short at print width, and the gap lets the
@@ -111,22 +114,25 @@
   .covermeta .v { font-size: 13.5px; font-weight: 600; margin: 0; }
 
   /* ================= Sections ================= */
-  section { padding: 62px 0; }
+  section { padding: 46px 0; }
   section.alt { background: var(--surface); border-top: 1px solid var(--hair); border-bottom: 1px solid var(--hair); }
-  .section-head { margin-bottom: 38px; }
-  .section-head .eyebrow { margin-bottom: 10px; }
+  .section-head { margin-bottom: 28px; }
+  /* Section labels carry heading weight, not kicker weight - the executive summary and
+     defensive priorities have no h2 under them, so this line IS their heading. The cover
+     and hero eyebrows are deliberately excluded: they sit under display type already. */
+  .section-head .eyebrow { font-size: 18.5px; letter-spacing: .18em; margin-bottom: 10px; }
   .section-head h2 {
-    font-size: clamp(22px, 3.1vw, 28px); letter-spacing: -.015em;
+    font-size: 28px; letter-spacing: -.015em;
     font-weight: 800; margin: 0; text-wrap: balance;
   }
-  .section-head p { color: var(--muted); max-width: 64ch; margin: 12px 0 0; font-size: 14.5px; }
+  .section-head p { color: var(--muted); max-width: 68ch; margin: 10px 0 0; font-size: 13px; }
 
   .prose { max-width: 68ch; }
-  .prose p { margin: 0 0 18px; font-size: 15px; }
+  .prose p { margin: 0 0 15px; font-size: 13.5px; }
   .prose p:last-child { margin-bottom: 0; }
   .prose strong { font-weight: 700; }
   .prose h3 {
-    font-size: 18px; font-weight: 700; letter-spacing: -.01em;
+    font-size: 24px; font-weight: 700; letter-spacing: -.01em;
     margin: 34px 0 12px; text-wrap: balance;
   }
 
@@ -158,15 +164,15 @@
     background: var(--surface); border: 3px solid var(--spine); z-index: 2;
   }
   .entry.key::after { border-color: var(--ember); background: var(--ember); }
-  .entry h3 { margin: 0 0 8px; font-size: 16.5px; font-weight: 700; letter-spacing: -.01em; }
-  .entry p { margin: 0 0 12px; font-size: 14.5px; max-width: 62ch; }
+  .entry h3 { margin: 0 0 6px; font-size: 24px; font-weight: 700; letter-spacing: -.01em; }
+  .entry p { margin: 0 0 10px; font-size: 13px; max-width: 66ch; }
   .entry p:last-child { margin-bottom: 0; }
 
   /* ================= 4. CONCLUSION ================= */
   .callout {
     margin-top: 28px; padding: 20px 22px;
     background: var(--surface); border: 1px solid var(--ember);
-    border-left: 4px solid var(--ember); border-radius: 12px; font-size: 15px;
+    border-left: 4px solid var(--ember); border-radius: 12px; font-size: 13.5px;
   }
   section.alt .callout { background: var(--ground); }
   .callout strong { color: var(--ember-ink); }
@@ -187,7 +193,7 @@
     border: 1px solid color-mix(in srgb, var(--ember) 28%, transparent);
     font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; font-weight: 700;
   }
-  .takeaway p { margin: 0; font-size: 14px; }
+  .takeaway p { margin: 0; font-size: 13px; }
 
   /* ================= 5. RISK & IMPACT ================= */
   .sectors {
@@ -201,8 +207,8 @@
     padding: 15px 20px; border-bottom: 1px solid var(--hair);
   }
   .sector:last-child { border-bottom: none; }
-  .sector .name { font-weight: 700; font-size: 14px; }
-  .sector .why { font-size: 13px; color: var(--muted); }
+  .sector .name { font-weight: 700; font-size: 13px; }
+  .sector .why { font-size: 12.5px; color: var(--muted); }
 
   .meter { display: flex; gap: 3px; }
   .meter i {
@@ -237,7 +243,7 @@
   .risklegend .sw { width: 22px; height: 8px; border-radius: 2px; }
 
   /* ================= Footer ================= */
-  footer { border-top: 1px solid var(--hair); padding: 40px 0 64px; color: var(--muted); font-size: 13px; }
+  footer { border-top: 1px solid var(--hair); padding: 32px 0 44px; color: var(--muted); font-size: 12px; }
   footer h3 { font-size: 11.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin: 0 0 14px; }
   footer a { color: var(--ember-ink); }
   .sources { counter-reset: s; display: grid; gap: 8px; margin: 0 0 26px; padding: 0; list-style: none; }
@@ -308,7 +314,7 @@
     font-weight: 800; margin: 0 0 8px; text-wrap: balance;
   }
 .flowpart h1 .destruct { color: var(--ember); }
-.flowpart .lede { font-size: clamp(15px, 2vw, 17px); color: var(--muted); max-width: 62ch; margin: 18px 0 0; }
+.flowpart .lede { font-size: clamp(14px, 1.7vw, 15.5px); color: var(--muted); max-width: 66ch; margin: 16px 0 0; }
 .flowpart .aliases { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .flowpart .aliases .label { font-size: 11.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-right: 4px; }
 .flowpart .chip {
@@ -323,11 +329,11 @@
 .flowpart .fact .k { font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0 0 6px; }
 .flowpart .fact .v { font-size: 13.5px; font-weight: 600; margin: 0; }
 .flowpart .fact .v.bad { color: var(--ember-ink); }
-.flowpart section { padding: 60px 0; }
-.flowpart .section-head { margin-bottom: 40px; }
-.flowpart .section-head .eyebrow { margin-bottom: 10px; }
-.flowpart .section-head h2 { font-size: clamp(21px, 3vw, 27px); letter-spacing: -.01em; font-weight: 800; margin: 0; text-wrap: balance; }
-.flowpart .section-head p { color: var(--muted); max-width: 64ch; margin: 12px 0 0; font-size: 14px; }
+.flowpart section { padding: 46px 0; }
+.flowpart .section-head { margin-bottom: 28px; }
+.flowpart .section-head .eyebrow { font-size: 18.5px; letter-spacing: .18em; margin-bottom: 10px; }
+.flowpart .section-head h2 { font-size: 28px; letter-spacing: -.01em; font-weight: 800; margin: 0; text-wrap: balance; }
+.flowpart .section-head p { color: var(--muted); max-width: 68ch; margin: 10px 0 0; font-size: 13px; }
 .flowpart .flow { position: relative; padding-left: 34px; }
 .flowpart .flow::before {
     content: ""; position: absolute; left: 11px; top: 6px; bottom: 40px; width: 3px; border-radius: 3px;
@@ -367,11 +373,11 @@
   }
 .flowpart .phase.heat .tactic { color: color-mix(in srgb, var(--ember-ink) 72%, var(--steel)); }
 .flowpart .phase.impact .tactic { color: var(--ember-ink); }
-.flowpart .card h3 { font-size: 17px; margin: 2px 0 10px; font-weight: 700; letter-spacing: -.01em; width: 100%; }
-.flowpart .card p { margin: 0 0 14px; color: var(--muted); font-size: 13.5px; }
+.flowpart .card h3 { font-size: 24px; margin: 2px 0 8px; font-weight: 700; letter-spacing: -.01em; width: 100%; }
+.flowpart .card p { margin: 0 0 12px; color: var(--muted); font-size: 12.5px; }
 .flowpart .card p:last-child { margin-bottom: 0; }
 .flowpart .ttps { display: flex; flex-direction: column; gap: 8px; }
-.flowpart .ttp { display: flex; gap: 12px; align-items: baseline; font-size: 13px; }
+.flowpart .ttp { display: flex; gap: 12px; align-items: baseline; font-size: 12.5px; }
 .flowpart .tid {
     font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; font-weight: 600;
     color: var(--steel); background: var(--steel-wash); padding: 2px 7px; border-radius: 5px;
@@ -394,7 +400,7 @@
   }
 .flowpart .weapon.destruct { border-left-color: var(--ember); }
 .flowpart .weapon .wname {
-    font-family: ui-monospace, Consolas, monospace; font-weight: 700; font-size: 13.5px; margin: 0 0 2px;
+    font-family: ui-monospace, Consolas, monospace; font-weight: 700; font-size: 17.5px; margin: 0 0 2px;
     display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
   }
 .flowpart .weapon .sid { font-size: 10.5px; color: var(--muted); font-weight: 500; }
@@ -423,7 +429,7 @@
     width: 26px; height: 8px; border-radius: 4px; flex-shrink: 0;
     background: linear-gradient(90deg, var(--spine), var(--ember));
   }
-.flowpart footer { border-top: 1px solid var(--hair); padding: 34px 0 56px; color: var(--muted); font-size: 12.5px; }
+.flowpart footer { border-top: 1px solid var(--hair); padding: 28px 0 40px; color: var(--muted); font-size: 12px; }
 .flowpart footer a { color: var(--ember-ink); }
 .flowpart footer .note {
     margin-top: 10px; padding: 14px 16px; background: var(--surface-2);
@@ -454,27 +460,36 @@
   color: var(--ember); border: 1px solid var(--ember); border-radius: 2px;
   padding: 3px 8px; margin-bottom: 12px;
 }
-.partrule h2 { font-size: 1.5rem; margin: 0; color: var(--ink); }
-.partrule p  { color: var(--muted); margin: 6px 0 0; max-width: 62ch; }
+.partrule h2 { font-size: 28px; margin: 0; color: var(--ink); }
+.partrule p  { color: var(--muted); margin: 6px 0 0; max-width: 62ch; font-size: 13px; }
 
 .bsummary, .bdefence { border-top: 1px solid var(--hair); background: var(--surface); }
+/* These two are the only sections with no h2 beneath the label, so the label has to do the
+   heading's job. Bigger than a section eyebrow and set in ink rather than muted, otherwise
+   the executive summary reads as the weakest heading in a document it opens. */
+.bsummary .eyebrow, .bdefence .eyebrow {
+  font-size: 32px; letter-spacing: .06em; color: var(--ink); font-weight: 700;
+}
 .bsummary .wrap, .bdefence .wrap { padding: 40px 0; }
-.bslede { color: var(--ink); max-width: 68ch; }
+/* Every one of these carried no font-size, so the editorial regions rendered at the browser
+   default - larger than the report's own body copy, which is why a hand-written summary read
+   as a different document from the analysis beneath it. Sized explicitly, to body copy. */
+.bslede { color: var(--ink); max-width: 68ch; font-size: 13.5px; }
 .bskey { margin: 18px 0 0; padding: 0; list-style: none; }
 .bskey li {
   border-left: 2px solid var(--ember); padding: 4px 0 4px 14px;
-  margin-bottom: 10px; color: var(--ink); max-width: 68ch;
+  margin-bottom: 10px; color: var(--ink); max-width: 68ch; font-size: 13.5px;
 }
-.bsteps { margin: 18px 0 0; padding-left: 20px; color: var(--ink); max-width: 68ch; }
+.bsteps { margin: 18px 0 0; padding-left: 20px; color: var(--ink); max-width: 68ch; font-size: 13.5px; }
 .bsteps li { margin-bottom: 10px; }
 .bwhat { display: block; font-weight: 600; }
-.bwhy  { display: block; color: var(--muted); font-size: .9rem; }
+.bwhy  { display: block; color: var(--muted); font-size: 12.5px; }
 
 /* The flow report carries its own hero. Inside a bulletin the cover already introduced the
    subject, so the hero is demoted rather than repeated at cover scale. */
 .flowpart > header { padding-top: 0; }
 .flowpart header h1 { font-size: 1.9rem; }
-.flowpart header .lede { font-size: 1rem; }
+.flowpart header .lede { font-size: 14.5px; }
 </style>
 
 <!-- ===================== 1. COVER ===================== -->
@@ -624,7 +639,7 @@
         </p>
       </div>
 
-      <h3 style="font-size:18px;font-weight:700;margin:38px 0 22px;">Activity, oldest first</h3>
+      <h3 style="font-size:24px;font-weight:700;margin:30px 0 18px;">Activity, oldest first</h3>
 
       <div class="chrono">
         <div class="entry key">

@@ -122,10 +122,19 @@
     font-size: clamp(15px, 2vw, 17.5px); color: var(--muted);
     max-width: 60ch; margin: 20px 0 0;
   }
+  /* Five cells. auto-fit leaves the last row short at print width, and the gap lets the
+     container's hairline background show through as an empty grey block - so the columns
+     are pinned and the last cell spans the remainder instead.
+     CHANGE THE NUMBER OF CELLS AND YOU MUST CHANGE THIS RULE. */
   .covermeta {
     margin-top: 42px; display: grid; gap: 1px;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     background: var(--hair); border: 1px solid var(--hair); border-radius: 12px; overflow: hidden;
+  }
+  .covermeta div:last-child { grid-column: span 2; }
+  @media (max-width: 640px) {
+    .covermeta { grid-template-columns: repeat(2, 1fr); }
+    .covermeta div:last-child { grid-column: 1 / -1; }
   }
   .covermeta div { background: var(--surface); padding: 15px 18px; }
   .covermeta .k { font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0 0 5px; }
@@ -331,7 +340,6 @@
       <div><p class="k">First observed</p><p class="v">{{FIRST_OBSERVED}}</p></div>
       <div><p class="k">Assessed risk</p><p class="v">{{OVERALL_RISK}}</p></div>
       <div><p class="k">Report date</p><p class="v">{{REPORT_DATE}}</p></div>
-      <div><p class="k">Analyst</p><p class="v">{{ANALYST}}</p></div>
     </div>
   </div>
 </header>

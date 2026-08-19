@@ -126,11 +126,12 @@ section, footer { break-before: page !important; page-break-before: always !impo
 .cover { break-before: auto !important; page-break-before: auto !important; }
 .flowpart > header { break-before: avoid !important; page-break-before: avoid !important; }
 
-/* The hero fact grids are auto-fit at minmax(150px, 1fr). On screen that gives three columns
-   for six fields - two tidy rows. The narrower print column fits four, so six fields leave
-   two orphan slots, and because the container paints --hair behind a 1px gap those orphans
-   render as a solid grey panel that reads as a mistake. Both grids carry exactly six fields,
-   so pinning three columns restores the intended two rows. */
+/* The hero fact grids are auto-fit at minmax(150px, 1fr). The narrower print column fits
+   four, so a six-field grid leaves two orphan slots, and because the container paints
+   --hair behind a 1px gap those orphans render as a solid grey panel that reads as a
+   mistake. .facts carries six fields, so three columns restores two tidy rows.
+   .covermeta now carries five and pins its own columns, spanning the last cell over the
+   remainder; it is kept here so a report built before that change still prints right. */
 .covermeta, .facts { grid-template-columns: repeat(3, 1fr) !important; }
 
 /* URLs are long; let them wrap rather than overflow the text column. */

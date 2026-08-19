@@ -299,6 +299,12 @@ $bulletinCss = @"
 .partrule p  { color: var(--muted); margin: 6px 0 0; max-width: 62ch; font-size: 13px; }
 
 .bsummary, .bdefence { border-top: 1px solid var(--hair); background: var(--surface); }
+/* These two are the only sections with no h2 beneath the label, so the label has to do the
+   heading's job. Bigger than a section eyebrow and set in ink rather than muted, otherwise
+   the executive summary reads as the weakest heading in a document it opens. */
+.bsummary .eyebrow, .bdefence .eyebrow {
+  font-size: 16px; letter-spacing: .16em; color: var(--ink); font-weight: 700;
+}
 .bsummary .wrap, .bdefence .wrap { padding: 40px 0; }
 /* Every one of these carried no font-size, so the editorial regions rendered at the browser
    default - larger than the report's own body copy, which is why a hand-written summary read

@@ -115,7 +115,10 @@
   section { padding: 46px 0; }
   section.alt { background: var(--surface); border-top: 1px solid var(--hair); border-bottom: 1px solid var(--hair); }
   .section-head { margin-bottom: 28px; }
-  .section-head .eyebrow { margin-bottom: 10px; }
+  /* Section labels carry heading weight, not kicker weight - the executive summary and
+     defensive priorities have no h2 under them, so this line IS their heading. The cover
+     and hero eyebrows are deliberately excluded: they sit under display type already. */
+  .section-head .eyebrow { font-size: 14px; letter-spacing: .18em; margin-bottom: 10px; }
   .section-head h2 {
     font-size: clamp(25px, 3.5vw, 32px); letter-spacing: -.015em;
     font-weight: 800; margin: 0; text-wrap: balance;
@@ -343,7 +346,7 @@
 .flowpart .fact .v.bad { color: var(--ember-ink); }
 .flowpart section { padding: 46px 0; }
 .flowpart .section-head { margin-bottom: 28px; }
-.flowpart .section-head .eyebrow { margin-bottom: 10px; }
+.flowpart .section-head .eyebrow { font-size: 14px; letter-spacing: .18em; margin-bottom: 10px; }
 .flowpart .section-head h2 { font-size: clamp(24px, 3.4vw, 31px); letter-spacing: -.01em; font-weight: 800; margin: 0; text-wrap: balance; }
 .flowpart .section-head p { color: var(--muted); max-width: 68ch; margin: 10px 0 0; font-size: 13px; }
 .flowpart .sev {
@@ -547,6 +550,12 @@
 .partrule p  { color: var(--muted); margin: 6px 0 0; max-width: 62ch; font-size: 13px; }
 
 .bsummary, .bdefence { border-top: 1px solid var(--hair); background: var(--surface); }
+/* These two are the only sections with no h2 beneath the label, so the label has to do the
+   heading's job. Bigger than a section eyebrow and set in ink rather than muted, otherwise
+   the executive summary reads as the weakest heading in a document it opens. */
+.bsummary .eyebrow, .bdefence .eyebrow {
+  font-size: 16px; letter-spacing: .16em; color: var(--ink); font-weight: 700;
+}
 .bsummary .wrap, .bdefence .wrap { padding: 40px 0; }
 /* Every one of these carried no font-size, so the editorial regions rendered at the browser
    default - larger than the report's own body copy, which is why a hand-written summary read

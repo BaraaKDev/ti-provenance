@@ -140,7 +140,10 @@
   section { padding: 62px 0; }
   section.alt { background: var(--surface); border-top: 1px solid var(--hair); border-bottom: 1px solid var(--hair); }
   .section-head { margin-bottom: 38px; }
-  .section-head .eyebrow { margin-bottom: 10px; }
+  /* Section labels carry heading weight, not kicker weight - the executive summary and
+     defensive priorities have no h2 under them, so this line IS their heading. The cover
+     and hero eyebrows are deliberately excluded: they sit under display type already. */
+  .section-head .eyebrow { font-size: 14px; letter-spacing: .18em; margin-bottom: 10px; }
   .section-head h2 {
     font-size: clamp(25px, 3.5vw, 32px); letter-spacing: -.015em;
     font-weight: 800; margin: 0; text-wrap: balance;

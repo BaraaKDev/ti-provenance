@@ -1,0 +1,119 @@
+{
+  "schema": "analysis/1.0",
+  "subject": "ProxyShell",
+  "slug": "proxyshell",
+  "subject_type": "vulnerability",
+  "matrix": "enterprise",
+  "aliases": ["ProxyShell chain"],
+  "objective": "unknown",
+  "objective_note": "The chain grants SYSTEM on a mail server and nothing more specific - what followed ranged from Chinese espionage clusters to Conti ransomware to spam distribution, so the objective belonged to whoever arrived.",
+  "cves": ["CVE-2021-34473", "CVE-2021-34523", "CVE-2021-31207"],
+  "vuln_relationship": "exploit-chain",
+  "confidence": "derived",
+  "facts": {
+    "vulnerabilities": "3",
+    "highest_cvss": "9.8 Critical",
+    "product": "Microsoft Exchange Server",
+    "affected": "2013 - 2016 - 2019",
+    "patched": "Apr-May 2021",
+    "auth_required": "None"
+  },
+  "background": [
+    "ProxyShell is not a vulnerability but a route: three flaws in on-premises Microsoft Exchange Server that are individually survivable and jointly catastrophic. CVE-2021-34473 is a server-side request forgery in the Autodiscover frontend that lets an unauthenticated request reach internal backends it should never touch. CVE-2021-34523 is an elevation of privilege in the Exchange PowerShell backend, which trusts requests arriving down that frontend path. CVE-2021-31207 is a security-feature bypass in mailbox export that writes a file of the attacker's choosing to a path of their choosing. Run in sequence over port 443, they convert an unauthenticated HTTPS request into code execution as NT AUTHORITY\\SYSTEM on an internet-facing mail server, with no credentials and no user interaction.",
+    "The middle link is what makes this a genuine attacker chain rather than three findings in one product. CVE-2021-31207 scores only 6.6 and requires high privileges, which reads like a low priority until you notice that links one and two exist to supply exactly those privileges. Each flaw is a precondition for the next, and each is close to useless alone: the SSRF is a reachability primitive with no code execution, the elevation has nothing externally reachable to elevate, and the file write needs administrator rights it cannot obtain by itself. This is the opposite of a remediation cascade, where the sequence describes versions a defender passed through - here the sequence is the exploit.",
+    "The exposure was created by publication rather than by discovery. Microsoft shipped fixes for the first two flaws on 13 April 2021 and for the third on 11 May 2021, without publicly documenting them at the time; the CVEs were assigned and described in July. Mass exploitation began on 12 August, within a week of the full technical detail being presented publicly, against an estate that had had four months to patch. Rapid7 estimated more than 84,000 Exchange servers still vulnerable to the chain on 25 August 2021. All three CVEs are listed in the CISA Known Exploited Vulnerabilities catalog."
+  ],
+  "chronology": [
+    {
+      "date": "2021-08",
+      "event": "Eight distinct clusters exploit the chain across four sectors",
+      "detail": "Across August 2021 Mandiant Managed Defense responds to ProxyShell exploitation at organisations in education, government, business services and telecommunications across the US, Europe and the Middle East, and tracks eight separate UNC clusters using the chain. One of them, UNC2980, is assessed with low confidence to operate from China and to be conducting espionage; it is observed against a US university. Exploitation is largely automated and arrives from a wide range of source addresses and user agents. The web shells dropped include BLUEBEAM, a Java-based manager also known as Godzilla, and CHINACHOP, a minimal .NET injection shell.",
+      "sources": [4]
+    },
+    {
+      "date": "2021-08-12",
+      "event": "Mass opportunistic scanning and exploitation begins",
+      "detail": "Rapid7 detects widespread opportunistic scanning and exploitation of Exchange servers using the ProxyShell chain, a week after the technique was presented in full at Black Hat USA. By 21 August its managed detection and incident response teams record a significant increase in Exchange exploitation by multiple distinct threat actors. The chain requires no authentication and operates entirely over port 443, so it is not distinguishable from ordinary mail traffic at the perimeter.",
+      "key": true,
+      "sources": [3]
+    },
+    {
+      "date": "2021-08-21",
+      "event": "CISA issues an urgent alert with the estate still largely unpatched",
+      "detail": "CISA publishes an urgent alert on active exploitation of the three ProxyShell vulnerabilities. Rapid7 estimates on 25 August that more than 84,000 Exchange servers remain vulnerable to the chain, more than three months after the last of the three patches shipped.",
+      "sources": [8, 3]
+    },
+    {
+      "date": "2021-08-27",
+      "event": "LockFile chains ProxyShell to PetitPotam to take the domain",
+      "detail": "Sophos reports LockFile ransomware breaching unpatched on-premises Exchange servers through ProxyShell and then running a PetitPotam NTLM relay attack to seize the domain controller - a second chain bolted onto the first. The encryptor writes through memory-mapped I/O so the Windows System process performs the disk writes rather than the malicious process, and encrypts every other 16 bytes, which leaves files partially readable and keeps chi-squared statistics close to normal so detection built on entropy scoring does not fire. It uses no command and control, and deletes itself with a ping-based delay once finished.",
+      "key": true,
+      "sources": [6]
+    },
+    {
+      "date": "2021-09-03",
+      "event": "Conti affiliates go from exploit to web shell in under a minute",
+      "detail": "Sophos documents a Conti affiliate intrusion beginning with ProxyShell against an Exchange Server 2016 running Cumulative Update 3. The operators create a mailbox named administrator and assign it Exchange roles including remote PowerShell rights, install a web shell in under a minute and a backup shell three minutes later, and finish mapping the network within thirty minutes. Credentials are harvested about four hours in, lateral movement over RDP follows roughly thirteen minutes after that, and around one terabyte is exfiltrated with rclone to Mega over two days. Conti is deployed on day five by four batch scripts targeting administrative shares by name. Seven separate persistence mechanisms are left behind: two web shells, Cobalt Strike, and four commercial remote access tools including AnyDesk, Atera, Splashtop and Remote Utilities.",
+      "key": true,
+      "sources": [5]
+    },
+    {
+      "date": "2021-11",
+      "event": "SquirrelWaffle uses compromised servers to hijack real email threads",
+      "detail": "Trend Micro reports intrusions in which ProxyShell and ProxyLogon are used together against on-premises Exchange servers, with exploitation of CVE-2021-26855, CVE-2021-34473 and CVE-2021-34523 visible in the IIS logs of three compromised servers. Rather than encrypting or stealing, the operators use the access to reply to existing legitimate email threads with malicious spam that distributes the SquirrelWaffle loader. The messages come from the real correspondent's real server, which is what makes them work.",
+      "key": true,
+      "sources": [7]
+    }
+  ],
+  "risk": [
+    {
+      "sector": "Education and research",
+      "level": "critical",
+      "why": "Named first among the sectors Mandiant responded to, and the one documented espionage case - UNC2980, assessed with low confidence to China - was against a US university."
+    },
+    {
+      "sector": "Government and public administration",
+      "level": "critical",
+      "why": "Named directly in Mandiant's account of the sectors exploited through this chain across the US, Europe and the Middle East."
+    },
+    {
+      "sector": "Business and professional services",
+      "level": "high",
+      "why": "Named in the same reporting, and the sector's characteristic mid-size on-premises Exchange estate is precisely the population that had not patched by August 2021."
+    },
+    {
+      "sector": "Telecommunications",
+      "level": "high",
+      "why": "Named in the same reporting. Nothing in the cited sources distinguishes it further, so this rests on observed targeting rather than on any specific incident."
+    },
+    {
+      "sector": "Healthcare",
+      "level": "moderate",
+      "why": "Plausible and often heavily invested in on-premises Exchange, but no healthcare victim appears in any of the cited sources for this chain."
+    },
+    {
+      "sector": "Retail and hospitality",
+      "level": "low",
+      "why": "No exploitation against retail appears in the cited reporting. The level reflects that absence rather than any protection - the ransomware crews using this chain selected by exposed server, not by industry."
+    },
+    {
+      "sector": "Estates on Exchange Online only",
+      "level": "minimal",
+      "why": "All three flaws are in on-premises Exchange Server. An organisation that moved its mail to Exchange Online was never in scope for this chain, which is the single clearest exposure boundary in this report."
+    }
+  ],
+  "sources": [
+    "https://nvd.nist.gov/vuln/detail/CVE-2021-34473",
+    "https://nvd.nist.gov/vuln/detail/CVE-2021-34523",
+    "https://nvd.nist.gov/vuln/detail/CVE-2021-31207",
+    "https://www.rapid7.com/blog/post/2021/08/12/proxyshell-more-widespread-exploitation-of-microsoft-exchange-servers/",
+    "https://cloud.google.com/blog/topics/threat-intelligence/pst-want-shell-proxyshell-exploiting-microsoft-exchange-servers",
+    "https://www.sophos.com/en-us/blog/conti-affiliates-use-proxyshell-exchange-exploit-in-ransomware-attacks/",
+    "https://www.sophos.com/en-us/blog/lockfile-ransomwares-box-of-tricks-intermittent-encryption-and-evasion/",
+    "https://www.trendmicro.com/en_us/research/21/k/Squirrelwaffle-Exploits-ProxyShell-and-ProxyLogon-to-Hijack-Email-Chains.html",
+    "https://www.cisa.gov/uscert/ncas/current-activity/2021/08/21/urgent-protect-against-active-exploitation-proxyshell",
+    "https://www.tenable.com/blog/proxyshell-attackers-actively-scanning-for-vulnerable-microsoft-exchange-servers-cve-2021-34473",
+    "https://www.cisa.gov/known-exploited-vulnerabilities-catalog"
+  ],
+  "report": "analysis.html"
+}

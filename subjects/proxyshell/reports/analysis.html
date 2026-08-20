@@ -1,0 +1,639 @@
+<title>ProxyShell &middot; Vulnerability Analysis</title>
+
+<style>
+  /* ---- Tokens: shared across TI-Reporting - see CLAUDE.md ---- */
+  :root {
+    color-scheme: light;
+
+    --ground: #ffffff;
+    --surface: #ffffff;
+    --surface-2: #f3f6fc;
+    --ink: #14181f;
+    --muted: #5b6474;
+    --hair: #e3e8f2;
+    --hair-strong: #c6cede;
+
+    /* ACCENT - objective is unknown by design: the chain grants SYSTEM on a mail server,
+       and the intent belonged to whoever arrived. Signal blue, as the flow report uses. */
+    --ember: #1d4ed8;
+    --ember-ink: #1e40af;
+    --ember-wash: rgba(29, 78, 216, 0.09);
+    --steel: #55607a;
+    --steel-wash: rgba(85, 96, 122, 0.10);
+    --spine: #c2cadb;
+
+    /* SECTOR RISK - shares the CVSS ramp, separate tokens, different form. */
+    --risk-critical: #a4161a;  --risk-critical-wash: rgba(164, 22, 26, 0.10);
+    --risk-high:     #b3541e;  --risk-high-wash:     rgba(179, 84, 30, 0.10);
+    --risk-moderate: #8a6a00;  --risk-moderate-wash: rgba(138, 106, 0, 0.10);
+    --risk-low:      #4a6b2a;  --risk-low-wash:      rgba(74, 107, 42, 0.10);
+    --risk-minimal:  #5c6470;  --risk-minimal-wash:  rgba(92, 100, 112, 0.10);
+
+    --shadow: 0 1px 2px rgba(20,22,26,.06), 0 8px 24px rgba(20,22,26,.05);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.55; -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 940px; margin: 0 auto; padding: 0 24px; }
+
+  /* ================= 1. COVER ================= */
+  .cover {
+    position: relative; overflow: hidden;
+    border-bottom: 1px solid var(--hair);
+    background:
+      radial-gradient(120% 90% at 88% -5%, var(--ember-wash), transparent 62%),
+      var(--surface);
+  }
+  .cover .wrap { position: relative; z-index: 2; padding-top: 84px; padding-bottom: 76px; }
+
+  .covermotif {
+    position: absolute; top: -40px; right: -60px; width: 460px; height: 460px;
+    color: var(--ember); pointer-events: none; z-index: 1;
+  }
+  .covermotif .arcs   { opacity: .16; }
+  .covermotif .rail   { opacity: .30; }
+  .covermotif .dots   { opacity: .22; }
+
+  .tlp {
+    display: inline-block; font-family: ui-monospace, Consolas, monospace;
+    font-size: 10.5px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
+    padding: 4px 10px; border-radius: 4px; margin-bottom: 26px;
+    background: var(--surface-2); border: 1px solid var(--hair-strong); color: var(--muted);
+  }
+  .tlp.clear { color: var(--muted); }
+  .tlp.green { color: var(--risk-low);      border-color: color-mix(in srgb, var(--risk-low) 40%, transparent);      background: var(--risk-low-wash); }
+  .tlp.amber { color: var(--risk-high);     border-color: color-mix(in srgb, var(--risk-high) 40%, transparent);     background: var(--risk-high-wash); }
+  .tlp.red   { color: var(--risk-critical); border-color: color-mix(in srgb, var(--risk-critical) 40%, transparent); background: var(--risk-critical-wash); }
+
+  .eyebrow {
+    font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+    font-size: 11.5px; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--muted); margin: 0 0 18px; display: flex; align-items: center; gap: 12px;
+  }
+  .eyebrow::after { content: ""; flex: 1; height: 1px; background: var(--hair-strong); }
+  .idtag { color: var(--ember-ink); font-weight: 600; }
+
+  .cover h1 {
+    font-size: clamp(34px, 5.6vw, 54px); line-height: .96; letter-spacing: -.025em;
+    font-weight: 800; margin: 0 0 10px; text-wrap: balance; max-width: 16ch;
+  }
+  .cover h1 .accent { color: var(--ember); }
+  /* The cover is deliberately left at the original scale - it is the one page that is not
+     dense reading, and the body-copy reduction is not wanted here. The explicit line-height
+     restores what it inherited before body dropped to 1.55. */
+  .cover .standfirst {
+    font-size: clamp(15px, 2vw, 17.5px); line-height: 1.6; color: var(--muted);
+    max-width: 60ch; margin: 20px 0 0;
+  }
+  /* Six cells. auto-fit leaves the last row short at print width, and the gap lets the
+     container's hairline background show through as an empty grey block - so the columns
+     are pinned instead. Three divides six exactly, and so does two on a narrow screen.
+     CHANGE THE NUMBER OF CELLS AND YOU MUST CHANGE THIS RULE. */
+  .covermeta {
+    margin-top: 42px; display: grid; gap: 1px;
+    grid-template-columns: repeat(3, 1fr);
+    background: var(--hair); border: 1px solid var(--hair); border-radius: 12px; overflow: hidden;
+  }
+  @media (max-width: 640px) { .covermeta { grid-template-columns: repeat(2, 1fr); } }
+  .covermeta div { background: var(--surface); padding: 15px 18px; }
+  .covermeta .k { font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0 0 5px; }
+  .covermeta .v { font-size: 13.5px; font-weight: 600; margin: 0; }
+
+  /* ================= Sections ================= */
+  section { padding: 46px 0; }
+  section.alt { background: var(--surface); border-top: 1px solid var(--hair); border-bottom: 1px solid var(--hair); }
+  .section-head { margin-bottom: 28px; }
+  /* Section labels carry heading weight, not kicker weight - the executive summary and
+     defensive priorities have no h2 under them, so this line IS their heading. The cover
+     and hero eyebrows are deliberately excluded: they sit under display type already. */
+  .section-head .eyebrow { font-size: 18.5px; letter-spacing: .18em; margin-bottom: 10px; }
+  .section-head h2 {
+    font-size: 28px; letter-spacing: -.015em;
+    font-weight: 800; margin: 0; text-wrap: balance;
+  }
+  .section-head p { color: var(--muted); max-width: 68ch; margin: 10px 0 0; font-size: 13px; }
+
+  .prose { max-width: 68ch; }
+  .prose p { margin: 0 0 15px; font-size: 13.5px; }
+  .prose p:last-child { margin-bottom: 0; }
+  .prose strong { font-weight: 700; }
+  .prose h3 {
+    font-size: 24px; font-weight: 700; letter-spacing: -.01em;
+    margin: 34px 0 12px; text-wrap: balance;
+  }
+
+  .src {
+    font-family: ui-monospace, Consolas, monospace; font-size: 10.5px; font-weight: 700;
+    color: var(--steel); background: var(--steel-wash);
+    border: 1px solid color-mix(in srgb, var(--steel) 24%, transparent);
+    padding: 0 5px; border-radius: 4px; vertical-align: 1px; margin-left: 3px;
+    text-decoration: none; white-space: nowrap;
+  }
+
+  /* ================= 2. CHRONOLOGY ================= */
+  .chrono { position: relative; padding-left: 116px; }
+  .chrono::before {
+    content: ""; position: absolute; left: 92px; top: 10px; bottom: 10px;
+    width: 3px; border-radius: 3px;
+    background: linear-gradient(to bottom, var(--spine) 0%, var(--spine) 45%, var(--ember) 100%);
+  }
+  .entry { position: relative; margin-bottom: 30px; }
+  .entry:last-child { margin-bottom: 0; }
+  .entry .when {
+    position: absolute; left: -116px; top: 1px; width: 76px; text-align: right;
+    font-family: ui-monospace, Consolas, monospace; font-size: 12px; font-weight: 700;
+    color: var(--ember-ink); letter-spacing: .02em;
+  }
+  .entry::after {
+    content: ""; position: absolute; left: -27px; top: 7px;
+    width: 11px; height: 11px; border-radius: 50%;
+    background: var(--surface); border: 3px solid var(--spine); z-index: 2;
+  }
+  .entry.key::after { border-color: var(--ember); background: var(--ember); }
+  .entry h3 { margin: 0 0 6px; font-size: 24px; font-weight: 700; letter-spacing: -.01em; }
+  .entry p { margin: 0 0 10px; font-size: 13px; max-width: 66ch; }
+  .entry p:last-child { margin-bottom: 0; }
+
+  /* ================= 4. CONCLUSION ================= */
+  .callout {
+    margin-top: 28px; padding: 20px 22px;
+    background: var(--surface); border: 1px solid var(--ember);
+    border-left: 4px solid var(--ember); border-radius: 12px; font-size: 13.5px;
+  }
+  section.alt .callout { background: var(--ground); }
+  .callout strong { color: var(--ember-ink); }
+  .callout p { margin: 0 0 14px; }
+  .callout p:last-child { margin: 0; }
+
+  .takeaways { display: grid; gap: 12px; margin-top: 26px; }
+  .takeaway {
+    display: grid; grid-template-columns: 30px 1fr; gap: 0 14px; align-items: start;
+    background: var(--surface); border: 1px solid var(--hair);
+    border-radius: 12px; padding: 16px 18px; box-shadow: var(--shadow);
+  }
+  section.alt .takeaway { background: var(--ground); }
+  .takeaway .n {
+    display: flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--ember-wash); color: var(--ember-ink);
+    border: 1px solid color-mix(in srgb, var(--ember) 28%, transparent);
+    font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; font-weight: 700;
+  }
+  .takeaway p { margin: 0; font-size: 13px; }
+
+  /* ================= 5. RISK & IMPACT ================= */
+  .sectors {
+    border: 1px solid var(--hair); border-radius: 14px; overflow: hidden;
+    background: var(--surface); box-shadow: var(--shadow);
+  }
+  section.alt .sectors { background: var(--ground); }
+  .sector {
+    display: grid; grid-template-columns: minmax(150px, 1.1fr) 104px 92px 2fr;
+    gap: 16px; align-items: center;
+    padding: 15px 20px; border-bottom: 1px solid var(--hair);
+  }
+  .sector:last-child { border-bottom: none; }
+  .sector .name { font-weight: 700; font-size: 13px; }
+  .sector .why { font-size: 12.5px; color: var(--muted); }
+
+  .meter { display: flex; gap: 3px; }
+  .meter i {
+    display: block; height: 9px; flex: 1; border-radius: 2px;
+    background: var(--hair-strong); opacity: .5;
+  }
+  .level {
+    font-family: ui-monospace, Consolas, monospace; font-size: 10px; font-weight: 700;
+    letter-spacing: .1em; text-transform: uppercase; text-align: center;
+    padding: 3px 8px; border-radius: 100px; white-space: nowrap;
+  }
+
+  .sector.critical .meter i:nth-child(-n+5) { background: var(--risk-critical); opacity: 1; }
+  .sector.high     .meter i:nth-child(-n+4) { background: var(--risk-high);     opacity: 1; }
+  .sector.moderate .meter i:nth-child(-n+3) { background: var(--risk-moderate); opacity: 1; }
+  .sector.low      .meter i:nth-child(-n+2) { background: var(--risk-low);      opacity: 1; }
+  .sector.minimal  .meter i:nth-child(-n+1) { background: var(--risk-minimal);  opacity: 1; }
+
+  .sector.critical .level { color: #fff; background: var(--risk-critical); }
+  .sector.high     .level { color: var(--risk-high);     background: var(--risk-high-wash);     border: 1px solid color-mix(in srgb, var(--risk-high) 32%, transparent); }
+  .sector.moderate .level { color: var(--risk-moderate); background: var(--risk-moderate-wash); border: 1px solid color-mix(in srgb, var(--risk-moderate) 32%, transparent); }
+  .sector.low      .level { color: var(--risk-low);      background: var(--risk-low-wash);      border: 1px solid color-mix(in srgb, var(--risk-low) 32%, transparent); }
+  .sector.minimal  .level { color: var(--risk-minimal);  background: var(--risk-minimal-wash);  border: 1px solid var(--hair-strong); }
+
+  .risklegend {
+    display: flex; flex-wrap: wrap; gap: 18px; margin-top: 20px;
+    padding: 14px 18px; background: var(--surface-2);
+    border: 1px solid var(--hair); border-radius: 12px;
+    font-size: 12.5px; color: var(--muted);
+  }
+  .risklegend .item { display: flex; align-items: center; gap: 8px; }
+  .risklegend .sw { width: 22px; height: 8px; border-radius: 2px; }
+
+  /* ================= Footer ================= */
+  footer { border-top: 1px solid var(--hair); padding: 32px 0 44px; color: var(--muted); font-size: 12px; }
+  footer h3 { font-size: 11.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin: 0 0 14px; }
+  footer a { color: var(--ember-ink); }
+  .sources { counter-reset: s; display: grid; gap: 8px; margin: 0 0 26px; padding: 0; list-style: none; }
+  /* Counter absolutely positioned, not a grid column: an <li> holding a text node AND an
+     <a> produces three grid items, so the anchor wrapped into the 30px counter column and
+     the URL rendered about four characters wide. */
+  .sources li {
+    counter-increment: s; position: relative; padding-left: 40px;
+    font-size: 12.5px; overflow-wrap: anywhere;
+  }
+  .sources li::before {
+    content: counter(s); position: absolute; left: 0; top: 2px;
+    font-family: ui-monospace, Consolas, monospace; font-size: 10.5px;
+    font-weight: 700; color: var(--steel); background: var(--steel-wash);
+    border: 1px solid color-mix(in srgb, var(--steel) 24%, transparent);
+    border-radius: 4px; text-align: center; width: 30px; height: 20px; line-height: 18px;
+  }
+  .note {
+    margin-top: 12px; padding: 14px 16px; background: var(--surface-2);
+    border: 1px dashed var(--hair-strong); border-radius: 10px; color: var(--muted);
+    font-size: 12.5px;
+  }
+  code { font-family: ui-monospace, Consolas, monospace; font-size: .9em; background: var(--surface-2); padding: 1px 5px; border-radius: 3px; }
+</style>
+
+<!-- ===================== 1. COVER ===================== -->
+<header class="cover">
+  <svg class="covermotif" viewBox="0 0 400 400" fill="none" aria-hidden="true">
+    <g class="arcs" stroke="currentColor" stroke-width="1.1">
+      <circle cx="286" cy="132" r="46"/>
+      <circle cx="286" cy="132" r="86"/>
+      <circle cx="286" cy="132" r="126"/>
+      <circle cx="286" cy="132" r="166"/>
+    </g>
+    <g class="rail" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+      <path d="M286 46 V318"/>
+    </g>
+    <g class="dots" fill="currentColor">
+      <circle cx="286" cy="86"  r="7"/>
+      <circle cx="286" cy="150" r="7"/>
+      <circle cx="286" cy="214" r="7"/>
+      <circle cx="286" cy="278" r="7"/>
+      <circle cx="196" cy="188" r="4"/>
+      <circle cx="352" cy="242" r="4"/>
+      <circle cx="230" cy="300" r="4"/>
+    </g>
+  </svg>
+
+  <div class="wrap">
+    <span class="tlp clear">TLP:CLEAR</span>
+
+    <p class="eyebrow">Vulnerability Analysis <span class="idtag">CVE-2021-34473 &middot; +2</span></p>
+    <h1>ProxyShell<span class="accent">.</span></h1>
+    <p class="standfirst">Three Exchange flaws that were patched four months before anyone attacked them,
+      and were still open on 84,000 servers when the exploit went public.</p>
+
+    <div class="covermeta">
+      <div><p class="k">Subject type</p><p class="v">Vulnerability &middot; exploit chain</p></div>
+      <div><p class="k">Attribution</p><p class="v">No single actor &middot; state and criminal</p></div>
+      <div><p class="k">First observed</p><p class="v">August 2021</p></div>
+      <div><p class="k">Assessed risk</p><p class="v">Critical</p></div>
+      <div><p class="k">Report date</p><p class="v">19 August 2026</p></div>
+      <div><p class="k">Is active?</p><p class="v">Yes</p></div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ===================== 2. OVERVIEW ===================== -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Overview</p>
+        <h2>Three flaws that only matter in order</h2>
+      </div>
+
+      <div class="prose">
+        <p>ProxyShell is not a vulnerability but a route: three flaws in on-premises Microsoft Exchange
+          Server that are individually survivable and jointly catastrophic. <strong>CVE-2021-34473</strong>
+          is a server-side request forgery in the Autodiscover frontend that lets an unauthenticated
+          request reach internal backends it should never touch.<a class="src" href="#s1">1</a>
+          <strong>CVE-2021-34523</strong> is an elevation of privilege in the Exchange PowerShell backend,
+          which trusts requests arriving down that frontend path.<a class="src" href="#s2">2</a>
+          <strong>CVE-2021-31207</strong> is a security-feature bypass in mailbox export that writes a file
+          of the attacker's choosing to a path of their choosing.<a class="src" href="#s3">3</a> Run in
+          sequence over port 443, they convert an unauthenticated HTTPS request into code execution as
+          <code>NT AUTHORITY\SYSTEM</code> on an internet-facing mail server, with no credentials and no
+          user interaction.</p>
+
+        <p>The middle link is what makes this a genuine attacker chain rather than three findings in one
+          product. CVE-2021-31207 scores only <strong>6.6 and requires high privileges</strong>, which
+          reads like a low priority until you notice that links one and two exist to supply exactly those
+          privileges.<a class="src" href="#s3">3</a> Each flaw is a precondition for the next, and each is
+          close to useless alone: the SSRF is a reachability primitive with no code execution, the
+          elevation has nothing externally reachable to elevate, and the file write needs administrator
+          rights it cannot obtain by itself. This is the opposite of a remediation cascade, where the
+          sequence describes versions a defender passed through &mdash; here <em>the sequence is the
+          exploit</em>.</p>
+
+        <p>The exposure was created by publication rather than by discovery. Microsoft shipped fixes for
+          the first two flaws on 13 April 2021 and for the third on 11 May 2021, without publicly
+          documenting them at the time; the CVEs were assigned and described in July. Mass exploitation
+          began on 12 August, within a week of the full technical detail being presented publicly, against
+          an estate that had had four months to patch. Rapid7 estimated more than <strong>84,000 Exchange
+          servers</strong> still vulnerable to the chain on 25 August 2021.<a class="src" href="#s4">4</a>
+          All three CVEs are listed in the CISA Known Exploited Vulnerabilities
+          catalog.<a class="src" href="#s11">11</a></p>
+      </div>
+
+      <h3 style="font-size:24px;font-weight:700;margin:30px 0 18px;">Exploitation, oldest first</h3>
+
+      <div class="chrono">
+        <div class="entry">
+          <div class="when">2021-08</div>
+          <h3>Eight distinct clusters exploit the chain across four sectors</h3>
+          <p>Across August 2021 Mandiant Managed Defense responds to ProxyShell exploitation at
+            organisations in education, government, business services and telecommunications across the
+            US, Europe and the Middle East, and tracks eight separate UNC clusters using the chain. One of
+            them, <strong>UNC2980</strong>, is assessed with low confidence to operate from China and to be
+            conducting espionage; it is observed against a US university. Exploitation is largely automated
+            and arrives from a wide range of source addresses and user agents. The web shells dropped
+            include BLUEBEAM, a Java-based manager also known as Godzilla, and CHINACHOP, a minimal .NET
+            injection shell.<a class="src" href="#s5">5</a></p>
+        </div>
+
+        <div class="entry key">
+          <div class="when">2021-08-12</div>
+          <h3>Mass opportunistic scanning and exploitation begins</h3>
+          <p>Rapid7 detects widespread opportunistic scanning and exploitation of Exchange servers using
+            the ProxyShell chain, a week after the technique was presented in full at Black Hat USA. By 21
+            August its managed detection and incident response teams record a significant increase in
+            Exchange exploitation by multiple distinct threat actors. The chain requires no authentication
+            and operates entirely over port 443, so it is not distinguishable from ordinary mail traffic at
+            the perimeter.<a class="src" href="#s4">4</a></p>
+        </div>
+
+        <div class="entry">
+          <div class="when">2021-08-21</div>
+          <h3>CISA issues an urgent alert with the estate still largely unpatched</h3>
+          <p>CISA publishes an urgent alert on active exploitation of the three ProxyShell
+            vulnerabilities.<a class="src" href="#s9">9</a> Rapid7 estimates on 25 August that more than
+            84,000 Exchange servers remain vulnerable to the chain, more than three months after the last
+            of the three patches shipped.<a class="src" href="#s4">4</a></p>
+        </div>
+
+        <div class="entry key">
+          <div class="when">2021-08-27</div>
+          <h3>LockFile chains ProxyShell to PetitPotam to take the domain</h3>
+          <p>Sophos reports LockFile ransomware breaching unpatched on-premises Exchange servers through
+            ProxyShell and then running a PetitPotam NTLM relay attack to seize the domain controller
+            &mdash; a second chain bolted onto the first. The encryptor writes through memory-mapped I/O so
+            the Windows System process performs the disk writes rather than the malicious process, and
+            encrypts every other 16 bytes, which leaves files partially readable and keeps chi-squared
+            statistics close to normal so detection built on entropy scoring does not fire. It uses no
+            command and control, and deletes itself with a ping-based delay once
+            finished.<a class="src" href="#s7">7</a></p>
+        </div>
+
+        <div class="entry key">
+          <div class="when">2021-09-03</div>
+          <h3>Conti affiliates go from exploit to web shell in under a minute</h3>
+          <p>Sophos documents a Conti affiliate intrusion beginning with ProxyShell against an Exchange
+            Server 2016 running Cumulative Update 3. The operators create a mailbox named
+            <code>administrator</code> and assign it Exchange roles including remote PowerShell rights,
+            install a web shell in under a minute and a backup shell three minutes later, and finish
+            mapping the network within thirty minutes. Credentials are harvested about four hours in,
+            lateral movement over RDP follows roughly thirteen minutes after that, and around one terabyte
+            is exfiltrated with rclone to Mega over two days. Conti is deployed on day five by four batch
+            scripts targeting administrative shares by name. Seven separate persistence mechanisms are left
+            behind: two web shells, Cobalt Strike, and four commercial remote access tools including
+            AnyDesk, Atera, Splashtop and Remote Utilities.<a class="src" href="#s6">6</a></p>
+        </div>
+
+        <div class="entry key">
+          <div class="when">2021-11</div>
+          <h3>SquirrelWaffle uses compromised servers to hijack real email threads</h3>
+          <p>Trend Micro reports intrusions in which ProxyShell and ProxyLogon are used together against
+            on-premises Exchange servers, with exploitation of CVE-2021-26855, CVE-2021-34473 and
+            CVE-2021-34523 visible in the IIS logs of three compromised servers. Rather than encrypting or
+            stealing, the operators use the access to reply to existing legitimate email threads with
+            malicious spam that distributes the SquirrelWaffle loader. The messages come from the real
+            correspondent's real server, which is what makes them work.<a class="src" href="#s8">8</a></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 3. HISTORY ===================== -->
+  <section class="alt">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">History</p>
+        <h2>Patched in April, dangerous in August</h2>
+        <p>ProxyShell is unusual among Exchange chains in that it was never a zero-day. The whole
+          exposure sits in the gap between a patch shipping and an estate applying it.</p>
+      </div>
+
+      <div class="chrono">
+        <div class="entry">
+          <div class="when">2021-04</div>
+          <h3>Demonstrated at Pwn2Own, then quietly patched</h3>
+          <p>The chain is demonstrated by researcher Orange Tsai at the Pwn2Own competition in April
+            2021.<a class="src" href="#s9">9</a> Microsoft ships fixes for CVE-2021-34473 and
+            CVE-2021-34523 on 13 April 2021 and for CVE-2021-31207 on 11 May, without documenting the
+            first two publicly at the time; the CVE records are assigned and described in
+            July.<a class="src" href="#s4">4</a></p>
+        </div>
+
+        <div class="entry key">
+          <div class="when">2021-08-05</div>
+          <h3>Full technical detail is published, and the window opens</h3>
+          <p>The chain is presented in detail in a Black Hat USA talk on 5 August
+            2021.<a class="src" href="#s9">9</a> Scanning for vulnerable servers follows almost
+            immediately<a class="src" href="#s10">10</a> and mass exploitation begins on 12 August. Nothing
+            about the vulnerabilities changed in those four months. What changed was that the exploit
+            became reproducible by anyone, against a population that had treated an undocumented April
+            cumulative update as optional.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 4. CONCLUSION ===================== -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Conclusion</p>
+        <h2>The severity score hid the chain</h2>
+      </div>
+
+      <div class="prose">
+        <p>ProxyShell is the clearest available argument against triaging vulnerabilities one row at a
+          time. Two of the three flaws score 9.8 and would have been patched on severity alone; the third
+          scores 6.6 with high privileges required, and reads on a spreadsheet like something to schedule
+          for next quarter. It is also the link that turns the other two into remote code execution as
+          SYSTEM. Anyone who patched by score and stopped at the criticals still had the chain. Once the
+          technique was public, the same three requests were used for espionage, for ransomware with a
+          five-day dwell time, and for sending spam that looked like it came from your own staff &mdash;
+          because what the chain delivers is SYSTEM on a mail server, and what happens next is a matter of
+          who arrived.</p>
+      </div>
+
+      <div class="takeaways">
+        <div class="takeaway"><span class="n">1</span><p><strong>The 6.6 is the load-bearing link.</strong>
+          CVE-2021-31207 requires administrator rights it cannot obtain, which is exactly what the first two
+          flaws supply. A triage process that sorts by CVSS and draws a line under the criticals leaves the
+          chain intact.</p></div>
+        <div class="takeaway"><span class="n">2</span><p><strong>This was never a zero-day.</strong> Fixes
+          shipped in April and May 2021 and exploitation started in August. Every compromised server had had
+          four months, so the finding is about patch latency on Exchange, not about attacker
+          capability.</p></div>
+        <div class="takeaway"><span class="n">3</span><p><strong>Silent patching has a cost.</strong> The
+          first two CVEs were fixed before they were publicly documented, which meant an April cumulative
+          update carried no visible urgency. Estates that patch on published severity had nothing to react
+          to until July.</p></div>
+        <div class="takeaway"><span class="n">4</span><p><strong>Detection at the perimeter will not help.</strong>
+          The chain is unauthenticated HTTPS to port 443 on a server whose job is to accept unauthenticated
+          HTTPS on port 443. The observable is what happens afterwards &mdash; a web shell written under the
+          Exchange directories, a new mailbox granted PowerShell rights, an <code>ntdsutil</code> snapshot.</p></div>
+        <div class="takeaway"><span class="n">5</span><p><strong>Assume speed, not dwell.</strong> The Conti
+          intrusion had a web shell in under a minute and the network mapped in thirty. Response plans built
+          around days of reconnaissance do not fit this entry vector.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 5. RISK &amp; IMPACT ===================== -->
+  <section class="alt">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Risk &amp; Impact</p>
+        <h2>One question decides your exposure</h2>
+        <p>Sector matters less here than a single architectural fact: whether mail is still served from
+          an on-premises Exchange box. The levels below follow the sectors where exploitation was actually
+          reported.</p>
+      </div>
+
+      <div class="sectors">
+        <div class="sector critical">
+          <div class="name">Education and research</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Critical</div>
+          <div class="why">Named first among the sectors Mandiant responded to, and the one documented
+            espionage case &mdash; UNC2980, assessed with low confidence to China &mdash; was against a US
+            university.</div>
+        </div>
+        <div class="sector critical">
+          <div class="name">Government and public administration</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Critical</div>
+          <div class="why">Named directly in Mandiant's account of the sectors exploited through this chain
+            across the US, Europe and the Middle East.</div>
+        </div>
+        <div class="sector high">
+          <div class="name">Business and professional services</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">High</div>
+          <div class="why">Named in the same reporting, and the sector's characteristic mid-size
+            on-premises Exchange estate is precisely the population that had not patched by August
+            2021.</div>
+        </div>
+        <div class="sector high">
+          <div class="name">Telecommunications</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">High</div>
+          <div class="why">Named in the same reporting. Nothing in the cited sources distinguishes it
+            further, so this rests on observed targeting rather than on any specific incident.</div>
+        </div>
+        <div class="sector moderate">
+          <div class="name">Healthcare</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Moderate</div>
+          <div class="why">Plausible and often heavily invested in on-premises Exchange, but no healthcare
+            victim appears in any of the cited sources for this chain.</div>
+        </div>
+        <div class="sector low">
+          <div class="name">Retail and hospitality</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Low</div>
+          <div class="why">No exploitation against retail appears in the cited reporting. The level
+            reflects that absence rather than any protection &mdash; the ransomware crews using this chain
+            selected by exposed server, not by industry.</div>
+        </div>
+        <div class="sector minimal">
+          <div class="name">Estates on Exchange Online only</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Minimal</div>
+          <div class="why">All three flaws are in on-premises Exchange Server. An organisation that moved
+            its mail to Exchange Online was never in scope for this chain, which is the single clearest
+            exposure boundary in this report.</div>
+        </div>
+      </div>
+
+      <div class="risklegend">
+        <div class="item"><span class="sw" style="background:var(--risk-critical)"></span> Critical — actively targeted</div>
+        <div class="item"><span class="sw" style="background:var(--risk-high)"></span> High — fits the victim profile</div>
+        <div class="item"><span class="sw" style="background:var(--risk-moderate)"></span> Moderate — plausible, not observed</div>
+        <div class="item"><span class="sw" style="background:var(--risk-low)"></span> Low — outside the pattern</div>
+        <div class="item"><span class="sw" style="background:var(--risk-minimal)"></span> Minimal — no indication</div>
+      </div>
+
+      <div class="callout">
+        <p><strong>Count your on-premises Exchange servers before you read the sector table.</strong> Every
+          documented victim of this chain ran mail on a box they owned. Hybrid deployments retaining a
+          single on-premises server for attribute management are in scope too, and are the ones most often
+          missing from an inventory because nobody thinks of them as mail servers any more.</p>
+        <p>
+          For <em>how</em> a compromise actually unfolds — the techniques, the tooling and the
+          order they run in — see the companion attack-flow report,
+          <code>proxyshell-chain-flow.html</code>.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 6. SOURCES ===================== -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Sources</p>
+        <h2>What this analysis is built on</h2>
+      </div>
+      <ol class="sources">
+        <li id="s1">NVD &mdash; CVE-2021-34473 (Exchange SSRF, CVSS 9.8, CWE-918) &mdash; <a href="https://nvd.nist.gov/vuln/detail/CVE-2021-34473">https://nvd.nist.gov/vuln/detail/CVE-2021-34473</a></li>
+        <li id="s2">NVD &mdash; CVE-2021-34523 (Exchange elevation of privilege, CVSS 9.8) &mdash; <a href="https://nvd.nist.gov/vuln/detail/CVE-2021-34523">https://nvd.nist.gov/vuln/detail/CVE-2021-34523</a></li>
+        <li id="s3">NVD &mdash; CVE-2021-31207 (Exchange security feature bypass, CVSS 6.6, CWE-434, PR:H) &mdash; <a href="https://nvd.nist.gov/vuln/detail/CVE-2021-31207">https://nvd.nist.gov/vuln/detail/CVE-2021-31207</a></li>
+        <li id="s4">Rapid7 &mdash; ProxyShell: more widespread exploitation of Microsoft Exchange servers &mdash; <a href="https://www.rapid7.com/blog/post/2021/08/12/proxyshell-more-widespread-exploitation-of-microsoft-exchange-servers/">https://www.rapid7.com/blog/post/2021/08/12/proxyshell-more-widespread-exploitation-of-microsoft-exchange-servers/</a></li>
+        <li id="s5">Mandiant (Google Cloud) &mdash; PST, want a shell? ProxyShell exploiting Microsoft Exchange servers &mdash; <a href="https://cloud.google.com/blog/topics/threat-intelligence/pst-want-shell-proxyshell-exploiting-microsoft-exchange-servers">https://cloud.google.com/blog/topics/threat-intelligence/pst-want-shell-proxyshell-exploiting-microsoft-exchange-servers</a></li>
+        <li id="s6">Sophos X-Ops &mdash; Conti affiliates use ProxyShell Exchange exploit in ransomware attacks &mdash; <a href="https://www.sophos.com/en-us/blog/conti-affiliates-use-proxyshell-exchange-exploit-in-ransomware-attacks/">https://www.sophos.com/en-us/blog/conti-affiliates-use-proxyshell-exchange-exploit-in-ransomware-attacks/</a></li>
+        <li id="s7">Sophos X-Ops &mdash; LockFile ransomware's box of tricks: intermittent encryption and evasion &mdash; <a href="https://www.sophos.com/en-us/blog/lockfile-ransomwares-box-of-tricks-intermittent-encryption-and-evasion/">https://www.sophos.com/en-us/blog/lockfile-ransomwares-box-of-tricks-intermittent-encryption-and-evasion/</a></li>
+        <li id="s8">Trend Micro Research &mdash; Squirrelwaffle exploits ProxyShell and ProxyLogon to hijack email chains &mdash; <a href="https://www.trendmicro.com/en_us/research/21/k/Squirrelwaffle-Exploits-ProxyShell-and-ProxyLogon-to-Hijack-Email-Chains.html">https://www.trendmicro.com/en_us/research/21/k/Squirrelwaffle-Exploits-ProxyShell-and-ProxyLogon-to-Hijack-Email-Chains.html</a></li>
+        <li id="s9">CISA &mdash; Urgent: protect against active exploitation of ProxyShell vulnerabilities &mdash; <a href="https://www.cisa.gov/uscert/ncas/current-activity/2021/08/21/urgent-protect-against-active-exploitation-proxyshell">https://www.cisa.gov/uscert/ncas/current-activity/2021/08/21/urgent-protect-against-active-exploitation-proxyshell</a></li>
+        <li id="s10">Tenable &mdash; ProxyShell: attackers actively scanning for vulnerable Microsoft Exchange servers &mdash; <a href="https://www.tenable.com/blog/proxyshell-attackers-actively-scanning-for-vulnerable-microsoft-exchange-servers-cve-2021-34473">https://www.tenable.com/blog/proxyshell-attackers-actively-scanning-for-vulnerable-microsoft-exchange-servers-cve-2021-34473</a></li>
+        <li id="s11">CISA &mdash; Known Exploited Vulnerabilities Catalog &mdash; <a href="https://www.cisa.gov/known-exploited-vulnerabilities-catalog">https://www.cisa.gov/known-exploited-vulnerabilities-catalog</a></li>
+      </ol>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+
+    <p class="note">
+      <strong>Confidence and sourcing.</strong> CVE identifiers, scores, weaknesses and affected builds are
+      reference data from NVD. The exploitation account rests on primary vendor and government reporting,
+      and where a claim comes from a single vendor the report names it: the eight-cluster figure and the
+      UNC2980 espionage case are Mandiant's, the two ransomware intrusions are Sophos's, and the
+      email-thread hijacking is Trend Micro's. The UNC2980 attribution to China is reported as
+      <em>low confidence</em> by Mandiant and is repeated at that strength here, not upgraded.
+      <strong>The <em>Is active?</em> cell reads Yes</strong> on the basis of continued CISA KEV listing
+      and the long life of unpatched on-premises Exchange; the most recent intrusion documented in these
+      sources is from late 2021. Sector risk levels are analyst assessments, not measured values; they
+      deliberately share a colour ramp with CVSS severity but are rendered as meters rather than scores so
+      the two are not confused.
+    </p>
+    <p class="note">
+      <strong>Pipeline.</strong> Step 1 of TI-Reporting. The companion ATT&amp;CK flow report
+      is built from the JSON handoff in <code>subjects/proxyshell/handoff/</code>, of which this analysis
+      produces <code>analysis.json</code>.
+    </p>
+  </div>
+</footer>

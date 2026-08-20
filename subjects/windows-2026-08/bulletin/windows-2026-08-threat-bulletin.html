@@ -1,0 +1,1339 @@
+<title>Windows August 2026 - Threat Bulletin</title>
+<style>
+/* ============================================================================
+   BULLETIN - Windows August 2026
+   Merged by scripts/Merge-Bulletin.ps1. Do not hand-edit the CSS: regenerate.
+   Part 1 CSS is verbatim from analysis.html.
+   Part 2 CSS is rewritten to sit under .flowpart, because the two halves share
+   class names ('high' and 'low' mean different things in each).
+   ============================================================================ */
+
+/* ---------- part 1: analysis (unscoped) ---------- */
+
+  /* ---- Tokens: shared across TI-Reporting - see CLAUDE.md ---- */
+  :root {
+    color-scheme: light;
+
+    --ground: #ffffff;
+    --surface: #ffffff;
+    --surface-2: #f3f6fc;
+    --ink: #14181f;
+    --muted: #5b6474;
+    --hair: #e3e8f2;
+    --hair-strong: #c6cede;
+
+    /* ACCENT - objective is unknown by design: three primitives from one release,
+       and only one is in use. Signal blue, as the flow report uses. */
+    --ember: #1d4ed8;
+    --ember-ink: #1e40af;
+    --ember-wash: rgba(29, 78, 216, 0.09);
+    --steel: #55607a;
+    --steel-wash: rgba(85, 96, 122, 0.10);
+    --spine: #c2cadb;
+
+    /* SECTOR RISK - shares the CVSS ramp, separate tokens, different form. */
+    --risk-critical: #a4161a;  --risk-critical-wash: rgba(164, 22, 26, 0.10);
+    --risk-high:     #b3541e;  --risk-high-wash:     rgba(179, 84, 30, 0.10);
+    --risk-moderate: #8a6a00;  --risk-moderate-wash: rgba(138, 106, 0, 0.10);
+    --risk-low:      #4a6b2a;  --risk-low-wash:      rgba(74, 107, 42, 0.10);
+    --risk-minimal:  #5c6470;  --risk-minimal-wash:  rgba(92, 100, 112, 0.10);
+
+    --shadow: 0 1px 2px rgba(20,22,26,.06), 0 8px 24px rgba(20,22,26,.05);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.55; -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 940px; margin: 0 auto; padding: 0 24px; }
+
+  /* ================= 1. COVER ================= */
+  .cover {
+    position: relative; overflow: hidden;
+    border-bottom: 1px solid var(--hair);
+    background:
+      radial-gradient(120% 90% at 88% -5%, var(--ember-wash), transparent 62%),
+      var(--surface);
+  }
+  .cover .wrap { position: relative; z-index: 2; padding-top: 84px; padding-bottom: 76px; }
+
+  .covermotif {
+    position: absolute; top: -40px; right: -60px; width: 460px; height: 460px;
+    color: var(--ember); pointer-events: none; z-index: 1;
+  }
+  .covermotif .arcs   { opacity: .16; }
+  .covermotif .rail   { opacity: .30; }
+  .covermotif .dots   { opacity: .22; }
+
+  .tlp {
+    display: inline-block; font-family: ui-monospace, Consolas, monospace;
+    font-size: 10.5px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
+    padding: 4px 10px; border-radius: 4px; margin-bottom: 26px;
+    background: var(--surface-2); border: 1px solid var(--hair-strong); color: var(--muted);
+  }
+  .tlp.clear { color: var(--muted); }
+  .tlp.green { color: var(--risk-low);      border-color: color-mix(in srgb, var(--risk-low) 40%, transparent);      background: var(--risk-low-wash); }
+  .tlp.amber { color: var(--risk-high);     border-color: color-mix(in srgb, var(--risk-high) 40%, transparent);     background: var(--risk-high-wash); }
+  .tlp.red   { color: var(--risk-critical); border-color: color-mix(in srgb, var(--risk-critical) 40%, transparent); background: var(--risk-critical-wash); }
+
+  .eyebrow {
+    font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+    font-size: 11.5px; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--muted); margin: 0 0 18px; display: flex; align-items: center; gap: 12px;
+  }
+  .eyebrow::after { content: ""; flex: 1; height: 1px; background: var(--hair-strong); }
+  .idtag { color: var(--ember-ink); font-weight: 600; }
+
+  .cover h1 {
+    font-size: clamp(34px, 5.6vw, 54px); line-height: .96; letter-spacing: -.025em;
+    font-weight: 800; margin: 0 0 10px; text-wrap: balance; max-width: 16ch;
+  }
+  .cover h1 .accent { color: var(--ember); }
+  /* The cover is deliberately left at the original scale - it is the one page that is not
+     dense reading, and the body-copy reduction is not wanted here. The explicit line-height
+     restores what it inherited before body dropped to 1.55. */
+  .cover .standfirst {
+    font-size: clamp(15px, 2vw, 17.5px); line-height: 1.6; color: var(--muted);
+    max-width: 60ch; margin: 20px 0 0;
+  }
+  /* Six cells. auto-fit leaves the last row short at print width, and the gap lets the
+     container's hairline background show through as an empty grey block - so the columns
+     are pinned instead. Three divides six exactly, and so does two on a narrow screen.
+     CHANGE THE NUMBER OF CELLS AND YOU MUST CHANGE THIS RULE. */
+  .covermeta {
+    margin-top: 42px; display: grid; gap: 1px;
+    grid-template-columns: repeat(3, 1fr);
+    background: var(--hair); border: 1px solid var(--hair); border-radius: 12px; overflow: hidden;
+  }
+  @media (max-width: 640px) { .covermeta { grid-template-columns: repeat(2, 1fr); } }
+  .covermeta div { background: var(--surface); padding: 15px 18px; }
+  .covermeta .k { font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0 0 5px; }
+  .covermeta .v { font-size: 13.5px; font-weight: 600; margin: 0; }
+
+  /* ================= Sections ================= */
+  section { padding: 46px 0; }
+  section.alt { background: var(--surface); border-top: 1px solid var(--hair); border-bottom: 1px solid var(--hair); }
+  .section-head { margin-bottom: 28px; }
+  /* Section labels carry heading weight, not kicker weight - the executive summary and
+     defensive priorities have no h2 under them, so this line IS their heading. The cover
+     and hero eyebrows are deliberately excluded: they sit under display type already. */
+  .section-head .eyebrow { font-size: 18.5px; letter-spacing: .18em; margin-bottom: 10px; }
+  .section-head h2 {
+    font-size: 28px; letter-spacing: -.015em;
+    font-weight: 800; margin: 0; text-wrap: balance;
+  }
+  .section-head p { color: var(--muted); max-width: 68ch; margin: 10px 0 0; font-size: 13px; }
+
+  .prose { max-width: 68ch; }
+  .prose p { margin: 0 0 15px; font-size: 13.5px; }
+  .prose p:last-child { margin-bottom: 0; }
+  .prose strong { font-weight: 700; }
+  .prose h3 {
+    font-size: 24px; font-weight: 700; letter-spacing: -.01em;
+    margin: 34px 0 12px; text-wrap: balance;
+  }
+
+  .src {
+    font-family: ui-monospace, Consolas, monospace; font-size: 10.5px; font-weight: 700;
+    color: var(--steel); background: var(--steel-wash);
+    border: 1px solid color-mix(in srgb, var(--steel) 24%, transparent);
+    padding: 0 5px; border-radius: 4px; vertical-align: 1px; margin-left: 3px;
+    text-decoration: none; white-space: nowrap;
+  }
+
+  /* ================= 2. CHRONOLOGY ================= */
+  .chrono { position: relative; padding-left: 116px; }
+  .chrono::before {
+    content: ""; position: absolute; left: 92px; top: 10px; bottom: 10px;
+    width: 3px; border-radius: 3px;
+    background: linear-gradient(to bottom, var(--spine) 0%, var(--spine) 45%, var(--ember) 100%);
+  }
+  .entry { position: relative; margin-bottom: 30px; }
+  .entry:last-child { margin-bottom: 0; }
+  .entry .when {
+    position: absolute; left: -116px; top: 1px; width: 76px; text-align: right;
+    font-family: ui-monospace, Consolas, monospace; font-size: 12px; font-weight: 700;
+    color: var(--ember-ink); letter-spacing: .02em;
+  }
+  .entry::after {
+    content: ""; position: absolute; left: -27px; top: 7px;
+    width: 11px; height: 11px; border-radius: 50%;
+    background: var(--surface); border: 3px solid var(--spine); z-index: 2;
+  }
+  .entry.key::after { border-color: var(--ember); background: var(--ember); }
+  .entry h3 { margin: 0 0 6px; font-size: 24px; font-weight: 700; letter-spacing: -.01em; }
+  .entry p { margin: 0 0 10px; font-size: 13px; max-width: 66ch; }
+  .entry p:last-child { margin-bottom: 0; }
+
+  /* ================= 4. CONCLUSION ================= */
+  .callout {
+    margin-top: 28px; padding: 20px 22px;
+    background: var(--surface); border: 1px solid var(--ember);
+    border-left: 4px solid var(--ember); border-radius: 12px; font-size: 13.5px;
+  }
+  section.alt .callout { background: var(--ground); }
+  .callout strong { color: var(--ember-ink); }
+  .callout p { margin: 0 0 14px; }
+  .callout p:last-child { margin: 0; }
+
+  .takeaways { display: grid; gap: 12px; margin-top: 26px; }
+  .takeaway {
+    display: grid; grid-template-columns: 30px 1fr; gap: 0 14px; align-items: start;
+    background: var(--surface); border: 1px solid var(--hair);
+    border-radius: 12px; padding: 16px 18px; box-shadow: var(--shadow);
+  }
+  section.alt .takeaway { background: var(--ground); }
+  .takeaway .n {
+    display: flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--ember-wash); color: var(--ember-ink);
+    border: 1px solid color-mix(in srgb, var(--ember) 28%, transparent);
+    font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; font-weight: 700;
+  }
+  .takeaway p { margin: 0; font-size: 13px; }
+
+  /* ================= 5. RISK & IMPACT ================= */
+  .sectors {
+    border: 1px solid var(--hair); border-radius: 14px; overflow: hidden;
+    background: var(--surface); box-shadow: var(--shadow);
+  }
+  section.alt .sectors { background: var(--ground); }
+  .sector {
+    display: grid; grid-template-columns: minmax(150px, 1.1fr) 104px 92px 2fr;
+    gap: 16px; align-items: center;
+    padding: 15px 20px; border-bottom: 1px solid var(--hair);
+  }
+  .sector:last-child { border-bottom: none; }
+  .sector .name { font-weight: 700; font-size: 13px; }
+  .sector .why { font-size: 12.5px; color: var(--muted); }
+
+  .meter { display: flex; gap: 3px; }
+  .meter i {
+    display: block; height: 9px; flex: 1; border-radius: 2px;
+    background: var(--hair-strong); opacity: .5;
+  }
+  .level {
+    font-family: ui-monospace, Consolas, monospace; font-size: 10px; font-weight: 700;
+    letter-spacing: .1em; text-transform: uppercase; text-align: center;
+    padding: 3px 8px; border-radius: 100px; white-space: nowrap;
+  }
+
+  .sector.critical .meter i:nth-child(-n+5) { background: var(--risk-critical); opacity: 1; }
+  .sector.high     .meter i:nth-child(-n+4) { background: var(--risk-high);     opacity: 1; }
+  .sector.moderate .meter i:nth-child(-n+3) { background: var(--risk-moderate); opacity: 1; }
+  .sector.low      .meter i:nth-child(-n+2) { background: var(--risk-low);      opacity: 1; }
+  .sector.minimal  .meter i:nth-child(-n+1) { background: var(--risk-minimal);  opacity: 1; }
+
+  .sector.critical .level { color: #fff; background: var(--risk-critical); }
+  .sector.high     .level { color: var(--risk-high);     background: var(--risk-high-wash);     border: 1px solid color-mix(in srgb, var(--risk-high) 32%, transparent); }
+  .sector.moderate .level { color: var(--risk-moderate); background: var(--risk-moderate-wash); border: 1px solid color-mix(in srgb, var(--risk-moderate) 32%, transparent); }
+  .sector.low      .level { color: var(--risk-low);      background: var(--risk-low-wash);      border: 1px solid color-mix(in srgb, var(--risk-low) 32%, transparent); }
+  .sector.minimal  .level { color: var(--risk-minimal);  background: var(--risk-minimal-wash);  border: 1px solid var(--hair-strong); }
+
+  .risklegend {
+    display: flex; flex-wrap: wrap; gap: 18px; margin-top: 20px;
+    padding: 14px 18px; background: var(--surface-2);
+    border: 1px solid var(--hair); border-radius: 12px;
+    font-size: 12.5px; color: var(--muted);
+  }
+  .risklegend .item { display: flex; align-items: center; gap: 8px; }
+  .risklegend .sw { width: 22px; height: 8px; border-radius: 2px; }
+
+  /* ================= Footer ================= */
+  footer { border-top: 1px solid var(--hair); padding: 32px 0 44px; color: var(--muted); font-size: 12px; }
+  footer h3 { font-size: 11.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin: 0 0 14px; }
+  footer a { color: var(--ember-ink); }
+  .sources { counter-reset: s; display: grid; gap: 8px; margin: 0 0 26px; padding: 0; list-style: none; }
+  /* Counter absolutely positioned, not a grid column: an <li> holding a text node AND an
+     <a> produces three grid items, so the anchor wrapped into the 30px counter column and
+     the URL rendered about four characters wide. */
+  .sources li {
+    counter-increment: s; position: relative; padding-left: 40px;
+    font-size: 12.5px; overflow-wrap: anywhere;
+  }
+  .sources li::before {
+    content: counter(s); position: absolute; left: 0; top: 2px;
+    font-family: ui-monospace, Consolas, monospace; font-size: 10.5px;
+    font-weight: 700; color: var(--steel); background: var(--steel-wash);
+    border: 1px solid color-mix(in srgb, var(--steel) 24%, transparent);
+    border-radius: 4px; text-align: center; width: 30px; height: 20px; line-height: 18px;
+  }
+  .note {
+    margin-top: 12px; padding: 14px 16px; background: var(--surface-2);
+    border: 1px dashed var(--hair-strong); border-radius: 10px; color: var(--muted);
+    font-size: 12.5px;
+  }
+  code { font-family: ui-monospace, Consolas, monospace; font-size: .9em; background: var(--surface-2); padding: 1px 5px; border-radius: 3px; }
+
+
+/* ---------- part 2: attack flow (scoped under .flowpart) ---------- */
+.flowpart {
+    color-scheme: light;
+
+    --ground: #ffffff;
+    --surface: #ffffff;
+    --surface-2: #f3f6fc;
+    --ink: #14181f;
+    --muted: #5b6474;
+    --hair: #e3e8f2;
+    --hair-strong: #c6cede;
+
+    --ember: #1d4ed8;
+    --ember-ink: #1e40af;
+    --ember-wash: rgba(29, 78, 216, 0.09);
+    --steel: #55607a;
+    --steel-wash: rgba(85, 96, 122, 0.10);
+    --spine: #c2cadb;
+
+    
+    --sev-crit: #a4161a;  --sev-crit-wash: rgba(164, 22, 26, 0.10);
+    --sev-high: #b3541e;  --sev-high-wash: rgba(179, 84, 30, 0.10);
+    --sev-med:  #8a6a00;  --sev-med-wash:  rgba(138, 106, 0, 0.10);
+    --sev-low:  #4a6b2a;  --sev-low-wash:  rgba(74, 107, 42, 0.10);
+
+    --shadow: 0 1px 2px rgba(20,22,26,.06), 0 8px 24px rgba(20,22,26,.05);
+  }
+.flowpart * { box-sizing: border-box; }
+.flowpart {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.5; -webkit-font-smoothing: antialiased;
+  }
+.flowpart .wrap { max-width: 940px; margin: 0 auto; padding: 0 24px; }
+.flowpart header {
+    border-bottom: 1px solid var(--hair);
+    background: radial-gradient(120% 80% at 85% -10%, var(--ember-wash), transparent 60%), var(--surface);
+  }
+.flowpart .hero { padding: 64px 0 52px; }
+.flowpart .eyebrow {
+    font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+    font-size: 11.5px; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--muted); margin: 0 0 18px; display: flex; align-items: center; gap: 12px;
+  }
+.flowpart .eyebrow::after { content: ""; flex: 1; height: 1px; background: var(--hair-strong); }
+.flowpart .idtag { color: var(--ember-ink); font-weight: 600; }
+.flowpart h1 {
+    font-size: clamp(32px, 5vw, 48px); line-height: .98; letter-spacing: -.02em;
+    font-weight: 800; margin: 0 0 8px; text-wrap: balance;
+  }
+.flowpart h1 .destruct { color: var(--ember); }
+.flowpart .lede { font-size: clamp(15px, 2vw, 17px); color: var(--muted); max-width: 62ch; margin: 18px 0 0; }
+.flowpart .cverow { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.flowpart .cverow .label {
+    font-size: 11.5px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--muted); margin-right: 4px;
+  }
+.flowpart .cve {
+    font-family: ui-monospace, Consolas, monospace; font-size: 12px; font-weight: 600;
+    padding: 4px 10px; border: 1px solid var(--hair-strong); border-radius: 100px;
+    color: var(--ink); background: var(--surface-2); white-space: nowrap;
+  }
+.flowpart .facts {
+    margin-top: 36px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1px; background: var(--hair); border: 1px solid var(--hair); border-radius: 12px; overflow: hidden;
+  }
+.flowpart .fact { background: var(--surface); padding: 16px 18px; }
+.flowpart .fact .k { font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0 0 6px; }
+.flowpart .fact .v { font-size: 13.5px; font-weight: 600; margin: 0; font-variant-numeric: tabular-nums; }
+.flowpart .fact .v.bad { color: var(--ember-ink); }
+.flowpart section { padding: 60px 0; }
+.flowpart .section-head { margin-bottom: 40px; }
+.flowpart .section-head .eyebrow { margin-bottom: 10px; }
+.flowpart .section-head h2 { font-size: clamp(21px, 3vw, 27px); letter-spacing: -.01em; font-weight: 800; margin: 0; text-wrap: balance; }
+.flowpart .section-head p { color: var(--muted); max-width: 64ch; margin: 12px 0 0; font-size: 14px; }
+.flowpart .sev {
+    font-family: ui-monospace, Consolas, monospace; font-size: 11px; font-weight: 700;
+    letter-spacing: .04em; padding: 2px 8px; border-radius: 5px; white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+.flowpart .sev.crit { color: var(--sev-crit); background: var(--sev-crit-wash); border: 1px solid color-mix(in srgb, var(--sev-crit) 26%, transparent); }
+.flowpart .sev.high { color: var(--sev-high); background: var(--sev-high-wash); border: 1px solid color-mix(in srgb, var(--sev-high) 26%, transparent); }
+.flowpart .sev.med { color: var(--sev-med);  background: var(--sev-med-wash);  border: 1px solid color-mix(in srgb, var(--sev-med) 26%, transparent); }
+.flowpart .sev.low { color: var(--sev-low);  background: var(--sev-low-wash);  border: 1px solid color-mix(in srgb, var(--sev-low) 26%, transparent); }
+.flowpart .exp {
+    font-family: ui-monospace, Consolas, monospace; font-size: 10px; font-weight: 700;
+    letter-spacing: .09em; text-transform: uppercase; padding: 3px 9px;
+    border-radius: 100px; white-space: nowrap;
+  }
+.flowpart .exp.kev { background: var(--sev-crit); color: #fff; border: 1px solid var(--sev-crit); }
+.flowpart .exp.poc { background: transparent; color: var(--sev-high); border: 1px solid color-mix(in srgb, var(--sev-high) 40%, transparent); }
+.flowpart .exp.none { background: transparent; color: var(--muted); border: 1px solid var(--hair-strong); }
+.flowpart .cwe {
+    font-family: ui-monospace, Consolas, monospace; font-size: 11px;
+    color: var(--steel); background: var(--steel-wash); padding: 2px 7px; border-radius: 5px; white-space: nowrap;
+  }
+.flowpart .table-wrap { overflow-x: auto; }
+.flowpart table { border-collapse: collapse; width: 100%; font-size: 13px; }
+.flowpart thead th {
+    text-align: left; font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--muted); font-weight: 700; padding: 0 14px 10px 0;
+    border-bottom: 1px solid var(--hair-strong); white-space: nowrap;
+  }
+.flowpart tbody td { padding: 12px 14px 12px 0; border-bottom: 1px solid var(--hair); vertical-align: middle; }
+.flowpart tbody tr:last-child td { border-bottom: none; }
+.flowpart td.mono { font-family: ui-monospace, Consolas, monospace; font-size: 12px; font-variant-numeric: tabular-nums; }
+.flowpart .rank {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--ember); color: #fff;
+    font-family: ui-monospace, Consolas, monospace; font-size: 11px; font-weight: 700;
+  }
+.flowpart .rank.lower { background: var(--surface-2); color: var(--muted); border: 1px solid var(--hair-strong); }
+.flowpart .callout {
+    margin-top: 26px; padding: 18px 20px;
+    background: var(--surface); border: 1px solid var(--ember);
+    border-left: 4px solid var(--ember); border-radius: 12px; font-size: 13.5px;
+  }
+.flowpart .callout strong { color: var(--ember-ink); }
+.flowpart .callout p { margin: 0 0 12px; }
+.flowpart .callout p:last-child { margin: 0; }
+.flowpart .vuln {
+    background: var(--surface); border: 1px solid var(--hair);
+    border-top: 3px solid var(--hair-strong);
+    border-radius: 14px; overflow: hidden; margin-bottom: 30px; box-shadow: var(--shadow);
+  }
+.flowpart .vuln.crit { border-top-color: var(--sev-crit); }
+.flowpart .vuln.high { border-top-color: var(--sev-high); }
+.flowpart .vuln.med { border-top-color: var(--sev-med); }
+.flowpart .vuln.low { border-top-color: var(--sev-low); }
+.flowpart .vulnhead {
+    padding: 18px 24px; background: var(--surface-2); border-bottom: 1px solid var(--hair);
+    display: flex; flex-wrap: wrap; gap: 9px; align-items: center;
+  }
+.flowpart .vulnhead .cve { background: var(--surface); font-size: 12.5px; }
+.flowpart .vulnhead .component { font-size: 12px; color: var(--muted); margin-left: auto; text-align: right; }
+.flowpart .vulnbody { padding: 24px; }
+.flowpart .vulnbody h3 { font-size: 18px; margin: 0 0 10px; font-weight: 800; letter-spacing: -.01em; text-wrap: balance; }
+.flowpart .sowhat { font-size: 13.5px; color: var(--ink); margin: 0 0 20px; max-width: 68ch; }
+.flowpart .reachlabel {
+    font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--muted); font-weight: 700; margin: 0 0 10px;
+  }
+.flowpart .reach { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; }
+.flowpart .reachitem { display: flex; flex-direction: column; align-items: center; gap: 5px; width: 70px; }
+.flowpart .reachnode {
+    width: 32px; height: 32px; border-radius: 9px;
+    display: flex; align-items: center; justify-content: center; border: 1px solid;
+  }
+.flowpart .reachnode svg { width: 17px; height: 17px; display: block; }
+.flowpart .reachitem.on .reachnode {
+    background: var(--ember-wash); color: var(--ember);
+    border-color: color-mix(in srgb, var(--ember) 32%, transparent);
+  }
+.flowpart .reachitem.off .reachnode { background: transparent; color: var(--hair-strong); border-color: var(--hair); }
+.flowpart .reachlbl { font-size: 9px; line-height: 1.25; text-align: center; }
+.flowpart .reachitem.on .reachlbl { color: var(--ink); font-weight: 700; }
+.flowpart .reachitem.off .reachlbl { color: var(--hair-strong); }
+.flowpart .flow { position: relative; padding-left: 34px; margin-bottom: 34px; }
+.flowpart .flow::before {
+    content: ""; position: absolute; left: 11px; top: 6px; bottom: 6px; width: 3px; border-radius: 3px;
+    background: linear-gradient(to bottom, var(--spine) 0%, var(--spine) 40%, var(--ember) 100%);
+  }
+.flowpart .flowlabel {
+    font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase;
+    color: var(--ember-ink); font-weight: 700; margin: 0 0 14px;
+  }
+.flowpart .phase { position: relative; margin-bottom: 12px; }
+.flowpart .node {
+    position: absolute; left: -34px; top: 20px; width: 25px; height: 25px; border-radius: 50%;
+    background: var(--surface); border: 3px solid var(--spine);
+    display: flex; align-items: center; justify-content: center;
+    font-family: ui-monospace, Consolas, monospace; font-size: 10.5px; font-weight: 700;
+    color: var(--muted); z-index: 2;
+  }
+.flowpart .phase.impact .node { border-color: var(--ember); background: var(--ember); color: #fff; }
+.flowpart .card { background: var(--surface); border: 1px solid var(--hair); border-radius: 12px; padding: 18px 20px; }
+.flowpart .phase.impact .card {
+    border-color: var(--ember);
+    background: linear-gradient(0deg, var(--ember-wash), var(--ember-wash)), var(--surface);
+  }
+.flowpart .card-top { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-bottom: 6px; }
+.flowpart .ticon {
+    width: 32px; height: 32px; border-radius: 9px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--steel-wash); color: var(--steel);
+    border: 1px solid color-mix(in srgb, var(--steel) 26%, transparent);
+  }
+.flowpart .ticon svg { width: 18px; height: 18px; display: block; }
+.flowpart .phase.impact .ticon {
+    background: var(--ember-wash); color: var(--ember);
+    border-color: color-mix(in srgb, var(--ember) 34%, transparent);
+  }
+.flowpart .tactic { font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--steel); font-weight: 700; }
+.flowpart .phase.heat .ticon {
+    background: color-mix(in srgb, var(--ember-wash) 70%, var(--steel-wash));
+    color: color-mix(in srgb, var(--ember) 62%, var(--steel));
+    border-color: color-mix(in srgb, var(--ember) 24%, transparent);
+  }
+.flowpart .phase.heat .tactic { color: color-mix(in srgb, var(--ember-ink) 72%, var(--steel)); }
+.flowpart .phase.impact .tactic { color: var(--ember-ink); }
+.flowpart .card h4 { font-size: 15.5px; margin: 2px 0 10px; font-weight: 700; letter-spacing: -.01em; width: 100%; }
+.flowpart .card p { margin: 0 0 12px; color: var(--muted); font-size: 13px; }
+.flowpart .card p:last-child { margin-bottom: 0; }
+.flowpart .ttps { display: flex; flex-direction: column; gap: 8px; }
+.flowpart .ttp { display: flex; gap: 12px; align-items: baseline; font-size: 12.5px; }
+.flowpart .tid {
+    font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; font-weight: 600;
+    color: var(--steel); background: var(--steel-wash); padding: 2px 7px; border-radius: 5px;
+    white-space: nowrap; flex-shrink: 0; min-width: 78px; text-align: center;
+  }
+.flowpart .ttp .desc { color: var(--ink); }
+.flowpart .tool {
+    font-family: ui-monospace, Consolas, monospace; font-size: .92em;
+    color: var(--ember-ink); background: var(--ember-wash); padding: 1px 5px; border-radius: 4px;
+  }
+.flowpart .fixgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px; }
+.flowpart .fix {
+    background: var(--surface); border: 1px solid var(--hair);
+    border-left: 3px solid var(--steel); border-radius: 10px; padding: 16px 18px;
+  }
+.flowpart .fix.urgent { border-left-color: var(--ember); }
+.flowpart .fix h3 { margin: 0 0 6px; font-size: 13.5px; font-weight: 700; }
+.flowpart .fix p { margin: 0; font-size: 12.5px; color: var(--muted); }
+.flowpart .fix .tagline {
+    display: inline-block; font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase;
+    font-weight: 700; margin-top: 10px; color: var(--steel);
+  }
+.flowpart .fix.urgent .tagline { color: var(--ember); }
+.flowpart code {
+    font-family: ui-monospace, Consolas, monospace; font-size: .9em;
+    background: var(--surface-2); padding: 1px 5px; border-radius: 3px;
+  }
+.flowpart .legend {
+    display: flex; flex-wrap: wrap; gap: 20px; margin-top: 28px; padding: 16px 20px;
+    background: var(--surface-2); border: 1px solid var(--hair); border-radius: 12px;
+    font-size: 12.5px; color: var(--muted);
+  }
+.flowpart .legend .item { display: flex; align-items: center; gap: 9px; }
+.flowpart .legend .keys { display: flex; gap: 5px; }
+.flowpart .legend .ticon { width: 26px; height: 26px; border-radius: 7px; }
+.flowpart .legend .ticon svg { width: 14px; height: 14px; }
+.flowpart .legend .ticon.impact {
+    background: var(--ember-wash); color: var(--ember);
+    border-color: color-mix(in srgb, var(--ember) 34%, transparent);
+  }
+.flowpart footer { border-top: 1px solid var(--hair); padding: 34px 0 56px; color: var(--muted); font-size: 12.5px; }
+.flowpart footer a { color: var(--ember-ink); }
+.flowpart footer .note {
+    margin-top: 10px; padding: 14px 16px; background: var(--surface-2);
+    border: 1px dashed var(--hair-strong); border-radius: 10px; color: var(--muted);
+  }
+.flowpart code.path { font-family: ui-monospace, Consolas, monospace; font-size: .92em; color: var(--ink); }
+.flowpart .sources { counter-reset: s; display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.flowpart .sources li {
+    counter-increment: s; position: relative; padding-left: 40px;
+    font-size: 12.5px; overflow-wrap: anywhere;
+  }
+.flowpart .sources li::before {
+    content: counter(s); position: absolute; left: 0; top: 2px;
+    font-family: ui-monospace, Consolas, monospace; font-size: 10.5px;
+    font-weight: 700; color: var(--steel); background: var(--steel-wash);
+    border: 1px solid color-mix(in srgb, var(--steel) 24%, transparent);
+    border-radius: 4px; text-align: center; width: 30px; height: 20px; line-height: 18px;
+  }
+.flowpart .sources a { color: var(--ember-ink); }
+
+
+
+/* ---------- bulletin chrome (step 4 only) ---------- */
+.partrule { border-top: 1px solid var(--hair); background: var(--ground); }
+.partrule .wrap { padding: 46px 0 8px; }
+.partrule .pnum {
+  display: inline-block; font-size: .68rem; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--ember); border: 1px solid var(--ember); border-radius: 2px;
+  padding: 3px 8px; margin-bottom: 12px;
+}
+.partrule h2 { font-size: 28px; margin: 0; color: var(--ink); }
+.partrule p  { color: var(--muted); margin: 6px 0 0; max-width: 62ch; font-size: 13px; }
+
+.bsummary, .bdefence { border-top: 1px solid var(--hair); background: var(--surface); }
+/* These two are the only sections with no h2 beneath the label, so the label has to do the
+   heading's job. Bigger than a section eyebrow and set in ink rather than muted, otherwise
+   the executive summary reads as the weakest heading in a document it opens. */
+.bsummary .eyebrow, .bdefence .eyebrow {
+  font-size: 32px; letter-spacing: .06em; color: var(--ink); font-weight: 700;
+}
+.bsummary .wrap, .bdefence .wrap { padding: 40px 0; }
+/* Every one of these carried no font-size, so the editorial regions rendered at the browser
+   default - larger than the report's own body copy, which is why a hand-written summary read
+   as a different document from the analysis beneath it. Sized explicitly, to body copy. */
+.bslede { color: var(--ink); max-width: 68ch; font-size: 13.5px; }
+.bskey { margin: 18px 0 0; padding: 0; list-style: none; }
+.bskey li {
+  border-left: 2px solid var(--ember); padding: 4px 0 4px 14px;
+  margin-bottom: 10px; color: var(--ink); max-width: 68ch; font-size: 13.5px;
+}
+.bsteps { margin: 18px 0 0; padding-left: 20px; color: var(--ink); max-width: 68ch; font-size: 13.5px; }
+.bsteps li { margin-bottom: 10px; }
+.bwhat { display: block; font-weight: 600; }
+.bwhy  { display: block; color: var(--muted); font-size: 12.5px; }
+
+/* The flow report carries its own hero. Inside a bulletin the cover already introduced the
+   subject, so the hero is demoted rather than repeated at cover scale. */
+.flowpart > header { padding-top: 0; }
+.flowpart header h1 { font-size: 1.9rem; }
+.flowpart header .lede { font-size: 14.5px; }
+</style>
+
+<!-- ===================== 1. COVER ===================== -->
+<header class="cover">
+  <svg class="covermotif" viewBox="0 0 400 400" fill="none" aria-hidden="true">
+    <g class="arcs" stroke="currentColor" stroke-width="1.1">
+      <circle cx="286" cy="132" r="46"/>
+      <circle cx="286" cy="132" r="86"/>
+      <circle cx="286" cy="132" r="126"/>
+      <circle cx="286" cy="132" r="166"/>
+    </g>
+    <g class="rail" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+      <path d="M286 46 V318"/>
+    </g>
+    <g class="dots" fill="currentColor">
+      <circle cx="286" cy="86"  r="7"/>
+      <circle cx="286" cy="150" r="7"/>
+      <circle cx="286" cy="214" r="7"/>
+      <circle cx="286" cy="278" r="7"/>
+      <circle cx="196" cy="188" r="4"/>
+      <circle cx="352" cy="242" r="4"/>
+      <circle cx="230" cy="300" r="4"/>
+    </g>
+  </svg>
+
+  <div class="wrap">
+    <span class="tlp clear">TLP:CLEAR</span>
+
+    <p class="eyebrow">Vulnerability Analysis <span class="idtag">Microsoft Windows &middot; Aug 2026</span></p>
+    <h1>Windows<span class="accent">.</span></h1>
+    <p class="standfirst">Three unrelated flaws from one patch cycle, where the lowest-scoring of the
+      three is the only one anyone is actually using.</p>
+
+    <div class="covermeta">
+      <div><p class="k">Subject type</p><p class="v">Vulnerability &middot; independent set</p></div>
+      <div><p class="k">Attribution</p><p class="v">Not published</p></div>
+      <div><p class="k">First observed</p><p class="v">August 2026</p></div>
+      <div><p class="k">Assessed risk</p><p class="v">Critical</p></div>
+      <div><p class="k">Report date</p><p class="v">19 August 2026</p></div>
+      <div><p class="k">Is active?</p><p class="v">Yes</p></div>
+    </div>
+  </div>
+</header>
+
+<!-- BULLETIN:SUMMARY -->
+  <section class="bsummary">
+    <div class="wrap">
+      <p class="eyebrow">Executive summary</p>
+      <p class="bslede">
+        Microsoft's August 2026 release contained three Windows flaws worth separating from the rest of
+        the cycle. They are unrelated to each other, and the ranking that matters is not the one CVSS
+        produces. CVE-2026-68820, a privilege escalation in the WinSock driver, scores lowest at 7.0 and
+        is the only one being exploited &mdash; it was a zero-day before it was a patch, and it carries a
+        remediation deadline of 25 August 2026. CVE-2026-62815 scores 9.8 and allows unauthenticated
+        remote code execution over Microsoft QUIC, with no exploitation reported. CVE-2026-62816 scores
+        8.8 but needs an attacker already on an adjacent network.
+      </p>
+      <ul class="bskey">
+        <li>
+          <strong>Patch the 7.0 first.</strong> It is the only one with documented exploitation and the
+          only one with a fixed date attached. Ranking this cycle by severity puts the one flaw that is
+          provably in use third.
+        </li>
+        <li>
+          <strong>The 9.8 is a forecast, not an observation.</strong> Nothing stands between an attacker
+          and Microsoft QUIC except the absence of a working exploit, and that is the single precondition
+          that can vanish without warning. Treat its position as second because of what it could become
+          this week, not because of what it is today.
+        </li>
+        <li>
+          <strong>Two questions decide your ranking.</strong> Does anything expose a QUIC-enabled service
+          to an untrusted network, and is Reliable Multicast Transport in use anywhere? A no to both
+          leaves exactly one flaw that matters this week.
+        </li>
+        <li>
+          <strong>Three flaws in one driver is the finding the CVE list hides.</strong> Two further
+          WinSock issues shipped in the same release. One patched CVE is an event; three in one component
+          in one month is a reason to look at what else touches it.
+        </li>
+        <li>
+          <strong>Nobody has said who is exploiting it.</strong> Microsoft confirms exploitation and no
+          vendor names an actor. Any attribution appearing in the coming weeks is new information, not
+          confirmation of something already reported.
+        </li>
+      </ul>
+    </div>
+  </section><!-- /BULLETIN:SUMMARY -->
+
+
+
+<main>
+
+  <!-- ===================== 2. OVERVIEW ===================== -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Overview</p>
+        <h2>The worst score is not the live threat</h2>
+      </div>
+
+      <div class="prose">
+        <p>These three flaws share a vendor and a release date and nothing else.
+          <strong>CVE-2026-68820</strong> is a use-after-free in the Windows Ancillary Function Driver
+          for WinSock: a local, already-authenticated attacker who wins a race condition gets SYSTEM. It
+          scores <strong>7.0</strong>, the lowest of the three.<a class="src" href="#s1">1</a>
+          <strong>CVE-2026-62815</strong> is a use-after-free in Microsoft QUIC that lets an
+          unauthenticated attacker execute code over the network with no user interaction, scoring
+          <strong>9.8</strong>.<a class="src" href="#s2">2</a> <strong>CVE-2026-62816</strong> is a heap
+          overflow with an integer overflow in the Reliable Multicast Transport Driver, reachable from an
+          adjacent network, scoring <strong>8.8</strong>.<a class="src" href="#s3">3</a> None of them
+          composes with the others: exploiting one grants nothing the next one needs, and fixing one
+          neither exposes nor creates another.</p>
+
+        <p>That independence is what makes this set worth writing up, because it forces a decision that
+          severity ranking answers wrongly. <strong>The flaw with the worst score is the one with no known
+          exploitation; the flaw with the best score is the one already being exploited.</strong>
+          CVE-2026-68820 was disclosed as an exploited zero-day on the day it was patched, credited to
+          researchers at Check Point, and it carries a binding remediation deadline of
+          <strong>25 August 2026</strong>.<a class="src" href="#s4">4</a><a class="src" href="#s10">10</a>
+          Neither remote code execution flaw has any public exploitation as of this report, eight days
+          after release.</p>
+
+        <p>Two things about the surrounding release affect how the numbers are read. First, this was an
+          unusually large cycle and the vendors disagree on how large: Tenable counts 398 CVEs,<a class="src" href="#s4">4</a>
+          the SANS Internet Storm Center 418,<a class="src" href="#s5">5</a> and Cisco Talos
+          421,<a class="src" href="#s6">6</a> because they include different sets of third-party and
+          re-released records. The three flaws here were selected on exploitation status and reachability,
+          not by working down a list. Second, the same release patched two further flaws in the same
+          WinSock driver, CVE-2026-61348 and CVE-2026-70307, which is a signal about that component rather
+          than about any single CVE in it.<a class="src" href="#s4">4</a></p>
+      </div>
+
+      <h3 style="font-size:24px;font-weight:700;margin:30px 0 18px;">The cycle, oldest first</h3>
+
+      <div class="chrono">
+        <div class="entry key">
+          <div class="when">2026-08-11</div>
+          <h3>One flaw ships already under exploitation</h3>
+          <p>Microsoft publishes CVE-2026-68820 as a zero-day exploited in the wild before the patch
+            existed. It is a use-after-free in the Ancillary Function Driver for WinSock that a locally
+            authenticated, low-privileged attacker triggers by running a crafted application to win a race
+            condition, ending with SYSTEM privileges and no user
+            interaction.<a class="src" href="#s9">9</a> Discovery is credited to researchers at Check
+            Point. Rapid7 notes that winning the race makes a stable exploit harder to build, which
+            constrains reliability rather than impact.<a class="src" href="#s8">8</a> Two further flaws in
+            the same driver, CVE-2026-61348 and CVE-2026-70307, are patched in the same
+            release.<a class="src" href="#s4">4</a> No actor is named by any
+            vendor.<a class="src" href="#s7">7</a></p>
+        </div>
+
+        <div class="entry">
+          <div class="when">2026-08-11</div>
+          <h3>The two higher-scoring flaws ship with no known exploitation</h3>
+          <p>CVE-2026-62815 is published as a critical use-after-free in Microsoft QUIC allowing
+            unauthenticated remote code execution with low attack complexity and no user interaction,
+            affecting Windows 11 23H2 through 26H1 and Windows Server 2022 and
+            2025.<a class="src" href="#s2">2</a><a class="src" href="#s7">7</a> CVE-2026-62816 is
+            published as a heap-based buffer overflow with an integer overflow in the Reliable Multicast
+            Transport Driver, reachable only from an adjacent network, affecting Windows 10 and Windows
+            11.<a class="src" href="#s3">3</a> The Internet Storm Center advises prioritising systems that
+            expose QUIC-enabled services to untrusted networks.<a class="src" href="#s5">5</a> Neither has
+            any public exploitation, and no proof of concept is reported.</p>
+        </div>
+
+        <div class="entry key">
+          <div class="when">2026-08-19</div>
+          <h3>Six days to the binding remediation deadline</h3>
+          <p>As of this report the position is unchanged: CVE-2026-68820 remains the only one of the three
+            with documented exploitation, and it carries a remediation due date of 25 August
+            2026.<a class="src" href="#s1">1</a><a class="src" href="#s10">10</a> The two remote code
+            execution flaws have gone eight days without a public exploit. That gap is the whole content
+            of the triage decision, and it is a snapshot rather than a stable state.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 4. CONCLUSION =====================
+       History is deliberately omitted. These flaws are eight days old and have no origin
+       story yet - an empty History section would say "we did not look" about something
+       that does not exist. -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Conclusion</p>
+        <h2>Patch order is not score order</h2>
+      </div>
+
+      <div class="prose">
+        <p>The useful output of this cycle is a sequence, not a severity list. Fix CVE-2026-68820 first
+          because someone is using it and a deadline is attached, even though it scores lowest and needs
+          local access an attacker has to obtain some other way. Fix CVE-2026-62815 second because it is
+          the one that would change fastest: unauthenticated, remote, no user interaction, and the moment a
+          working proof of concept appears the exposure becomes immediate. Fix CVE-2026-62816 third because
+          adjacency is a real constraint and multicast transport is not enabled on most estates. That order
+          inverts the CVSS ranking at the first step and follows it thereafter, which is the argument for
+          reading exploitation status and reachability before reading the score.</p>
+      </div>
+
+      <div class="takeaways">
+        <div class="takeaway"><span class="n">1</span><p><strong>The 7.0 goes first.</strong> It is the only
+          one with documented exploitation, it was a zero-day before it was a patch, and it is the only one
+          of the three carrying a fixed remediation date.</p></div>
+        <div class="takeaway"><span class="n">2</span><p><strong>The 9.8 is a forecast, not an
+          observation.</strong> Microsoft QUIC has no known exploitation today. What earns it second place
+          is that nothing stands between an attacker and the flaw except the absence of a working exploit,
+          and that is the one precondition that can disappear overnight.</p></div>
+        <div class="takeaway"><span class="n">3</span><p><strong>Adjacency is doing real work in the third
+          case.</strong> CVE-2026-62816 needs an attacker already on the same network segment, and the
+          Reliable Multicast Transport Driver is not in the default path for most estates. Check whether
+          multicast transport is actually in use before treating an 8.8 as urgent.</p></div>
+        <div class="takeaway"><span class="n">4</span><p><strong>Three flaws in one driver is the finding
+          the CVE list hides.</strong> Two further WinSock issues shipped in the same release. A single
+          patched CVE is an event; three in one component in one month is a reason to look at what else
+          touches that driver.</p></div>
+        <div class="takeaway"><span class="n">5</span><p><strong>Nobody has said who is exploiting
+          it.</strong> Microsoft confirms exploitation and no vendor names an actor. Any attribution
+          attached to this flaw in the next few weeks should be treated as new information, not as
+          confirmation of something already reported.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 5. RISK &amp; IMPACT ===================== -->
+  <section class="alt">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Risk &amp; Impact</p>
+        <h2>Assessed on exposure, because there is no victimology yet</h2>
+        <p>Eight days after release, no reporting names a victim or a sector for any of these three. Every
+          level below is therefore an exposure judgment, and each row says so rather than implying observed
+          targeting the sources do not support.</p>
+      </div>
+
+      <div class="sectors">
+        <div class="sector critical">
+          <div class="name">Managed service providers and hosting</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Critical</div>
+          <div class="why">Carries the densest population of internet-facing Server 2022 and 2025 and the
+            most QUIC-capable services, and a local privilege escalation turns any single tenant foothold
+            into SYSTEM. No victimology exists eight days in, so this rests on exposure rather than
+            observed targeting.</div>
+        </div>
+        <div class="sector critical">
+          <div class="name">Government and public administration</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Critical</div>
+          <div class="why">The only sector under a binding obligation here: the catalog entry for
+            CVE-2026-68820 sets a remediation deadline of 25 August 2026 for federal civilian agencies.
+            That is a compliance fact rather than evidence of targeting, and it is the reason the level is
+            not lower.</div>
+        </div>
+        <div class="sector high">
+          <div class="name">Financial services</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">High</div>
+          <div class="why">Large centrally managed Windows 11 fleets and early Server 2025 adoption put
+            both the local flaw and the QUIC flaw across most of the estate. Exposure reasoning only; no
+            financial victim is named anywhere in the cited reporting.</div>
+        </div>
+        <div class="sector high">
+          <div class="name">Education and research</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">High</div>
+          <div class="why">The one sector where the adjacent-network flaw is more than theoretical: flat
+            campus networks with genuine multicast use give CVE-2026-62816 the adjacency it needs, which
+            most corporate networks do not.</div>
+        </div>
+        <div class="sector moderate">
+          <div class="name">Healthcare</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Moderate</div>
+          <div class="why">Slower Windows 11 adoption means the QUIC flaw reaches less of a typical estate,
+            though the WinSock privilege escalation applies to every supported Windows version including
+            Server 2012 onward.</div>
+        </div>
+        <div class="sector low">
+          <div class="name">Retail and hospitality</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Low</div>
+          <div class="why">No exposure argument distinguishes it and no reporting names it. The level
+            reflects the absence of any signal in either direction, not a judgment that these systems are
+            safer.</div>
+        </div>
+        <div class="sector minimal">
+          <div class="name">Estates with no Windows 11 or Server 2022 and later</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Minimal</div>
+          <div class="why">CVE-2026-62815 does not affect them at all &mdash; Microsoft QUIC ships only on
+            Windows 11 and Server 2022 onward. Only the local privilege escalation applies, and that
+            requires an attacker to already be on the host.</div>
+        </div>
+      </div>
+
+      <div class="risklegend">
+        <div class="item"><span class="sw" style="background:var(--risk-critical)"></span> Critical — actively targeted</div>
+        <div class="item"><span class="sw" style="background:var(--risk-high)"></span> High — fits the victim profile</div>
+        <div class="item"><span class="sw" style="background:var(--risk-moderate)"></span> Moderate — plausible, not observed</div>
+        <div class="item"><span class="sw" style="background:var(--risk-low)"></span> Low — outside the pattern</div>
+        <div class="item"><span class="sw" style="background:var(--risk-minimal)"></span> Minimal — no indication</div>
+      </div>
+
+      <div class="callout">
+        <p><strong>Answer two questions before you rank anything.</strong> Does anything in the estate
+          expose a QUIC-enabled service to an untrusted network, and is Reliable Multicast Transport
+          actually in use anywhere? A no to both leaves one flaw that matters this week, and it is the one
+          scoring 7.0. A yes to the first moves a 9.8 with no exploit into the same conversation as a 7.0
+          with one.</p>
+        <p>
+          For <em>how</em> a compromise actually unfolds — the techniques, the tooling and the
+          order they run in — see the companion attack-flow report.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 6. SOURCES ===================== -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Part 1 sources</p>
+        <h2>What this analysis is built on</h2>
+      </div>
+      <ol class="sources">
+        <li id="s1">NVD &mdash; CVE-2026-68820 (WinSock AFD use-after-free, CVSS 7.0, CWE-416) &mdash; <a href="https://nvd.nist.gov/vuln/detail/CVE-2026-68820">https://nvd.nist.gov/vuln/detail/CVE-2026-68820</a></li>
+        <li id="s2">NVD &mdash; CVE-2026-62815 (Microsoft QUIC use-after-free, CVSS 9.8, CWE-416) &mdash; <a href="https://nvd.nist.gov/vuln/detail/CVE-2026-62815">https://nvd.nist.gov/vuln/detail/CVE-2026-62815</a></li>
+        <li id="s3">NVD &mdash; CVE-2026-62816 (RMCAST heap overflow, CVSS 8.8, CWE-122/CWE-190) &mdash; <a href="https://nvd.nist.gov/vuln/detail/CVE-2026-62816">https://nvd.nist.gov/vuln/detail/CVE-2026-62816</a></li>
+        <li id="s4">Tenable &mdash; Microsoft's August 2026 Patch Tuesday addresses 398 CVEs &mdash; <a href="https://www.tenable.com/blog/microsofts-august-2026-patch-tuesday-addresses-398-cves-cve-2026-68820">https://www.tenable.com/blog/microsofts-august-2026-patch-tuesday-addresses-398-cves-cve-2026-68820</a></li>
+        <li id="s5">SANS Internet Storm Center &mdash; Microsoft Patch Tuesday August 2026 &mdash; <a href="https://isc.sans.edu/diary/Microsoft+Patch+Tuesday+August+2026/33236/">https://isc.sans.edu/diary/Microsoft+Patch+Tuesday+August+2026/33236/</a></li>
+        <li id="s6">Cisco Talos &mdash; Microsoft Patch Tuesday for August 2026 &mdash; <a href="https://blog.talosintelligence.com/microsoft-patch-tuesday-for-august-2026/">https://blog.talosintelligence.com/microsoft-patch-tuesday-for-august-2026/</a></li>
+        <li id="s7">CrowdStrike &mdash; August 2026 Patch Tuesday: updates and analysis &mdash; <a href="https://www.crowdstrike.com/en-us/blog/patch-tuesday-analysis-august-2026/">https://www.crowdstrike.com/en-us/blog/patch-tuesday-analysis-august-2026/</a></li>
+        <li id="s8">Rapid7 &mdash; Patch Tuesday, August 2026 &mdash; <a href="https://www.rapid7.com/blog/post/em-patch-tuesday-august-2026/">https://www.rapid7.com/blog/post/em-patch-tuesday-august-2026/</a></li>
+        <li id="s9">Microsoft Security Response Center &mdash; CVE-2026-68820 advisory &mdash; <a href="https://msrc.microsoft.com/update-guide/vulnerability/CVE-2026-68820">https://msrc.microsoft.com/update-guide/vulnerability/CVE-2026-68820</a></li>
+        <li id="s10">CISA &mdash; Known Exploited Vulnerabilities Catalog &mdash; <a href="https://www.cisa.gov/known-exploited-vulnerabilities-catalog">https://www.cisa.gov/known-exploited-vulnerabilities-catalog</a></li>
+      </ol>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+
+    <p class="note">
+      <strong>Confidence and sourcing.</strong> Scores, vectors, weaknesses and affected product lists are
+      reference data taken from NVD, and were read per CVE rather than from any summary. Exploitation
+      status for CVE-2026-68820 is Microsoft's own statement, repeated independently by four vendors.
+      <strong>One disagreement is worth recording:</strong> the Internet Storm Center scores CVE-2026-62816
+      at 9.8 while NVD and Cisco Talos both record 8.8 with an adjacent-network vector. This report uses
+      8.8, because the adjacency constraint is load-bearing for the triage argument and NVD is the
+      reference for scoring. The vendors also disagree on the size of the release &mdash; 398, 418 and 421
+      CVEs &mdash; which is stated in the overview rather than resolved, since each is counting a different
+      set. No actor is named for the exploited flaw by any source, and none is inferred here. Sector risk
+      levels are analyst assessments, not measured values; for this subject they rest entirely on exposure,
+      because no victimology has been published.
+    </p>
+  </div>
+</footer>
+
+<section class="partrule">
+  <div class="wrap">
+    <span class="pnum">Part 2</span>
+    <h2>ATT&amp;CK attack flow</h2>
+    <p>How a compromise unfolds, tactic by tactic and in order. Part 1 established who is at
+       risk and why; this part is how they get hit.</p>
+  </div>
+</section>
+
+<div class="flowpart">
+<header>
+  <div class="wrap hero">
+    <p class="eyebrow">Vulnerability Report <span class="idtag">Microsoft Windows · August 2026</span></p>
+    <h1>Windows<span class="destruct">.</span></h1>
+    <p class="lede">
+      Three unrelated flaws from one patch cycle — a kernel use-after-free, a QUIC use-after-free
+      and a multicast heap overflow. They share a vendor and a release date and
+      <strong>nothing else</strong>. The work here is not explaining a chain; it is deciding
+      which one to fix on Monday.
+    </p>
+
+    <div class="cverow">
+      <span class="label">In scope</span>
+      <span class="cve">CVE-2026-68820</span>
+      <span class="cve">CVE-2026-62815</span>
+      <span class="cve">CVE-2026-62816</span>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><p class="k">Vulnerabilities</p><p class="v">3</p></div>
+      <div class="fact"><p class="k">Highest CVSS</p><p class="v bad">9.8</p></div>
+      <div class="fact"><p class="k">In CISA KEV</p><p class="v bad">1 of 3</p></div>
+      <div class="fact"><p class="k">Product</p><p class="v">Microsoft Windows</p></div>
+      <div class="fact"><p class="k">Published</p><p class="v">11 Aug 2026</p></div>
+      <div class="fact"><p class="k">KEV deadline</p><p class="v bad">25 Aug 2026</p></div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ===================== 1. VULNERABILITIES ===================== -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Vulnerabilities</p>
+        <h2>The highest score is not the first fix</h2>
+        <p>
+          These do not compose. Listed in <strong>patch order</strong>, which is not score
+          order — and the reason is the whole point of this section.
+        </p>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Fix</th><th>CVE</th><th>CVSS</th><th>Exploitation</th><th>Vector</th><th>Why this position</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="rank">1</span></td>
+              <td class="mono">CVE-2026-68820</td>
+              <td><span class="sev high">7.0</span></td>
+              <td><span class="exp kev">KEV</span></td>
+              <td class="mono">AV:L / PR:L</td>
+              <td>Lowest score of the three, and the only one someone is provably using today.</td>
+            </tr>
+            <tr>
+              <td><span class="rank lower">2</span></td>
+              <td class="mono">CVE-2026-62815</td>
+              <td><span class="sev crit">9.8</span></td>
+              <td><span class="exp none">No known exploitation</span></td>
+              <td class="mono">AV:N / PR:N</td>
+              <td>Unauthenticated and remote with no preconditions — the largest blast radius if a PoC lands.</td>
+            </tr>
+            <tr>
+              <td><span class="rank lower">3</span></td>
+              <td class="mono">CVE-2026-62816</td>
+              <td><span class="sev high">8.8</span></td>
+              <td><span class="exp none">No known exploitation</span></td>
+              <td class="mono">AV:A / PR:N</td>
+              <td>Adjacent-network only, so the attacker needs a position on the segment first.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout">
+        <p>
+          <strong>Why this order is not the CVSS order.</strong> CVE-2026-68820 scores 7.0 — the
+          lowest of the three — and sits first because it is in CISA's KEV catalog with a
+          <strong>25 August 2026 deadline</strong>. Someone is exploiting it now. The other two are
+          scored higher on what an attacker <em>could</em> do; this one is ranked on what attackers
+          <em>are</em> doing. An exploited 7.0 outranks a theoretical 9.8.
+        </p>
+        <p>
+          <strong>Exposure flips it, and no CVSS score knows your estate.</strong> If you run
+          internet-reachable QUIC endpoints — HTTP/3 front ends, SMB over QUIC — then CVE-2026-62815
+          is an unauthenticated remote code execution path with no preconditions at all, and it
+          becomes the first fix. Conversely, if 68820 is only reachable on workstations behind an
+          MFA'd VPN, its practical urgency drops. Rank the table against your own exposure before
+          acting on it.
+        </p>
+        <p>
+          <strong>None of these three reaches an objective on its own.</strong> Look at the reach
+          strips below: every one is an <em>enabler</em> — a way in, a way across, or a way up. That
+          is worth noticing, because an attacker holding an RCE from 62815 or 62816 and a local
+          escalation from 68820 has a complete path from the network to SYSTEM. <strong>That is a
+          triage observation, not a chain.</strong> No vendor or researcher has documented these
+          being used together; RCE-plus-LPE is simply the shape of most Windows intrusions. If
+          evidence of an actual combined exploit emerges, this becomes a chain report instead.
+        </p>
+      </div>
+
+      <!-- ===== VULN 1 ===== -->
+      <div class="vuln high">
+        <div class="vulnhead">
+          <span class="cve">CVE-2026-68820</span>
+          <span class="sev high">7.0 HIGH</span>
+          <span class="exp kev">KEV</span>
+          <span class="cwe">CWE-416 Use After Free</span>
+          <span class="component">Ancillary Function Driver for WinSock</span>
+        </div>
+        <div class="vulnbody">
+          <h3>A local foothold becomes SYSTEM</h3>
+          <p class="sowhat">
+            <strong>So what:</strong> a use-after-free in the WinSock kernel driver lets an already
+            authenticated local user elevate to SYSTEM. The vector is
+            <code>AV:L/AC:H/PR:L/UI:N</code> — local access and low privileges required, with high
+            attack complexity. That precondition is exactly why it scores 7.0 rather than 9-something,
+            and exactly why it is being exploited: every phishing payload and every commodity loader
+            already satisfies "authenticated local user". This is the second stage of somebody else's
+            intrusion, which makes it valuable rather than academic.
+          </p>
+
+          <p class="reachlabel">Reaches, on its own</p>
+          <div class="reach">
+            <div class="reachitem off"><span class="reachnode" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5l7.5 3.2v6c0 4.4-3.1 8.1-7.5 9.6-4.4-1.5-7.5-5.2-7.5-9.6v-6L12 2.5z"/><path d="M13.2 7.8l-2.9 4.7h3.4l-2.9 4.2"/></svg></span><span class="reachlbl">Initial Access</span></div>
+            <div class="reachitem on"><span class="reachnode" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.8" y="4.2" width="18.4" height="15.6" rx="2.2"/><path d="M7 9.5l3 2.9-3 2.9M13 15.3h4.2"/></svg></span><span class="reachlbl">Execution</span></div>
+            <div class="reachitem on"><span class="reachnode" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.8 20.6H7.9V15.5H13V10.4H18.1V5.3H21.2"/></svg></span><span class="reachlbl">Priv Esc</span></div>
+            <div class="reachitem off"><span class="reachnode" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4.6" r="2.3"/><path d="M12 6.9v14.2M5 12v1.2a7 7 0 0 0 14 0V12"/><path d="M3.2 12h4.2M16.6 12h4.2"/></svg></span><span class="reachlbl">Persistence</span></div>
+            <div class="reachitem off"><span class="reachnode" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.8" cy="12" r="4.3"/><path d="M12.1 12h9.1M17.6 12v3.9M20.4 12v2.8"/></svg></span><span class="reachlbl">Cred Access</span></div>
+            <div class="reachitem off"><span class="reachnode" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1.8" y="7.8" width="7.4" height="8.4" rx="1.6"/><rect x="14.8" y="7.8" width="7.4" height="8.4" rx="1.6"/><path d="M9.6 12h4.8M12.4 9.6l2.4 2.4-2.4 2.4"/></svg></span><span class="reachlbl">Lateral</span></div>
+            <div class="reachitem off"><span class="reachnode" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5.6" rx="7.8" ry="2.9"/><path d="M19.8 5.6v12.8c0 1.6-3.5 2.9-7.8 2.9s-7.8-1.3-7.8-2.9V5.6"/><path d="M8.7 10.9l6.6 6.6M15.3 10.9l-6.6 6.6"/></svg></span><span class="reachlbl">Impact</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== VULN 2 ===== -->
+      <div class="vuln crit">
+        <div class="vulnhead">
+          <span class="cve">CVE-2026-62815</span>
+          <span class="sev crit">9.8 CRITICAL</span>
+          <span class="exp none">No known exploitation</span>
+          <span class="cwe">CWE-416 Use After Free</span>
+          <span class="component">Microsoft QUIC</span>
+        </div>
+        <div class="vulnbody">
+          <h3>Unauthenticated code execution over the network</h3>
+          <p class="sowhat">
+            <strong>So what:</strong> a use-after-free in Microsoft's QUIC implementation allows code
+            execution from the network with no authentication and no user interaction —
+            <code>AV:N/AC:L/PR:N/UI:N</code>, which is as clean as an attack vector gets. The
+            practical question is reachability: QUIC underpins HTTP/3 and SMB over QUIC, so exposure
+            depends on whether those endpoints face untrusted networks. Where they do, this is the
+            most dangerous item in the set despite having no known exploitation yet.
+          </p>
+
+          <p class="reachlabel">Reaches, on its own</p>
+          <div class="reach">
+            <div class="reachitem on"><span class="reachnode" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5l7.5 3.2v6c0 4.4-3.1 8.1-7.5 9.6-4.4-1.5-7.5-5.2-7.5-9.6v-6L12 2.5z"/><path d="M13.2 7.8l-2.9 4.7h3.4l-2.9 4.2"/></svg></span><span class="reachlbl">Initial Access</span></div>
+            <div class="reachitem on"><span class="reachnode" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.8" y="4.2" width="18.4" height="15.6" rx="2.2"/><path d="M7 9.5l3 2.9-3 2.9M13 15.3h4.2"/></svg></span><span class="reachlbl">Execution</span></div>
+            <div class="reachitem off"><span class="reachnode" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.8 20.6H7.9V15.5H13V10.4H18.1V5.3H21.2"/></svg></span><span class="reachlbl">Priv Esc</span></div>
+            <div class="reachitem off"><span class="reachnode" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4.6" r="2.3"/><path d="M12 6.9v14.2M5 12v1.2a7 7 0 0 0 14 0V12"/><path d="M3.2 12h4.2M16.6 12h4.2"/></svg></span><span class="reachlbl">Persistence</span></div>
+            <div class="reachitem off"><span class="reachnode" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.8" cy="12" r="4.3"/><path d="M12.1 12h9.1M17.6 12v3.9M20.4 12v2.8"/></svg></span><span class="reachlbl">Cred Access</span></div>
+            <div class="reachitem off"><span class="reachnode" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1.8" y="7.8" width="7.4" height="8.4" rx="1.6"/><rect x="14.8" y="7.8" width="7.4" height="8.4" rx="1.6"/><path d="M9.6 12h4.8M12.4 9.6l2.4 2.4-2.4 2.4"/></svg></span><span class="reachlbl">Lateral</span></div>
+            <div class="reachitem off"><span class="reachnode" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5.6" rx="7.8" ry="2.9"/><path d="M19.8 5.6v12.8c0 1.6-3.5 2.9-7.8 2.9s-7.8-1.3-7.8-2.9V5.6"/><path d="M8.7 10.9l6.6 6.6M15.3 10.9l-6.6 6.6"/></svg></span><span class="reachlbl">Impact</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== VULN 3 ===== -->
+      <div class="vuln high">
+        <div class="vulnhead">
+          <span class="cve">CVE-2026-62816</span>
+          <span class="sev high">8.8 HIGH</span>
+          <span class="exp none">No known exploitation</span>
+          <span class="cwe">CWE-122 · CWE-190</span>
+          <span class="component">Reliable Multicast Transport Driver (RMCAST)</span>
+        </div>
+        <div class="vulnbody">
+          <h3>Code execution from the same broadcast domain</h3>
+          <p class="sowhat">
+            <strong>So what:</strong> a heap overflow driven by an integer wraparound in the PGM
+            multicast transport driver, giving unauthenticated code execution — but only from an
+            <em>adjacent</em> network (<code>AV:A</code>). The attacker must already have a position
+            on the segment, which is what separates 8.8 from 9.8. It is a lateral-movement primitive
+            rather than a front door, and it matters most in flat networks where one compromised
+            workstation shares a broadcast domain with servers.
+          </p>
+
+          <p class="reachlabel">Reaches, on its own</p>
+          <div class="reach">
+            <div class="reachitem off"><span class="reachnode" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5l7.5 3.2v6c0 4.4-3.1 8.1-7.5 9.6-4.4-1.5-7.5-5.2-7.5-9.6v-6L12 2.5z"/><path d="M13.2 7.8l-2.9 4.7h3.4l-2.9 4.2"/></svg></span><span class="reachlbl">Initial Access</span></div>
+            <div class="reachitem on"><span class="reachnode" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.8" y="4.2" width="18.4" height="15.6" rx="2.2"/><path d="M7 9.5l3 2.9-3 2.9M13 15.3h4.2"/></svg></span><span class="reachlbl">Execution</span></div>
+            <div class="reachitem off"><span class="reachnode" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.8 20.6H7.9V15.5H13V10.4H18.1V5.3H21.2"/></svg></span><span class="reachlbl">Priv Esc</span></div>
+            <div class="reachitem off"><span class="reachnode" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4.6" r="2.3"/><path d="M12 6.9v14.2M5 12v1.2a7 7 0 0 0 14 0V12"/><path d="M3.2 12h4.2M16.6 12h4.2"/></svg></span><span class="reachlbl">Persistence</span></div>
+            <div class="reachitem off"><span class="reachnode" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.8" cy="12" r="4.3"/><path d="M12.1 12h9.1M17.6 12v3.9M20.4 12v2.8"/></svg></span><span class="reachlbl">Cred Access</span></div>
+            <div class="reachitem on"><span class="reachnode" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1.8" y="7.8" width="7.4" height="8.4" rx="1.6"/><rect x="14.8" y="7.8" width="7.4" height="8.4" rx="1.6"/><path d="M9.6 12h4.8M12.4 9.6l2.4 2.4-2.4 2.4"/></svg></span><span class="reachlbl">Lateral</span></div>
+            <div class="reachitem off"><span class="reachnode" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5.6" rx="7.8" ry="2.9"/><path d="M19.8 5.6v12.8c0 1.6-3.5 2.9-7.8 2.9s-7.8-1.3-7.8-2.9V5.6"/><path d="M8.7 10.9l6.6 6.6M15.3 10.9l-6.6 6.6"/></svg></span><span class="reachlbl">Impact</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 2. THE INTRUSION ===================== -->
+  <section style="background:var(--surface); border-top:1px solid var(--hair); border-bottom:1px solid var(--hair);">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">The Intrusion</p>
+        <h2>Three separate paths, one phase each</h2>
+        <p>
+          One flow per vulnerability, because each is its own attack path and node numbering restarts
+          in every one. Each flow is a <strong>single phase</strong>, and that is the honest length:
+          these are primitives, not intrusions. None carries an impact phase, because none of them
+          reaches an objective by itself.
+        </p>
+      </div>
+
+      <p class="flowlabel">CVE-2026-68820 — attack path</p>
+      <div class="flow">
+        <div class="phase">
+          <div class="node">01</div>
+          <div class="card">
+            <div class="card-top">
+              <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.8 20.6H7.9V15.5H13V10.4H18.1V5.3H21.2"/></svg></span>
+              <span class="tactic">Privilege Escalation</span>
+            </div>
+            <h4>Elevate from a local account to SYSTEM</h4>
+            <div class="ttps">
+              <div class="ttp"><span class="tid">T1068</span><span class="desc">Exploitation for Privilege Escalation — triggering the use-after-free in <span class="tool">afd.sys</span> runs attacker-controlled code in kernel context, taking an ordinary logged-in user to SYSTEM.</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p class="flowlabel">CVE-2026-62815 — attack path</p>
+      <div class="flow">
+        <div class="phase">
+          <div class="node">01</div>
+          <div class="card">
+            <div class="card-top">
+              <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5l7.5 3.2v6c0 4.4-3.1 8.1-7.5 9.6-4.4-1.5-7.5-5.2-7.5-9.6v-6L12 2.5z"/><path d="M13.2 7.8l-2.9 4.7h3.4l-2.9 4.2"/></svg></span>
+              <span class="tactic">Initial Access</span>
+            </div>
+            <h4>Execute code on a QUIC listener from the network</h4>
+            <div class="ttps">
+              <div class="ttp"><span class="tid">T1190</span><span class="desc">Exploit Public-Facing Application — a crafted QUIC exchange drives the use-after-free in <span class="tool">msquic</span>, giving code execution with no credentials and no user action.</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p class="flowlabel">CVE-2026-62816 — attack path</p>
+      <div class="flow">
+        <div class="phase">
+          <div class="node">01</div>
+          <div class="card">
+            <div class="card-top">
+              <span class="ticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="1.8" y="7.8" width="7.4" height="8.4" rx="1.6"/><rect x="14.8" y="7.8" width="7.4" height="8.4" rx="1.6"/><path d="M9.6 12h4.8M12.4 9.6l2.4 2.4-2.4 2.4"/></svg></span>
+              <span class="tactic">Lateral Movement</span>
+            </div>
+            <h4>Reach a neighbour over multicast</h4>
+            <div class="ttps">
+              <div class="ttp"><span class="tid">T1210</span><span class="desc">Exploitation of Remote Services — an integer wraparound produces a heap overflow in the <span class="tool">RMCAST</span> PGM driver, executing code on any host sharing the broadcast domain.</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="legend">
+        <div class="item"><span class="sev crit">9.8</span> <span class="sev high">7.0</span> CVSS v3.1 base score — how bad if exploited</div>
+        <div class="item"><span class="exp kev">KEV</span> <span class="exp none">No known exploitation</span> Whether anyone is actually doing it</div>
+        <div class="item"><span class="tid" style="min-width:0">T####</span> ATT&amp;CK technique ID</div>
+        <div class="item">
+          <span class="keys" aria-hidden="true">
+            <span class="ticon impact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="7.6"/><circle cx="12" cy="12" r="2.4"/></svg></span>
+            <span class="ticon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="7.6"/><circle cx="12" cy="12" r="2.4"/></svg></span>
+          </span>
+          Reached / not reached by that vulnerability alone
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 3. REMEDIATION ===================== -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Remediation</p>
+        <h2>One cumulative update, three problems</h2>
+        <p>
+          All three are closed by the August 2026 cumulative update for the affected build. The
+          triage order above matters for <em>sequencing rings</em>, not for choosing patches — there
+          is only one patch.
+        </p>
+      </div>
+
+      <div class="fixgrid">
+        <div class="fix urgent">
+          <h3>Patch the KEV item to deadline</h3>
+          <p>CVE-2026-68820 carries a CISA remediation date of <code>25 Aug 2026</code>. Where the estate is too large to complete in one pass, sequence rings so that systems most likely to receive an initial foothold — user workstations, jump hosts — go first.</p>
+          <span class="tagline">Patch</span>
+        </div>
+        <div class="fix">
+          <h3>Inventory QUIC exposure</h3>
+          <p>CVE-2026-62815 only matters where a QUIC listener is reachable. Identify HTTP/3 front ends and SMB-over-QUIC endpoints; anything facing an untrusted network moves to the front of the queue regardless of the table above.</p>
+          <span class="tagline">Exposure</span>
+        </div>
+        <div class="fix">
+          <h3>Check whether PGM is even enabled</h3>
+          <p>CVE-2026-62816 requires the Reliable Multicast Transport Driver. Where the MSMQ / PGM feature is not installed, exposure is nil — confirm before spending a change window on it.</p>
+          <span class="tagline">Scoping</span>
+        </div>
+      </div>
+
+      <div class="table-wrap" style="margin-top:22px">
+        <table>
+          <thead>
+            <tr><th>CVE</th><th>CVSS</th><th>CWE</th><th>Affected</th><th>Example fixed build</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="cve">CVE-2026-68820</span></td>
+              <td><span class="sev high">7.0</span></td>
+              <td>CWE-416</td>
+              <td class="mono">Win 10 1607–22H2 · Win 11 23H2–26H1 · Server 2012 R2–2025</td>
+              <td class="mono">10.0.14393.9418 (Win10 1607)</td>
+            </tr>
+            <tr>
+              <td><span class="cve">CVE-2026-62815</span></td>
+              <td><span class="sev crit">9.8</span></td>
+              <td>CWE-416</td>
+              <td class="mono">Win 11 23H2–26H1 · Server 2022 · Server 2025</td>
+              <td class="mono">10.0.26100.9106 (Win11 24H2)</td>
+            </tr>
+            <tr>
+              <td><span class="cve">CVE-2026-62816</span></td>
+              <td><span class="sev high">8.8</span></td>
+              <td>CWE-122 · CWE-190</td>
+              <td class="mono">Win 10 1607–22H2 · Win 11 23H2–26H1 · Server 2012 · 2012 R2</td>
+              <td class="mono">10.0.14393.9418 (Win10 1607)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+  <!-- ---------------- Sources ----------------
+       A real section, headed like every other one - not a footer afterthought. -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Part 2 sources</p>
+        <h2>What this mapping is built on</h2>
+      </div>
+      <ol class="sources">
+        <li id="fs1">NVD &mdash; CVE-2026-68820 &mdash; <a href="https://nvd.nist.gov/vuln/detail/CVE-2026-68820">https://nvd.nist.gov/vuln/detail/CVE-2026-68820</a></li>
+        <li id="fs2">NVD &mdash; CVE-2026-62815 &mdash; <a href="https://nvd.nist.gov/vuln/detail/CVE-2026-62815">https://nvd.nist.gov/vuln/detail/CVE-2026-62815</a></li>
+        <li id="fs3">NVD &mdash; CVE-2026-62816 &mdash; <a href="https://nvd.nist.gov/vuln/detail/CVE-2026-62816">https://nvd.nist.gov/vuln/detail/CVE-2026-62816</a></li>
+      </ol>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p class="note">CVSS scores, vectors, CWE assignments, affected products and KEV status verified against NVD. Build numbers are examples drawn from the NVD CPE data; confirm the exact fixed build for each SKU in your estate against the vendor advisory.</p>
+    <p class="note">
+      <strong>These three are independent, and that is the finding.</strong> They share a vendor and a
+      release date. They do not compose: exploiting one gives you nothing you need to exploit another,
+      and fixing one neither exposes nor creates another. The RCE-plus-LPE combination noted in the
+      triage callout is the generic shape of Windows intrusions, not a documented chain — if evidence
+      of a specific combined exploit emerges, rebuild this as a chain report.
+    </p>
+    <p class="note">
+      <strong>Derived mapping — read before citing.</strong> MITRE ATT&amp;CK publishes no mapping for
+      these CVEs, so the techniques were <strong>derived by analysis</strong> from the NVD
+      descriptions and CVSS vectors. Every ID and tactic was verified to exist against
+      attack.mitre.org, but applying them here is analytical judgment. The single-phase flows are
+      deliberate: each CVE grants one primitive, and padding them into multi-phase narratives would
+      invent behaviour nobody has observed.
+    </p>
+  </div>
+</footer>
+</div>
+
+<!-- BULLETIN:DEFENCE -->
+
+  <!-- Intentionally empty. Part 2 carries its own Remediation section, ordered by patch
+       priority rather than by score. Duplicating it here would create two versions of the
+       same guidance that drift apart the moment one is updated. --><!-- /BULLETIN:DEFENCE -->

@@ -1,0 +1,571 @@
+<title>Windows August 2026 &middot; Vulnerability Analysis</title>
+
+<style>
+  /* ---- Tokens: shared across TI-Reporting - see CLAUDE.md ---- */
+  :root {
+    color-scheme: light;
+
+    --ground: #ffffff;
+    --surface: #ffffff;
+    --surface-2: #f3f6fc;
+    --ink: #14181f;
+    --muted: #5b6474;
+    --hair: #e3e8f2;
+    --hair-strong: #c6cede;
+
+    /* ACCENT - objective is unknown by design: three primitives from one release,
+       and only one is in use. Signal blue, as the flow report uses. */
+    --ember: #1d4ed8;
+    --ember-ink: #1e40af;
+    --ember-wash: rgba(29, 78, 216, 0.09);
+    --steel: #55607a;
+    --steel-wash: rgba(85, 96, 122, 0.10);
+    --spine: #c2cadb;
+
+    /* SECTOR RISK - shares the CVSS ramp, separate tokens, different form. */
+    --risk-critical: #a4161a;  --risk-critical-wash: rgba(164, 22, 26, 0.10);
+    --risk-high:     #b3541e;  --risk-high-wash:     rgba(179, 84, 30, 0.10);
+    --risk-moderate: #8a6a00;  --risk-moderate-wash: rgba(138, 106, 0, 0.10);
+    --risk-low:      #4a6b2a;  --risk-low-wash:      rgba(74, 107, 42, 0.10);
+    --risk-minimal:  #5c6470;  --risk-minimal-wash:  rgba(92, 100, 112, 0.10);
+
+    --shadow: 0 1px 2px rgba(20,22,26,.06), 0 8px 24px rgba(20,22,26,.05);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.55; -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 940px; margin: 0 auto; padding: 0 24px; }
+
+  /* ================= 1. COVER ================= */
+  .cover {
+    position: relative; overflow: hidden;
+    border-bottom: 1px solid var(--hair);
+    background:
+      radial-gradient(120% 90% at 88% -5%, var(--ember-wash), transparent 62%),
+      var(--surface);
+  }
+  .cover .wrap { position: relative; z-index: 2; padding-top: 84px; padding-bottom: 76px; }
+
+  .covermotif {
+    position: absolute; top: -40px; right: -60px; width: 460px; height: 460px;
+    color: var(--ember); pointer-events: none; z-index: 1;
+  }
+  .covermotif .arcs   { opacity: .16; }
+  .covermotif .rail   { opacity: .30; }
+  .covermotif .dots   { opacity: .22; }
+
+  .tlp {
+    display: inline-block; font-family: ui-monospace, Consolas, monospace;
+    font-size: 10.5px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
+    padding: 4px 10px; border-radius: 4px; margin-bottom: 26px;
+    background: var(--surface-2); border: 1px solid var(--hair-strong); color: var(--muted);
+  }
+  .tlp.clear { color: var(--muted); }
+  .tlp.green { color: var(--risk-low);      border-color: color-mix(in srgb, var(--risk-low) 40%, transparent);      background: var(--risk-low-wash); }
+  .tlp.amber { color: var(--risk-high);     border-color: color-mix(in srgb, var(--risk-high) 40%, transparent);     background: var(--risk-high-wash); }
+  .tlp.red   { color: var(--risk-critical); border-color: color-mix(in srgb, var(--risk-critical) 40%, transparent); background: var(--risk-critical-wash); }
+
+  .eyebrow {
+    font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+    font-size: 11.5px; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--muted); margin: 0 0 18px; display: flex; align-items: center; gap: 12px;
+  }
+  .eyebrow::after { content: ""; flex: 1; height: 1px; background: var(--hair-strong); }
+  .idtag { color: var(--ember-ink); font-weight: 600; }
+
+  .cover h1 {
+    font-size: clamp(34px, 5.6vw, 54px); line-height: .96; letter-spacing: -.025em;
+    font-weight: 800; margin: 0 0 10px; text-wrap: balance; max-width: 16ch;
+  }
+  .cover h1 .accent { color: var(--ember); }
+  /* The cover is deliberately left at the original scale - it is the one page that is not
+     dense reading, and the body-copy reduction is not wanted here. The explicit line-height
+     restores what it inherited before body dropped to 1.55. */
+  .cover .standfirst {
+    font-size: clamp(15px, 2vw, 17.5px); line-height: 1.6; color: var(--muted);
+    max-width: 60ch; margin: 20px 0 0;
+  }
+  /* Six cells. auto-fit leaves the last row short at print width, and the gap lets the
+     container's hairline background show through as an empty grey block - so the columns
+     are pinned instead. Three divides six exactly, and so does two on a narrow screen.
+     CHANGE THE NUMBER OF CELLS AND YOU MUST CHANGE THIS RULE. */
+  .covermeta {
+    margin-top: 42px; display: grid; gap: 1px;
+    grid-template-columns: repeat(3, 1fr);
+    background: var(--hair); border: 1px solid var(--hair); border-radius: 12px; overflow: hidden;
+  }
+  @media (max-width: 640px) { .covermeta { grid-template-columns: repeat(2, 1fr); } }
+  .covermeta div { background: var(--surface); padding: 15px 18px; }
+  .covermeta .k { font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0 0 5px; }
+  .covermeta .v { font-size: 13.5px; font-weight: 600; margin: 0; }
+
+  /* ================= Sections ================= */
+  section { padding: 46px 0; }
+  section.alt { background: var(--surface); border-top: 1px solid var(--hair); border-bottom: 1px solid var(--hair); }
+  .section-head { margin-bottom: 28px; }
+  /* Section labels carry heading weight, not kicker weight - the executive summary and
+     defensive priorities have no h2 under them, so this line IS their heading. The cover
+     and hero eyebrows are deliberately excluded: they sit under display type already. */
+  .section-head .eyebrow { font-size: 18.5px; letter-spacing: .18em; margin-bottom: 10px; }
+  .section-head h2 {
+    font-size: 28px; letter-spacing: -.015em;
+    font-weight: 800; margin: 0; text-wrap: balance;
+  }
+  .section-head p { color: var(--muted); max-width: 68ch; margin: 10px 0 0; font-size: 13px; }
+
+  .prose { max-width: 68ch; }
+  .prose p { margin: 0 0 15px; font-size: 13.5px; }
+  .prose p:last-child { margin-bottom: 0; }
+  .prose strong { font-weight: 700; }
+  .prose h3 {
+    font-size: 24px; font-weight: 700; letter-spacing: -.01em;
+    margin: 34px 0 12px; text-wrap: balance;
+  }
+
+  .src {
+    font-family: ui-monospace, Consolas, monospace; font-size: 10.5px; font-weight: 700;
+    color: var(--steel); background: var(--steel-wash);
+    border: 1px solid color-mix(in srgb, var(--steel) 24%, transparent);
+    padding: 0 5px; border-radius: 4px; vertical-align: 1px; margin-left: 3px;
+    text-decoration: none; white-space: nowrap;
+  }
+
+  /* ================= 2. CHRONOLOGY ================= */
+  .chrono { position: relative; padding-left: 116px; }
+  .chrono::before {
+    content: ""; position: absolute; left: 92px; top: 10px; bottom: 10px;
+    width: 3px; border-radius: 3px;
+    background: linear-gradient(to bottom, var(--spine) 0%, var(--spine) 45%, var(--ember) 100%);
+  }
+  .entry { position: relative; margin-bottom: 30px; }
+  .entry:last-child { margin-bottom: 0; }
+  .entry .when {
+    position: absolute; left: -116px; top: 1px; width: 76px; text-align: right;
+    font-family: ui-monospace, Consolas, monospace; font-size: 12px; font-weight: 700;
+    color: var(--ember-ink); letter-spacing: .02em;
+  }
+  .entry::after {
+    content: ""; position: absolute; left: -27px; top: 7px;
+    width: 11px; height: 11px; border-radius: 50%;
+    background: var(--surface); border: 3px solid var(--spine); z-index: 2;
+  }
+  .entry.key::after { border-color: var(--ember); background: var(--ember); }
+  .entry h3 { margin: 0 0 6px; font-size: 24px; font-weight: 700; letter-spacing: -.01em; }
+  .entry p { margin: 0 0 10px; font-size: 13px; max-width: 66ch; }
+  .entry p:last-child { margin-bottom: 0; }
+
+  /* ================= 4. CONCLUSION ================= */
+  .callout {
+    margin-top: 28px; padding: 20px 22px;
+    background: var(--surface); border: 1px solid var(--ember);
+    border-left: 4px solid var(--ember); border-radius: 12px; font-size: 13.5px;
+  }
+  section.alt .callout { background: var(--ground); }
+  .callout strong { color: var(--ember-ink); }
+  .callout p { margin: 0 0 14px; }
+  .callout p:last-child { margin: 0; }
+
+  .takeaways { display: grid; gap: 12px; margin-top: 26px; }
+  .takeaway {
+    display: grid; grid-template-columns: 30px 1fr; gap: 0 14px; align-items: start;
+    background: var(--surface); border: 1px solid var(--hair);
+    border-radius: 12px; padding: 16px 18px; box-shadow: var(--shadow);
+  }
+  section.alt .takeaway { background: var(--ground); }
+  .takeaway .n {
+    display: flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--ember-wash); color: var(--ember-ink);
+    border: 1px solid color-mix(in srgb, var(--ember) 28%, transparent);
+    font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; font-weight: 700;
+  }
+  .takeaway p { margin: 0; font-size: 13px; }
+
+  /* ================= 5. RISK & IMPACT ================= */
+  .sectors {
+    border: 1px solid var(--hair); border-radius: 14px; overflow: hidden;
+    background: var(--surface); box-shadow: var(--shadow);
+  }
+  section.alt .sectors { background: var(--ground); }
+  .sector {
+    display: grid; grid-template-columns: minmax(150px, 1.1fr) 104px 92px 2fr;
+    gap: 16px; align-items: center;
+    padding: 15px 20px; border-bottom: 1px solid var(--hair);
+  }
+  .sector:last-child { border-bottom: none; }
+  .sector .name { font-weight: 700; font-size: 13px; }
+  .sector .why { font-size: 12.5px; color: var(--muted); }
+
+  .meter { display: flex; gap: 3px; }
+  .meter i {
+    display: block; height: 9px; flex: 1; border-radius: 2px;
+    background: var(--hair-strong); opacity: .5;
+  }
+  .level {
+    font-family: ui-monospace, Consolas, monospace; font-size: 10px; font-weight: 700;
+    letter-spacing: .1em; text-transform: uppercase; text-align: center;
+    padding: 3px 8px; border-radius: 100px; white-space: nowrap;
+  }
+
+  .sector.critical .meter i:nth-child(-n+5) { background: var(--risk-critical); opacity: 1; }
+  .sector.high     .meter i:nth-child(-n+4) { background: var(--risk-high);     opacity: 1; }
+  .sector.moderate .meter i:nth-child(-n+3) { background: var(--risk-moderate); opacity: 1; }
+  .sector.low      .meter i:nth-child(-n+2) { background: var(--risk-low);      opacity: 1; }
+  .sector.minimal  .meter i:nth-child(-n+1) { background: var(--risk-minimal);  opacity: 1; }
+
+  .sector.critical .level { color: #fff; background: var(--risk-critical); }
+  .sector.high     .level { color: var(--risk-high);     background: var(--risk-high-wash);     border: 1px solid color-mix(in srgb, var(--risk-high) 32%, transparent); }
+  .sector.moderate .level { color: var(--risk-moderate); background: var(--risk-moderate-wash); border: 1px solid color-mix(in srgb, var(--risk-moderate) 32%, transparent); }
+  .sector.low      .level { color: var(--risk-low);      background: var(--risk-low-wash);      border: 1px solid color-mix(in srgb, var(--risk-low) 32%, transparent); }
+  .sector.minimal  .level { color: var(--risk-minimal);  background: var(--risk-minimal-wash);  border: 1px solid var(--hair-strong); }
+
+  .risklegend {
+    display: flex; flex-wrap: wrap; gap: 18px; margin-top: 20px;
+    padding: 14px 18px; background: var(--surface-2);
+    border: 1px solid var(--hair); border-radius: 12px;
+    font-size: 12.5px; color: var(--muted);
+  }
+  .risklegend .item { display: flex; align-items: center; gap: 8px; }
+  .risklegend .sw { width: 22px; height: 8px; border-radius: 2px; }
+
+  /* ================= Footer ================= */
+  footer { border-top: 1px solid var(--hair); padding: 32px 0 44px; color: var(--muted); font-size: 12px; }
+  footer h3 { font-size: 11.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin: 0 0 14px; }
+  footer a { color: var(--ember-ink); }
+  .sources { counter-reset: s; display: grid; gap: 8px; margin: 0 0 26px; padding: 0; list-style: none; }
+  /* Counter absolutely positioned, not a grid column: an <li> holding a text node AND an
+     <a> produces three grid items, so the anchor wrapped into the 30px counter column and
+     the URL rendered about four characters wide. */
+  .sources li {
+    counter-increment: s; position: relative; padding-left: 40px;
+    font-size: 12.5px; overflow-wrap: anywhere;
+  }
+  .sources li::before {
+    content: counter(s); position: absolute; left: 0; top: 2px;
+    font-family: ui-monospace, Consolas, monospace; font-size: 10.5px;
+    font-weight: 700; color: var(--steel); background: var(--steel-wash);
+    border: 1px solid color-mix(in srgb, var(--steel) 24%, transparent);
+    border-radius: 4px; text-align: center; width: 30px; height: 20px; line-height: 18px;
+  }
+  .note {
+    margin-top: 12px; padding: 14px 16px; background: var(--surface-2);
+    border: 1px dashed var(--hair-strong); border-radius: 10px; color: var(--muted);
+    font-size: 12.5px;
+  }
+  code { font-family: ui-monospace, Consolas, monospace; font-size: .9em; background: var(--surface-2); padding: 1px 5px; border-radius: 3px; }
+</style>
+
+<!-- ===================== 1. COVER ===================== -->
+<header class="cover">
+  <svg class="covermotif" viewBox="0 0 400 400" fill="none" aria-hidden="true">
+    <g class="arcs" stroke="currentColor" stroke-width="1.1">
+      <circle cx="286" cy="132" r="46"/>
+      <circle cx="286" cy="132" r="86"/>
+      <circle cx="286" cy="132" r="126"/>
+      <circle cx="286" cy="132" r="166"/>
+    </g>
+    <g class="rail" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+      <path d="M286 46 V318"/>
+    </g>
+    <g class="dots" fill="currentColor">
+      <circle cx="286" cy="86"  r="7"/>
+      <circle cx="286" cy="150" r="7"/>
+      <circle cx="286" cy="214" r="7"/>
+      <circle cx="286" cy="278" r="7"/>
+      <circle cx="196" cy="188" r="4"/>
+      <circle cx="352" cy="242" r="4"/>
+      <circle cx="230" cy="300" r="4"/>
+    </g>
+  </svg>
+
+  <div class="wrap">
+    <span class="tlp clear">TLP:CLEAR</span>
+
+    <p class="eyebrow">Vulnerability Analysis <span class="idtag">Microsoft Windows &middot; Aug 2026</span></p>
+    <h1>Windows<span class="accent">.</span></h1>
+    <p class="standfirst">Three unrelated flaws from one patch cycle, where the lowest-scoring of the
+      three is the only one anyone is actually using.</p>
+
+    <div class="covermeta">
+      <div><p class="k">Subject type</p><p class="v">Vulnerability &middot; independent set</p></div>
+      <div><p class="k">Attribution</p><p class="v">Not published</p></div>
+      <div><p class="k">First observed</p><p class="v">August 2026</p></div>
+      <div><p class="k">Assessed risk</p><p class="v">Critical</p></div>
+      <div><p class="k">Report date</p><p class="v">19 August 2026</p></div>
+      <div><p class="k">Is active?</p><p class="v">Yes</p></div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ===================== 2. OVERVIEW ===================== -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Overview</p>
+        <h2>The worst score is not the live threat</h2>
+      </div>
+
+      <div class="prose">
+        <p>These three flaws share a vendor and a release date and nothing else.
+          <strong>CVE-2026-68820</strong> is a use-after-free in the Windows Ancillary Function Driver
+          for WinSock: a local, already-authenticated attacker who wins a race condition gets SYSTEM. It
+          scores <strong>7.0</strong>, the lowest of the three.<a class="src" href="#s1">1</a>
+          <strong>CVE-2026-62815</strong> is a use-after-free in Microsoft QUIC that lets an
+          unauthenticated attacker execute code over the network with no user interaction, scoring
+          <strong>9.8</strong>.<a class="src" href="#s2">2</a> <strong>CVE-2026-62816</strong> is a heap
+          overflow with an integer overflow in the Reliable Multicast Transport Driver, reachable from an
+          adjacent network, scoring <strong>8.8</strong>.<a class="src" href="#s3">3</a> None of them
+          composes with the others: exploiting one grants nothing the next one needs, and fixing one
+          neither exposes nor creates another.</p>
+
+        <p>That independence is what makes this set worth writing up, because it forces a decision that
+          severity ranking answers wrongly. <strong>The flaw with the worst score is the one with no known
+          exploitation; the flaw with the best score is the one already being exploited.</strong>
+          CVE-2026-68820 was disclosed as an exploited zero-day on the day it was patched, credited to
+          researchers at Check Point, and it carries a binding remediation deadline of
+          <strong>25 August 2026</strong>.<a class="src" href="#s4">4</a><a class="src" href="#s10">10</a>
+          Neither remote code execution flaw has any public exploitation as of this report, eight days
+          after release.</p>
+
+        <p>Two things about the surrounding release affect how the numbers are read. First, this was an
+          unusually large cycle and the vendors disagree on how large: Tenable counts 398 CVEs,<a class="src" href="#s4">4</a>
+          the SANS Internet Storm Center 418,<a class="src" href="#s5">5</a> and Cisco Talos
+          421,<a class="src" href="#s6">6</a> because they include different sets of third-party and
+          re-released records. The three flaws here were selected on exploitation status and reachability,
+          not by working down a list. Second, the same release patched two further flaws in the same
+          WinSock driver, CVE-2026-61348 and CVE-2026-70307, which is a signal about that component rather
+          than about any single CVE in it.<a class="src" href="#s4">4</a></p>
+      </div>
+
+      <h3 style="font-size:24px;font-weight:700;margin:30px 0 18px;">The cycle, oldest first</h3>
+
+      <div class="chrono">
+        <div class="entry key">
+          <div class="when">2026-08-11</div>
+          <h3>One flaw ships already under exploitation</h3>
+          <p>Microsoft publishes CVE-2026-68820 as a zero-day exploited in the wild before the patch
+            existed. It is a use-after-free in the Ancillary Function Driver for WinSock that a locally
+            authenticated, low-privileged attacker triggers by running a crafted application to win a race
+            condition, ending with SYSTEM privileges and no user
+            interaction.<a class="src" href="#s9">9</a> Discovery is credited to researchers at Check
+            Point. Rapid7 notes that winning the race makes a stable exploit harder to build, which
+            constrains reliability rather than impact.<a class="src" href="#s8">8</a> Two further flaws in
+            the same driver, CVE-2026-61348 and CVE-2026-70307, are patched in the same
+            release.<a class="src" href="#s4">4</a> No actor is named by any
+            vendor.<a class="src" href="#s7">7</a></p>
+        </div>
+
+        <div class="entry">
+          <div class="when">2026-08-11</div>
+          <h3>The two higher-scoring flaws ship with no known exploitation</h3>
+          <p>CVE-2026-62815 is published as a critical use-after-free in Microsoft QUIC allowing
+            unauthenticated remote code execution with low attack complexity and no user interaction,
+            affecting Windows 11 23H2 through 26H1 and Windows Server 2022 and
+            2025.<a class="src" href="#s2">2</a><a class="src" href="#s7">7</a> CVE-2026-62816 is
+            published as a heap-based buffer overflow with an integer overflow in the Reliable Multicast
+            Transport Driver, reachable only from an adjacent network, affecting Windows 10 and Windows
+            11.<a class="src" href="#s3">3</a> The Internet Storm Center advises prioritising systems that
+            expose QUIC-enabled services to untrusted networks.<a class="src" href="#s5">5</a> Neither has
+            any public exploitation, and no proof of concept is reported.</p>
+        </div>
+
+        <div class="entry key">
+          <div class="when">2026-08-19</div>
+          <h3>Six days to the binding remediation deadline</h3>
+          <p>As of this report the position is unchanged: CVE-2026-68820 remains the only one of the three
+            with documented exploitation, and it carries a remediation due date of 25 August
+            2026.<a class="src" href="#s1">1</a><a class="src" href="#s10">10</a> The two remote code
+            execution flaws have gone eight days without a public exploit. That gap is the whole content
+            of the triage decision, and it is a snapshot rather than a stable state.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 4. CONCLUSION =====================
+       History is deliberately omitted. These flaws are eight days old and have no origin
+       story yet - an empty History section would say "we did not look" about something
+       that does not exist. -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Conclusion</p>
+        <h2>Patch order is not score order</h2>
+      </div>
+
+      <div class="prose">
+        <p>The useful output of this cycle is a sequence, not a severity list. Fix CVE-2026-68820 first
+          because someone is using it and a deadline is attached, even though it scores lowest and needs
+          local access an attacker has to obtain some other way. Fix CVE-2026-62815 second because it is
+          the one that would change fastest: unauthenticated, remote, no user interaction, and the moment a
+          working proof of concept appears the exposure becomes immediate. Fix CVE-2026-62816 third because
+          adjacency is a real constraint and multicast transport is not enabled on most estates. That order
+          inverts the CVSS ranking at the first step and follows it thereafter, which is the argument for
+          reading exploitation status and reachability before reading the score.</p>
+      </div>
+
+      <div class="takeaways">
+        <div class="takeaway"><span class="n">1</span><p><strong>The 7.0 goes first.</strong> It is the only
+          one with documented exploitation, it was a zero-day before it was a patch, and it is the only one
+          of the three carrying a fixed remediation date.</p></div>
+        <div class="takeaway"><span class="n">2</span><p><strong>The 9.8 is a forecast, not an
+          observation.</strong> Microsoft QUIC has no known exploitation today. What earns it second place
+          is that nothing stands between an attacker and the flaw except the absence of a working exploit,
+          and that is the one precondition that can disappear overnight.</p></div>
+        <div class="takeaway"><span class="n">3</span><p><strong>Adjacency is doing real work in the third
+          case.</strong> CVE-2026-62816 needs an attacker already on the same network segment, and the
+          Reliable Multicast Transport Driver is not in the default path for most estates. Check whether
+          multicast transport is actually in use before treating an 8.8 as urgent.</p></div>
+        <div class="takeaway"><span class="n">4</span><p><strong>Three flaws in one driver is the finding
+          the CVE list hides.</strong> Two further WinSock issues shipped in the same release. A single
+          patched CVE is an event; three in one component in one month is a reason to look at what else
+          touches that driver.</p></div>
+        <div class="takeaway"><span class="n">5</span><p><strong>Nobody has said who is exploiting
+          it.</strong> Microsoft confirms exploitation and no vendor names an actor. Any attribution
+          attached to this flaw in the next few weeks should be treated as new information, not as
+          confirmation of something already reported.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 5. RISK &amp; IMPACT ===================== -->
+  <section class="alt">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Risk &amp; Impact</p>
+        <h2>Assessed on exposure, because there is no victimology yet</h2>
+        <p>Eight days after release, no reporting names a victim or a sector for any of these three. Every
+          level below is therefore an exposure judgment, and each row says so rather than implying observed
+          targeting the sources do not support.</p>
+      </div>
+
+      <div class="sectors">
+        <div class="sector critical">
+          <div class="name">Managed service providers and hosting</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Critical</div>
+          <div class="why">Carries the densest population of internet-facing Server 2022 and 2025 and the
+            most QUIC-capable services, and a local privilege escalation turns any single tenant foothold
+            into SYSTEM. No victimology exists eight days in, so this rests on exposure rather than
+            observed targeting.</div>
+        </div>
+        <div class="sector critical">
+          <div class="name">Government and public administration</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Critical</div>
+          <div class="why">The only sector under a binding obligation here: the catalog entry for
+            CVE-2026-68820 sets a remediation deadline of 25 August 2026 for federal civilian agencies.
+            That is a compliance fact rather than evidence of targeting, and it is the reason the level is
+            not lower.</div>
+        </div>
+        <div class="sector high">
+          <div class="name">Financial services</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">High</div>
+          <div class="why">Large centrally managed Windows 11 fleets and early Server 2025 adoption put
+            both the local flaw and the QUIC flaw across most of the estate. Exposure reasoning only; no
+            financial victim is named anywhere in the cited reporting.</div>
+        </div>
+        <div class="sector high">
+          <div class="name">Education and research</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">High</div>
+          <div class="why">The one sector where the adjacent-network flaw is more than theoretical: flat
+            campus networks with genuine multicast use give CVE-2026-62816 the adjacency it needs, which
+            most corporate networks do not.</div>
+        </div>
+        <div class="sector moderate">
+          <div class="name">Healthcare</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Moderate</div>
+          <div class="why">Slower Windows 11 adoption means the QUIC flaw reaches less of a typical estate,
+            though the WinSock privilege escalation applies to every supported Windows version including
+            Server 2012 onward.</div>
+        </div>
+        <div class="sector low">
+          <div class="name">Retail and hospitality</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Low</div>
+          <div class="why">No exposure argument distinguishes it and no reporting names it. The level
+            reflects the absence of any signal in either direction, not a judgment that these systems are
+            safer.</div>
+        </div>
+        <div class="sector minimal">
+          <div class="name">Estates with no Windows 11 or Server 2022 and later</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Minimal</div>
+          <div class="why">CVE-2026-62815 does not affect them at all &mdash; Microsoft QUIC ships only on
+            Windows 11 and Server 2022 onward. Only the local privilege escalation applies, and that
+            requires an attacker to already be on the host.</div>
+        </div>
+      </div>
+
+      <div class="risklegend">
+        <div class="item"><span class="sw" style="background:var(--risk-critical)"></span> Critical — actively targeted</div>
+        <div class="item"><span class="sw" style="background:var(--risk-high)"></span> High — fits the victim profile</div>
+        <div class="item"><span class="sw" style="background:var(--risk-moderate)"></span> Moderate — plausible, not observed</div>
+        <div class="item"><span class="sw" style="background:var(--risk-low)"></span> Low — outside the pattern</div>
+        <div class="item"><span class="sw" style="background:var(--risk-minimal)"></span> Minimal — no indication</div>
+      </div>
+
+      <div class="callout">
+        <p><strong>Answer two questions before you rank anything.</strong> Does anything in the estate
+          expose a QUIC-enabled service to an untrusted network, and is Reliable Multicast Transport
+          actually in use anywhere? A no to both leaves one flaw that matters this week, and it is the one
+          scoring 7.0. A yes to the first moves a 9.8 with no exploit into the same conversation as a 7.0
+          with one.</p>
+        <p>
+          For <em>how</em> a compromise actually unfolds — the techniques, the tooling and the
+          order they run in — see the companion attack-flow report.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 6. SOURCES ===================== -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Sources</p>
+        <h2>What this analysis is built on</h2>
+      </div>
+      <ol class="sources">
+        <li id="s1">NVD &mdash; CVE-2026-68820 (WinSock AFD use-after-free, CVSS 7.0, CWE-416) &mdash; <a href="https://nvd.nist.gov/vuln/detail/CVE-2026-68820">https://nvd.nist.gov/vuln/detail/CVE-2026-68820</a></li>
+        <li id="s2">NVD &mdash; CVE-2026-62815 (Microsoft QUIC use-after-free, CVSS 9.8, CWE-416) &mdash; <a href="https://nvd.nist.gov/vuln/detail/CVE-2026-62815">https://nvd.nist.gov/vuln/detail/CVE-2026-62815</a></li>
+        <li id="s3">NVD &mdash; CVE-2026-62816 (RMCAST heap overflow, CVSS 8.8, CWE-122/CWE-190) &mdash; <a href="https://nvd.nist.gov/vuln/detail/CVE-2026-62816">https://nvd.nist.gov/vuln/detail/CVE-2026-62816</a></li>
+        <li id="s4">Tenable &mdash; Microsoft's August 2026 Patch Tuesday addresses 398 CVEs &mdash; <a href="https://www.tenable.com/blog/microsofts-august-2026-patch-tuesday-addresses-398-cves-cve-2026-68820">https://www.tenable.com/blog/microsofts-august-2026-patch-tuesday-addresses-398-cves-cve-2026-68820</a></li>
+        <li id="s5">SANS Internet Storm Center &mdash; Microsoft Patch Tuesday August 2026 &mdash; <a href="https://isc.sans.edu/diary/Microsoft+Patch+Tuesday+August+2026/33236/">https://isc.sans.edu/diary/Microsoft+Patch+Tuesday+August+2026/33236/</a></li>
+        <li id="s6">Cisco Talos &mdash; Microsoft Patch Tuesday for August 2026 &mdash; <a href="https://blog.talosintelligence.com/microsoft-patch-tuesday-for-august-2026/">https://blog.talosintelligence.com/microsoft-patch-tuesday-for-august-2026/</a></li>
+        <li id="s7">CrowdStrike &mdash; August 2026 Patch Tuesday: updates and analysis &mdash; <a href="https://www.crowdstrike.com/en-us/blog/patch-tuesday-analysis-august-2026/">https://www.crowdstrike.com/en-us/blog/patch-tuesday-analysis-august-2026/</a></li>
+        <li id="s8">Rapid7 &mdash; Patch Tuesday, August 2026 &mdash; <a href="https://www.rapid7.com/blog/post/em-patch-tuesday-august-2026/">https://www.rapid7.com/blog/post/em-patch-tuesday-august-2026/</a></li>
+        <li id="s9">Microsoft Security Response Center &mdash; CVE-2026-68820 advisory &mdash; <a href="https://msrc.microsoft.com/update-guide/vulnerability/CVE-2026-68820">https://msrc.microsoft.com/update-guide/vulnerability/CVE-2026-68820</a></li>
+        <li id="s10">CISA &mdash; Known Exploited Vulnerabilities Catalog &mdash; <a href="https://www.cisa.gov/known-exploited-vulnerabilities-catalog">https://www.cisa.gov/known-exploited-vulnerabilities-catalog</a></li>
+      </ol>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+
+    <p class="note">
+      <strong>Confidence and sourcing.</strong> Scores, vectors, weaknesses and affected product lists are
+      reference data taken from NVD, and were read per CVE rather than from any summary. Exploitation
+      status for CVE-2026-68820 is Microsoft's own statement, repeated independently by four vendors.
+      <strong>One disagreement is worth recording:</strong> the Internet Storm Center scores CVE-2026-62816
+      at 9.8 while NVD and Cisco Talos both record 8.8 with an adjacent-network vector. This report uses
+      8.8, because the adjacency constraint is load-bearing for the triage argument and NVD is the
+      reference for scoring. The vendors also disagree on the size of the release &mdash; 398, 418 and 421
+      CVEs &mdash; which is stated in the overview rather than resolved, since each is counting a different
+      set. No actor is named for the exploited flaw by any source, and none is inferred here. Sector risk
+      levels are analyst assessments, not measured values; for this subject they rest entirely on exposure,
+      because no victimology has been published.
+    </p>
+  </div>
+</footer>

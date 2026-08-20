@@ -1,0 +1,98 @@
+{
+  "schema": "analysis/1.0",
+  "subject": "Windows August 2026",
+  "slug": "windows-2026-08",
+  "subject_type": "vulnerability",
+  "matrix": "enterprise",
+  "aliases": ["August 2026 Patch Tuesday"],
+  "objective": "unknown",
+  "objective_note": "Three unrelated primitives from one release. Only one is being used, and by whom is not published.",
+  "cves": ["CVE-2026-68820", "CVE-2026-62815", "CVE-2026-62816"],
+  "vuln_relationship": "none",
+  "confidence": "derived",
+  "facts": {
+    "vulnerabilities": "3",
+    "highest_cvss": "9.8",
+    "in_cisa_kev": "1 of 3",
+    "product": "Microsoft Windows",
+    "published": "11 Aug 2026",
+    "kev_deadline": "25 Aug 2026"
+  },
+  "background": [
+    "These three flaws share a vendor and a release date and nothing else. CVE-2026-68820 is a use-after-free in the Windows Ancillary Function Driver for WinSock: a local, already-authenticated attacker who wins a race condition gets SYSTEM. It scores 7.0, the lowest of the three, and it is the only one anyone is provably using. CVE-2026-62815 is a use-after-free in Microsoft QUIC that lets an unauthenticated attacker execute code over the network with no user interaction, scoring 9.8. CVE-2026-62816 is a heap overflow with an integer overflow in the Reliable Multicast Transport Driver, reachable from an adjacent network, scoring 8.8. None of them composes with the others: exploiting one grants nothing the next one needs, and fixing one neither exposes nor creates another.",
+    "That independence is what makes this set worth writing up, because it forces a decision that severity ranking answers wrongly. The flaw with the worst score is the one with no known exploitation; the flaw with the best score is the one already being exploited. CVE-2026-68820 was disclosed as an exploited zero-day on the day it was patched, credited to researchers at Check Point, and it carries a binding CISA remediation deadline of 25 August 2026. Neither remote code execution flaw has any public exploitation as of this report, eight days after release.",
+    "Two things about the surrounding release are worth stating because they affect how the numbers are read. First, this was an unusually large cycle and the vendors disagree on how large: Tenable counts 398 CVEs, the SANS Internet Storm Center 418, and Cisco Talos 421, because they include different sets of third-party and re-released records. The three flaws here were selected on exploitation status and reachability, not by working down a list. Second, the same release patched two further flaws in the same WinSock driver, CVE-2026-61348 and CVE-2026-70307, which is a signal about that component rather than about any single CVE in it."
+  ],
+  "chronology": [
+    {
+      "date": "2026-08-11",
+      "event": "One flaw ships already under exploitation",
+      "detail": "Microsoft publishes CVE-2026-68820 as a zero-day exploited in the wild before the patch existed. It is a use-after-free in the Ancillary Function Driver for WinSock that a locally authenticated, low-privileged attacker triggers by running a crafted application to win a race condition, ending with SYSTEM privileges and no user interaction. Discovery is credited to researchers at Check Point. Rapid7 notes that winning the race makes a stable exploit harder to build, which constrains reliability rather than impact. Two further flaws in the same driver, CVE-2026-61348 and CVE-2026-70307, are patched in the same release. No actor is named by any vendor.",
+      "key": true,
+      "sources": [3, 5, 6, 7, 8]
+    },
+    {
+      "date": "2026-08-11",
+      "event": "The two higher-scoring flaws ship with no known exploitation",
+      "detail": "CVE-2026-62815 is published as a critical use-after-free in Microsoft QUIC allowing unauthenticated remote code execution with low attack complexity and no user interaction, affecting Windows 11 23H2 through 26H1 and Windows Server 2022 and 2025. CVE-2026-62816 is published as a heap-based buffer overflow with an integer overflow in the Reliable Multicast Transport Driver, reachable only from an adjacent network, affecting Windows 10 and Windows 11. The Internet Storm Center advises prioritising systems that expose QUIC-enabled services to untrusted networks. Neither has any public exploitation, and no proof of concept is reported.",
+      "sources": [1, 2, 4, 6]
+    },
+    {
+      "date": "2026-08-19",
+      "event": "Six days to the binding remediation deadline",
+      "detail": "As of this report the position is unchanged: CVE-2026-68820 remains the only one of the three with documented exploitation, and it sits in the CISA Known Exploited Vulnerabilities catalog with a remediation due date of 25 August 2026. The two remote code execution flaws have gone eight days without a public exploit. That gap is the whole content of the triage decision, and it is a snapshot rather than a stable state.",
+      "key": true,
+      "sources": [0, 9]
+    }
+  ],
+  "risk": [
+    {
+      "sector": "Managed service providers and hosting",
+      "level": "critical",
+      "why": "Carries the densest population of internet-facing Server 2022 and 2025 and the most QUIC-capable services, and a local privilege escalation turns any single tenant foothold into SYSTEM. No victimology exists eight days in, so this rests on exposure rather than observed targeting."
+    },
+    {
+      "sector": "Government and public administration",
+      "level": "critical",
+      "why": "The only sector under a binding obligation here: the CISA catalog entry for CVE-2026-68820 sets a remediation deadline of 25 August 2026 for federal civilian agencies. That is a compliance fact rather than evidence of targeting, and it is the reason the level is not lower."
+    },
+    {
+      "sector": "Financial services",
+      "level": "high",
+      "why": "Large centrally managed Windows 11 fleets and early Server 2025 adoption put both the local flaw and the QUIC flaw across most of the estate. Exposure reasoning only; no financial victim is named anywhere in the cited reporting."
+    },
+    {
+      "sector": "Education and research",
+      "level": "high",
+      "why": "The one sector where the adjacent-network flaw is more than theoretical: flat campus networks with genuine multicast use give CVE-2026-62816 the adjacency it needs, which most corporate networks do not."
+    },
+    {
+      "sector": "Healthcare",
+      "level": "moderate",
+      "why": "Slower Windows 11 adoption means the QUIC flaw reaches less of a typical estate, though the WinSock privilege escalation applies to every supported Windows version including Server 2012 onward."
+    },
+    {
+      "sector": "Retail and hospitality",
+      "level": "low",
+      "why": "No exposure argument distinguishes it and no reporting names it. The level reflects the absence of any signal in either direction, not a judgment that these systems are safer."
+    },
+    {
+      "sector": "Estates with no Windows 11 or Server 2022 and later",
+      "level": "minimal",
+      "why": "CVE-2026-62815 does not affect them at all - Microsoft QUIC ships only on Windows 11 and Server 2022 onward. Only the local privilege escalation applies, and that requires an attacker to already be on the host."
+    }
+  ],
+  "sources": [
+    "https://nvd.nist.gov/vuln/detail/CVE-2026-68820",
+    "https://nvd.nist.gov/vuln/detail/CVE-2026-62815",
+    "https://nvd.nist.gov/vuln/detail/CVE-2026-62816",
+    "https://www.tenable.com/blog/microsofts-august-2026-patch-tuesday-addresses-398-cves-cve-2026-68820",
+    "https://isc.sans.edu/diary/Microsoft+Patch+Tuesday+August+2026/33236/",
+    "https://blog.talosintelligence.com/microsoft-patch-tuesday-for-august-2026/",
+    "https://www.crowdstrike.com/en-us/blog/patch-tuesday-analysis-august-2026/",
+    "https://www.rapid7.com/blog/post/em-patch-tuesday-august-2026/",
+    "https://msrc.microsoft.com/update-guide/vulnerability/CVE-2026-68820",
+    "https://www.cisa.gov/known-exploited-vulnerabilities-catalog"
+  ],
+  "report": "analysis.html"
+}

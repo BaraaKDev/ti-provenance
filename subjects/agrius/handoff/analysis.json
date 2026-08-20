@@ -7,6 +7,8 @@
   "attack_id": "G1030",
   "aliases": ["Pink Sandstorm", "AMERICIUM", "Agonizing Serpens", "BlackShadow"],
   "objective": "destruction",
+  "severity": "high",
+  "severity_note": "Active and destructive, but the documented victimology is regional and sectoral rather than any exposed estate, so the reach axis does not hold.",
   "objective_note": "Wipers disguised as ransomware - destruction is the goal, payment is cover",
   "cves": ["CVE-2018-13379"],
   "vuln_relationship": "none",

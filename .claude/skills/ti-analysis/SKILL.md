@@ -125,6 +125,52 @@ There is no script in this skill that checks the rendered report, so here the ru
 hold. Read the finished page once with the question "would a stranger understand every word of
 this?" - anything that only makes sense to someone who built the pipeline does not belong.
 
+
+## Assessed severity — the one number on the cover
+
+`severity` is a single level for the whole subject, shown on the cover as a colour-coded band.
+It is **not** the sector table summarised, and it does not reuse the sector definitions: those
+are about targeting, and "is this subject targeted by itself" is not a question. Decide it here,
+in the analysis, because everything it depends on is established here and nowhere else.
+
+It uses the same five words as the sector rows, so one document never carries two scales.
+
+**Take the highest level whose conditions all hold.**
+
+| Level | Active now? | Reach | Impact |
+|---|---|---|---|
+| `critical` | yes | reaches a typical estate with no precondition the defender controls | full compromise |
+| `high` | yes | *one* of the other two fails — needs an existing foothold, or hits a subset of estates, or the impact is bounded |
+| `moderate` | no | capability is real and documented, but nothing is currently using it | would be serious if it resumed |
+| `low` | no | historic, fixed, and the population still exposed is small | — |
+| `minimal` | no | no realistic path to the estates this report is written for | — |
+
+Read the two axes per subject type:
+
+- **Actor or campaign** — *active now* is the `Is active?` cell. *Reach* is victimology breadth:
+  a crew hitting any exposed appliance reaches a typical estate; one hitting a single industry in
+  one region does not. *Impact* is the objective — destruction, extortion and domain-wide
+  compromise are full; collection from a narrow target set is bounded.
+- **Vulnerability** — *active now* is documented exploitation, not a published proof of concept.
+  *Reach* is the CVSS vector read honestly: `AV:N/PR:N` reaches a typical estate, `AV:L` needs a
+  foothold the attacker has to get some other way, `AV:A` needs adjacency. *Impact* is what the
+  flaw grants on its own.
+
+Three things that keep it honest:
+
+- **State the axis that failed.** `severity_note` is one line saying why it is not the level
+  above: "active and full compromise, but needs a local foothold first" is an assessment;
+  "Critical" on its own is a colour.
+- **A patch existing does not lower it.** What lowers it is the exposed population shrinking.
+  Log4Shell was `critical` in December 2021 and is `high` years later for exactly that reason,
+  not because a fix shipped.
+- **This is severity to the reader, not in the abstract.** A flaw that is catastrophic for a
+  narrow population scores below one that is merely bad for everybody. That is the right answer
+  for a bulletin and the wrong answer for a vendor advisory, so do not import levels from one.
+
+If every subject you write comes out `critical`, the scale has stopped carrying information —
+that is a signal to re-read this table, not evidence that everything is critical.
+
 ## Sourcing
 
 **`references/sources.yaml` is the allowlist.** Research only from the sources it names. A
@@ -199,6 +245,8 @@ The full contract is `references/analysis-schema.md`.
   "attack_id": "{{G-ID, omit if none}}",
   "aliases": ["{{other tracked names}}"],
   "objective": "destruction | extortion | espionage | collection | disruption | unknown",
+  "severity": "critical | high | moderate | low | minimal",
+  "severity_note": "{{one line: which axis kept it off the level above}}",
   "objective_note": "{{one line}}",
   "cves": ["{{CVE IDs, omit if none}}"],
   "vuln_relationship": "none | exploit-chain | remediation-cascade",

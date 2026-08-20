@@ -6,6 +6,8 @@
   "matrix": "enterprise",
   "aliases": ["ProxyShell chain"],
   "objective": "unknown",
+  "severity": "high",
+  "severity_note": "Still productive against unpatched on-premises Exchange, but that population shrinks every year and cloud-only estates were never in scope.",
   "objective_note": "The chain grants SYSTEM on a mail server and nothing more specific - what followed ranged from Chinese espionage clusters to Conti ransomware to spam distribution, so the objective belonged to whoever arrived.",
   "cves": ["CVE-2021-34473", "CVE-2021-34523", "CVE-2021-31207"],
   "vuln_relationship": "exploit-chain",

@@ -6,6 +6,8 @@
   "matrix": "enterprise",
   "aliases": ["Log4Shell", "LogJam"],
   "objective": "unknown",
+  "severity": "high",
+  "severity_note": "Impact is unchanged and exploitation continues, but the exposed population is now the remnant that never patched rather than everybody.",
   "objective_note": "A logging flaw grants a capability, not an intent - the objective belongs to whoever picks it up, and cryptominers, ransomware crews and four states' intelligence services all did.",
   "cves": ["CVE-2021-44228", "CVE-2021-45046", "CVE-2021-45105", "CVE-2021-44832"],
   "vuln_relationship": "remediation-cascade",

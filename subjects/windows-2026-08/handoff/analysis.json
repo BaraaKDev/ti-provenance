@@ -6,6 +6,8 @@
   "matrix": "enterprise",
   "aliases": ["August 2026 Patch Tuesday"],
   "objective": "unknown",
+  "severity": "high",
+  "severity_note": "The only flaw under exploitation needs a local foothold first; the one that reaches a typical estate unauthenticated has no exploit yet.",
   "objective_note": "Three unrelated primitives from one release. Only one is being used, and by whom is not published.",
   "cves": ["CVE-2026-68820", "CVE-2026-62815", "CVE-2026-62816"],
   "vuln_relationship": "none",

@@ -74,6 +74,8 @@ Validate with `scripts/Verify-Mapping.ps1` before consuming.
 | `attack_id` | no | e.g. `G1030` | Hero eyebrow |
 | `aliases` | no | string[] | Alias chips |
 | `objective` | yes | `destruction` · `extortion` · `espionage` · `collection` · `disruption` · `unknown` | Sets the accent **and** whether there is an impact phase |
+| `severity` | yes | `critical` · `high` · `moderate` · `low` · `minimal` | One level for the whole subject, shown on the cover. Same five words as the sector rows so a document never carries two scales |
+| `severity_note` | no | string | One line naming the axis that kept it off the level above |
 | `objective_note` | no | string | One line, used in impact-phase copy |
 | `cves` | if any | string[] of CVE IDs | Identifiers only — details are looked up live |
 | `vuln_relationship` | if `cves` | `none` · `exploit-chain` · `remediation-cascade` | Picks chain vs set, and the hero row label |

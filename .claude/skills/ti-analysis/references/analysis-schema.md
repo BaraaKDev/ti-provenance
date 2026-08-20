@@ -74,6 +74,8 @@ stops the two halves of one subject disagreeing.
 | `attack_id` | no | e.g. `G1030` | Omit if the subject has no ATT&CK group ID |
 | `aliases` | no | string[] | Other tracked names for the same subject |
 | `objective` | yes | `destruction` · `extortion` · `espionage` · `collection` · `disruption` · `unknown` | Drives the accent palette |
+| `severity` | yes | `critical` · `high` · `moderate` · `low` · `minimal` | One level for the whole subject, shown on the cover. Same five words as the sector rows so a document never carries two scales |
+| `severity_note` | no | string | One line naming the axis that kept it off the level above |
 | `objective_note` | no | string | One line expanding on the objective |
 | `cves` | if any | string[] of CVE IDs | Identifiers only — never CVE details, which go stale |
 | `vuln_relationship` | if `cves` | `none` · `exploit-chain` · `remediation-cascade` | See below |

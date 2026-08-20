@@ -137,7 +137,7 @@ process {
             $results += Test-Check 'analysis.json is valid JSON' $parsed
 
             if ($parsed) {
-                $req = @('schema','subject','slug','subject_type','matrix','objective','confidence','sources','background','chronology')
+                $req = @('schema','subject','slug','subject_type','matrix','objective','severity','confidence','sources','background','chronology')
                 $missing = @($req | Where-Object { -not (Test-Prop $analysis $_) })
                 $results += Test-Check 'analysis.json required fields' ($missing.Count -eq 0) $(if ($missing.Count) { "missing: " + ($missing -join ', ') } else { "$($req.Count) present" })
 
@@ -146,6 +146,7 @@ process {
                 $obj = Get-Val $analysis 'objective'
                 $cf  = Get-Val $analysis 'confidence'
                 $rel = Get-Val $analysis 'vuln_relationship'
+                $sev = Get-Val $analysis 'severity'
                 $cves = (Get-Arr $analysis 'cves')
 
                 $bad = @()
@@ -154,6 +155,8 @@ process {
                 if ($obj -and $OBJECTIVES -notcontains $obj)    { $bad += "objective '$obj'" }
                 if ($cf  -and $CONFIDENCE -notcontains $cf)     { $bad += "confidence '$cf'" }
                 if ($rel -and $RELATIONSHIPS -notcontains $rel) { $bad += "vuln_relationship '$rel'" }
+                # severity shares the sector vocabulary on purpose - one scale per document.
+                if ($sev -and $RISK_LEVELS -notcontains $sev)     { $bad += "severity '$sev'" }
                 $results += Test-Check 'analysis.json values in vocabulary' ($bad.Count -eq 0) $(if ($bad.Count) { $bad -join '; ' })
 
                 $xf = @()

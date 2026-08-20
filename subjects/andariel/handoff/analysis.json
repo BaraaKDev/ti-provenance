@@ -7,6 +7,8 @@
   "attack_id": "G0138",
   "aliases": ["Onyx Sleet", "Silent Chollima", "Stonefly", "APT45", "DarkSeoul", "PLUTONIUM"],
   "objective": "espionage",
+  "severity": "high",
+  "severity_note": "Active with full-compromise impact, but the target set is defence, aerospace and nuclear engineering rather than a typical estate.",
   "objective_note": "Collection against military and nuclear programmes, funded by ransomware run against the same victims",
   "confidence": "published",
   "facts": {

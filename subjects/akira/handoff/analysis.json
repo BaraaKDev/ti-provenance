@@ -7,6 +7,8 @@
   "attack_id": "G1024",
   "aliases": ["GOLD SAHARA", "PUNK SPIDER", "Howling Scorpius", "Storm-1567"],
   "objective": "extortion",
+  "severity": "critical",
+  "severity_note": "Active, entered through internet-facing remote access that only needs a password, and ends in domain-wide encryption - all three axes hold.",
   "objective_note": "Double extortion - data stolen first, encrypted second, and increasingly stolen without any encryption at all",
   "cves": ["CVE-2020-3259", "CVE-2023-20269", "CVE-2024-40766"],
   "vuln_relationship": "none",

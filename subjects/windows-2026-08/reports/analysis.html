@@ -51,15 +51,58 @@
   .cover .wrap { position: relative; z-index: 2; padding-top: 84px; padding-bottom: 76px; }
 
   .covermotif {
-    position: absolute; top: -40px; right: -60px; width: 460px; height: 460px;
+    position: absolute; top: 40px; right: -130px; width: 700px; height: 700px;
     color: var(--ember); pointer-events: none; z-index: 1;
   }
   .covermotif .arcs   { opacity: .16; }
   .covermotif .rail   { opacity: .30; }
   .covermotif .dots   { opacity: .22; }
 
+  /* The cover is a full page by design. Without a height it stopped at its text, which left
+     more than half the sheet bare and sliced the motif off mid-arc - the emptiness read as a
+     mistake rather than as a title page. The title block sits at the top, .coverfoot is pushed
+     to the bottom by margin-top:auto, and the gap between them is deliberate. */
+  .cover { min-height: 100vh; display: flex; flex-direction: column; }
+  .cover .wrap { flex: 1; display: flex; flex-direction: column; }
+  .coverfoot { margin-top: auto; }
+
+  /* Assessed severity, colour-coded. Deliberately uses the --risk-* family and NOT --sev-*:
+     this is an analyst judgment about the subject on the same five-level scale the sector rows
+     use. Borrowing the CVSS ramp here would put severity colour on something that is not a
+     CVSS score, which is what makes the two stop meaning different things. */
+  .sevband {
+    display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+    padding: 16px 20px; margin-bottom: 20px;
+    border: 1px solid var(--hair-strong); border-radius: 12px;
+    border-left-width: 6px; border-left-style: solid;
+  }
+  .sevband .k {
+    font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--muted); margin: 0; flex: 1 0 auto;
+  }
+  .sevband .v { font-size: 20px; font-weight: 800; margin: 0; letter-spacing: -.01em; }
+  .sevmeter { display: flex; gap: 4px; }
+  .sevmeter i { width: 26px; height: 9px; border-radius: 2px; background: var(--hair-strong); }
+
+  .sevband.critical { border-left-color: var(--risk-critical); background: var(--risk-critical-wash); }
+  .sevband.critical .v { color: var(--risk-critical); }
+  .sevband.critical .sevmeter i:nth-child(-n+5) { background: var(--risk-critical); }
+  .sevband.high { border-left-color: var(--risk-high); background: var(--risk-high-wash); }
+  .sevband.high .v { color: var(--risk-high); }
+  .sevband.high .sevmeter i:nth-child(-n+4) { background: var(--risk-high); }
+  .sevband.moderate { border-left-color: var(--risk-moderate); background: var(--risk-moderate-wash); }
+  .sevband.moderate .v { color: var(--risk-moderate); }
+  .sevband.moderate .sevmeter i:nth-child(-n+3) { background: var(--risk-moderate); }
+  .sevband.low { border-left-color: var(--risk-low); background: var(--risk-low-wash); }
+  .sevband.low .v { color: var(--risk-low); }
+  .sevband.low .sevmeter i:nth-child(-n+2) { background: var(--risk-low); }
+  .sevband.minimal { border-left-color: var(--risk-minimal); background: var(--risk-minimal-wash); }
+  .sevband.minimal .v { color: var(--risk-minimal); }
+  .sevband.minimal .sevmeter i:nth-child(-n+1) { background: var(--risk-minimal); }
+
   .tlp {
-    display: inline-block; font-family: ui-monospace, Consolas, monospace;
+    display: inline-block; align-self: flex-start;
+    font-family: ui-monospace, Consolas, monospace;
     font-size: 10.5px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
     padding: 4px 10px; border-radius: 4px; margin-bottom: 26px;
     background: var(--surface-2); border: 1px solid var(--hair-strong); color: var(--muted);
@@ -290,13 +333,20 @@
     <p class="standfirst">Three unrelated flaws from one patch cycle, where the lowest-scoring of the
       three is the only one anyone is actually using.</p>
 
-    <div class="covermeta">
-      <div><p class="k">Subject type</p><p class="v">Vulnerability &middot; independent set</p></div>
-      <div><p class="k">Attribution</p><p class="v">Not published</p></div>
-      <div><p class="k">First observed</p><p class="v">August 2026</p></div>
-      <div><p class="k">Assessed risk</p><p class="v">Critical</p></div>
-      <div><p class="k">Report date</p><p class="v">19 August 2026</p></div>
-      <div><p class="k">Is active?</p><p class="v">Yes</p></div>
+    <div class="coverfoot">
+      <div class="sevband critical">
+        <p class="k">Assessed severity</p>
+        <span class="sevmeter"><i></i><i></i><i></i><i></i><i></i></span>
+        <p class="v">Critical</p>
+      </div>
+      <div class="covermeta">
+        <div><p class="k">Subject type</p><p class="v">Vulnerability &middot; independent set</p></div>
+        <div><p class="k">Attribution</p><p class="v">Not published</p></div>
+        <div><p class="k">First observed</p><p class="v">August 2026</p></div>
+        <div><p class="k">Report date</p><p class="v">19 August 2026</p></div>
+        <div><p class="k">Is active?</p><p class="v">Yes</p></div>
+        <div><p class="k">Affected product</p><p class="v">Microsoft Windows</p></div>
+      </div>
     </div>
   </div>
 </header>

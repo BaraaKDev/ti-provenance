@@ -1,6 +1,6 @@
 # Handoff schema
 
-Two JSON files, one per producing step, both written into `subjects/<slug>/handoff/`:
+Two JSON files, one per producing step, both written into `samples/<slug>/handoff/`:
 
 | File | Written by | Carries |
 |---|---|---|
@@ -215,5 +215,5 @@ craft.
 
 # Worked example
 
-`subjects/agrius/handoff/analysis.json` and `subjects/agrius/handoff/mapping.json` are complete, validated
+`samples/agrius/handoff/analysis.json` and `samples/agrius/handoff/mapping.json` are complete, validated
 instances. Read them before writing new ones.

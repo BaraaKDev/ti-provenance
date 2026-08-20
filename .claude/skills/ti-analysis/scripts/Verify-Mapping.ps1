@@ -16,8 +16,8 @@
     Exit 0 = clean, 1 = at least one failure.
 
 .EXAMPLE
-    .\Verify-Mapping.ps1 -Path .\subjects\agrius
-    Get-ChildItem .\subjects -Directory | .\Verify-Mapping.ps1
+    .\Verify-Mapping.ps1 -Path .\samples\agrius
+    Get-ChildItem .\samples -Directory | .\Verify-Mapping.ps1
 #>
 [CmdletBinding()]
 param(
@@ -123,7 +123,7 @@ process {
         $mExists = Test-Path -LiteralPath $mPath
 
         Write-Host ""
-        Write-Host "=== subjects/$slug ==="
+        Write-Host "=== samples/$slug ==="
 
         if (-not $aExists -and -not $mExists) {
             Write-Host "  [SKIP] no handoff files present - nothing to validate"
@@ -299,7 +299,7 @@ end {
     Write-Host ""
     if ($checked -eq 0) {
         Write-Host "RESULT: NOTHING CHECKED - no input matched."
-        Write-Host "        Point this at a subject folder, e.g. .\subjects\<slug>."
+        Write-Host "        Point this at a subject folder, e.g. .\samples\<slug>."
         exit 1
     }
     if ($anyFailed) { Write-Host "RESULT: failures present."; exit 1 }

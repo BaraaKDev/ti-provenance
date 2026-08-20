@@ -22,9 +22,9 @@
     Exit 0 = written, 1 = refused or the engine failed.
 
 .EXAMPLE
-    .\scripts\Export-Bulletin.ps1 -Path .\subjects\akira
-    .\scripts\Export-Bulletin.ps1 -Path .\subjects\akira -Force
-    Get-ChildItem .\subjects -Directory | .\scripts\Export-Bulletin.ps1 -Force
+    .\scripts\Export-Bulletin.ps1 -Path .\samples\akira
+    .\scripts\Export-Bulletin.ps1 -Path .\samples\akira -Force
+    Get-ChildItem .\samples -Directory | .\scripts\Export-Bulletin.ps1 -Force
 #>
 [CmdletBinding()]
 param(
@@ -179,7 +179,7 @@ process {
         $slug = Split-Path $dir -Leaf
 
         Write-Host ""
-        Write-Host "=== subjects/$slug ==="
+        Write-Host "=== samples/$slug ==="
 
         $bDir = Join-Path $dir 'bulletin'
         $src = $null
@@ -307,7 +307,7 @@ end {
     Write-Host ""
     if ($checked -eq 0) {
         Write-Host "RESULT: NOTHING EXPORTED - no input matched."
-        Write-Host "        Point this at a subject folder, e.g. .\subjects\<slug>."
+        Write-Host "        Point this at a subject folder, e.g. .\samples\<slug>."
         exit 1
     }
     if ($anyFailed) { Write-Host "RESULT: failures present."; exit 1 }

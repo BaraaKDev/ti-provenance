@@ -49,7 +49,7 @@ its development budget goes.
 
 ## Worked example
 
-`subjects/andariel/reports/andariel-G0138-attack-flow.html` — state espionage, and the
+`samples/andariel/reports/andariel-G0138-attack-flow.html` — state espionage, and the
 reference for this report type. Four things it shows that a destruction crew cannot:
 
 - **A retuned accent.** Violet rather than signal blue, because the objective is quiet
@@ -70,8 +70,8 @@ an oversight. Both obvious candidates turned out to be campaigns:
 
 | Candidate | Why it is not an actor report |
 |---|---|
-| Agrius | MITRE documents CVE-2018-13379 for its initial access → `subjects/agrius/reports/agrius-fortios-campaign-flow.html` |
-| Akira | Three CVEs across Cisco and SonicWall, carrying five `via_cve` tags → `subjects/akira/reports/akira-G1024-attack-flow.html` |
+| Agrius | MITRE documents CVE-2018-13379 for its initial access → `samples/agrius/reports/agrius-fortios-campaign-flow.html` |
+| Akira | Three CVEs across Cisco and SonicWall, carrying five `via_cve` tags → `samples/akira/reports/akira-G1024-attack-flow.html` |
 
 Before starting an actor report, check whether the mapping names a CVE in Initial Access. If
 it does, this is the wrong guide: writing an actor report anyway produces a page that

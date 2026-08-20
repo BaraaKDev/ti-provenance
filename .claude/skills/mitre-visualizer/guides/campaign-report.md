@@ -95,7 +95,7 @@ on the page.
 
 ## Worked example
 
-`subjects/agrius/reports/agrius-fortios-campaign-flow.html` — Agrius (G1030) entering through
+`samples/agrius/reports/agrius-fortios-campaign-flow.html` — Agrius (G1030) entering through
 CVE-2018-13379 in FortiOS. Shows the `.viacve` chip appearing once and stopping, the
 `.transition.handoff` marking that boundary, a section 1 callout split into what patching
 buys and what it does not, and a Remediation section carrying patch, credential-rotation and

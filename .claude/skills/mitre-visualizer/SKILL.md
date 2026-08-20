@@ -1,6 +1,6 @@
 ---
 name: mitre-visualizer
-description: Renders a COMPLETED MITRE ATT&CK mapping as a vertical attack-flow report for a threat actor, a vulnerability/CVE set or chain, or an actor exploiting specific CVEs. Its preferred input is the JSON handoff in subjects/<slug>/ (analysis.json and mapping.json, both optional), but it also accepts a mapping pasted inline or held in a CSV, .xlsx, .docx, .md or .txt file. Use when techniques are already assigned to tactics and the intrusion needs rendering as a flow through initial access, execution, persistence, stealth, lateral movement and impact. Do NOT use this to perform the mapping itself; it only visualizes a mapping that already exists.
+description: Renders a COMPLETED MITRE ATT&CK mapping as a vertical attack-flow report for a threat actor, a vulnerability/CVE set or chain, or an actor exploiting specific CVEs. Its preferred input is the JSON handoff in samples/<slug>/ (analysis.json and mapping.json, both optional), but it also accepts a mapping pasted inline or held in a CSV, .xlsx, .docx, .md or .txt file. Use when techniques are already assigned to tactics and the intrusion needs rendering as a flow through initial access, execution, persistence, stealth, lateral movement and impact. Do NOT use this to perform the mapping itself; it only visualizes a mapping that already exists.
 ---
 
 # MITRE ATT&CK Attack-Flow Visualizer
@@ -24,9 +24,9 @@ what is there and mark the gaps honestly rather than filling them in.
 ## Input and output
 
 ```
-subjects/<slug>/handoff/analysis.json  ─┐
-                                ├─→  this skill  ─→  subjects/<slug>/reports/<name>-flow.html
-subjects/<slug>/handoff/mapping.json   ─┘
+samples/<slug>/handoff/analysis.json  ─┐
+                                ├─→  this skill  ─→  samples/<slug>/reports/<name>-flow.html
+samples/<slug>/handoff/mapping.json   ─┘
 ```
 
 Two JSON handoff files, each owned by one producing step. **Both are optional.** They exist
@@ -34,15 +34,15 @@ only when a pipeline run produced them; invoked on its own this skill works from
 the analyst supplies directly. Nothing here depends on another skill existing.
 
 **Path convention.** Paths starting `references/`, `guides/` or `scripts/` are relative to
-this skill folder. Paths starting `subjects/` are relative to the **project root**. Run the
+this skill folder. Paths starting `samples/` are relative to the **project root**. Run the
 scripts from the project root.
 
 ## Step 1 — Read the mapping
 
-**Preferred input: the JSON handoff** in `subjects/<slug>/`. Validate first, then read:
+**Preferred input: the JSON handoff** in `samples/<slug>/`. Validate first, then read:
 
 ```powershell
-.\.claude\skills\mitre-visualizer\scripts\Verify-Mapping.ps1 -Path .\subjects\<slug>
+.\.claude\skills\mitre-visualizer\scripts\Verify-Mapping.ps1 -Path .\samples\<slug>
 ```
 
 It validates whichever files are present and cross-checks them when both are. A **missing**
@@ -54,7 +54,7 @@ present and malformed **is** a failure.
 | `analysis.json` | `subject_type` (picks the template), `matrix` (tactic order), `objective` (accent + impact phase), `cves` + `vuln_relationship` (chain vs set), `subject` · `attack_id` · `aliases` · `facts` (hero), `confidence` · `sources` (footer) |
 | `mapping.json` | `tactics[]` → phases, `techniques[]` → rows, `via_cve` → CVE wiring, `arsenal[]` → the Arsenal section |
 
-The full contract is `references/handoff-schema.md`. `subjects/agrius/handoff/` holds a
+The full contract is `references/handoff-schema.md`. `samples/agrius/handoff/` holds a
 validated worked pair.
 
 **If only `mapping.json` is present**, you have techniques but no framing — establish subject
@@ -106,7 +106,7 @@ Every report is built from three things, in this order:
 2. **`references/tactic-icons.md`** — one icon per tactic, covering all three ATT&CK matrices.
    `references/icon-sheet.html` renders them all at working size with copyable source if you
    would rather see them than read path data.
-3. **The worked examples named by your guide**, in `subjects/<slug>/reports/` — the standard
+3. **The worked examples named by your guide**, in `samples/<slug>/reports/` — the standard
    for phase copy, technique density and transition wording.
 
 **`references/flow-craft.md` carries everything shared across all three report types**:
@@ -118,8 +118,8 @@ gaps; and the checks a script cannot make. Read it alongside your guide.
 
 ```powershell
 $v = ".\.claude\skills\mitre-visualizer\scripts\Verify-Flow.ps1"
-& $v -Path .\subjects\<slug>\reports\<name>-flow.html
-Get-ChildItem .\subjects\*\reports\*-flow.html | & $v   # every report in the project
+& $v -Path .\samples\<slug>\reports\<name>-flow.html
+Get-ChildItem .\samples\*\reports\*-flow.html | & $v   # every report in the project
 ```
 
 **The `reports\` segment is load-bearing.** A glob that misses it matches zero files. The
@@ -139,7 +139,7 @@ exactly one and it comes last. A flow whose objective is unknown correctly has n
 Then work the hand checks in `references/flow-craft.md` §3, which cover what the script
 cannot judge — above all, **never "correct" an unfamiliar technique ID from memory.**
 
-Save the HTML in `subjects/<slug>/reports/`, beside the analysis report and one level up from
+Save the HTML in `samples/<slug>/reports/`, beside the analysis report and one level up from
 the `handoff/` it was built from.
 
 ## Files
@@ -162,7 +162,7 @@ the `handoff/` it was built from.
     Verify-Mapping.ps1                validates the JSON handoff (Step 1)
     Verify-Flow.ps1                   validates a rendered report (Step 4)
 
-subjects/<slug>/                      one folder per threat actor or vulnerability
+samples/<slug>/                      one folder per threat actor or vulnerability
   handoff/
     analysis.json                     handoff: framing (optional)
     mapping.json                      handoff: tactics and techniques (optional)

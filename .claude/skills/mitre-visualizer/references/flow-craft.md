@@ -238,7 +238,7 @@ the severity ramp cannot survive. Keep the accent and the severity ramp in diffe
 ## Never write the pipeline into the report
 
 The reader knows nothing about this project. **No text they can see may name this skill or any
-other, a template file, a `subjects/...` path, a JSON handoff, or the mode labels MODE CHAIN and
+other, a template file, a `samples/...` path, a JSON handoff, or the mode labels MODE CHAIN and
 MODE SET.** Those labels are how this guide talks to you about which shape to build; they are not
 words a defender reading about three Exchange flaws can interpret. Say "these compose" rather
 than "MODE CHAIN: these compose".

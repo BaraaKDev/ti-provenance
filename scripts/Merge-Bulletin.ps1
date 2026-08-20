@@ -20,8 +20,8 @@
     Exit 0 = written, 1 = refused.
 
 .EXAMPLE
-    .\scripts\Merge-Bulletin.ps1 -Path .\subjects\agrius
-    .\scripts\Merge-Bulletin.ps1 -Path .\subjects\agrius -Force
+    .\scripts\Merge-Bulletin.ps1 -Path .\samples\agrius
+    .\scripts\Merge-Bulletin.ps1 -Path .\samples\agrius -Force
 #>
 [CmdletBinding()]
 param(
@@ -159,17 +159,17 @@ $bulletinDir = Join-Path $dir 'bulletin'
 
 $aPath = Join-Path $reportsDir 'analysis.html'
 if (-not (Test-Path -LiteralPath $aPath)) {
-    Write-Host "REFUSED: no reports/analysis.html in subjects/$slug - run the analysis step first."
+    Write-Host "REFUSED: no reports/analysis.html in samples/$slug - run the analysis step first."
     exit 1
 }
 
 $flows = @(Get-ChildItem -LiteralPath $reportsDir -Filter '*-flow.html' -File)
 if ($flows.Count -eq 0) {
-    Write-Host "REFUSED: no reports/*-flow.html in subjects/$slug - run the visualization step first."
+    Write-Host "REFUSED: no reports/*-flow.html in samples/$slug - run the visualization step first."
     exit 1
 }
 if ($flows.Count -gt 1) {
-    Write-Host "REFUSED: $($flows.Count) flow reports in subjects/$slug/reports - expected exactly one:"
+    Write-Host "REFUSED: $($flows.Count) flow reports in samples/$slug/reports - expected exactly one:"
     $flows | ForEach-Object { Write-Host "         $($_.Name)" }
     exit 1
 }
@@ -191,7 +191,7 @@ elseif (Test-Path -LiteralPath $legacyPath)  { $priorPath = $legacyPath }
 $existing = $null
 if ($null -ne $priorPath) {
     if (-not $Force) {
-        Write-Host "REFUSED: subjects/$slug/bulletin/$(Split-Path $priorPath -Leaf) exists. Re-run with -Force."
+        Write-Host "REFUSED: samples/$slug/bulletin/$(Split-Path $priorPath -Leaf) exists. Re-run with -Force."
         Write-Host "         Editorial regions are preserved across a forced re-merge."
         exit 1
     }
@@ -376,7 +376,7 @@ Write-Text $outPath $doc
 # ---------------------------------------------------------------- report
 
 Write-Host ""
-Write-Host "=== subjects/$slug ==="
+Write-Host "=== samples/$slug ==="
 Write-Host "  part 1   reports/analysis.html  $($A.Body.Length) chars"
 Write-Host "  part 2   reports/$($flows[0].Name)  $($F.Body.Length) chars"
 Write-Host "  scoped   $($F.Css.Length) chars of CSS rewritten under $SCOPE"
@@ -385,9 +385,9 @@ if ($carried.Count -gt 0) {
 } else {
     Write-Host "  editorial regions are placeholders - fill BULLETIN:SUMMARY and BULLETIN:DEFENCE"
 }
-Write-Host "  WROTE    subjects/$slug/bulletin/$outName  ($($doc.Length) chars)"
+Write-Host "  WROTE    samples/$slug/bulletin/$outName  ($($doc.Length) chars)"
 if ($priorPath -eq $legacyPath -and $legacyPath -ne $outPath) {
-    [void]$warnings.Add("carried the editorial regions over from the old name; delete subjects/$slug/bulletin/bulletin.html")
+    [void]$warnings.Add("carried the editorial regions over from the old name; delete samples/$slug/bulletin/bulletin.html")
 }
 
 if ($warnings.Count -gt 0) {
@@ -397,5 +397,5 @@ if ($warnings.Count -gt 0) {
 }
 
 Write-Host ""
-Write-Host "Now run: .\scripts\Verify-Bulletin.ps1 -Path .\subjects\$slug"
+Write-Host "Now run: .\scripts\Verify-Bulletin.ps1 -Path .\samples\$slug"
 exit 0

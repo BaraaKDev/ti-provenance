@@ -1,6 +1,6 @@
 # `analysis.json` schema
 
-The structured output of this skill, written to `subjects/<slug>/handoff/analysis.json` alongside the
+The structured output of this skill, written to `samples/<slug>/handoff/analysis.json` alongside the
 human-readable `analysis.html`.
 
 **This skill owns this file entirely.** Nothing else writes to it.
@@ -133,5 +133,5 @@ is a better `chronology[].detail` instead.
 
 ## Worked example
 
-`subjects/agrius/handoff/analysis.json` is a complete, validated instance. Read it before writing a
+`samples/agrius/handoff/analysis.json` is a complete, validated instance. Read it before writing a
 new one.

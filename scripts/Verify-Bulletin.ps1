@@ -14,8 +14,8 @@
     Exit 0 = clean, 1 = at least one failure.
 
 .EXAMPLE
-    .\scripts\Verify-Bulletin.ps1 -Path .\subjects\agrius
-    Get-ChildItem .\subjects -Directory | .\scripts\Verify-Bulletin.ps1
+    .\scripts\Verify-Bulletin.ps1 -Path .\samples\agrius
+    Get-ChildItem .\samples -Directory | .\scripts\Verify-Bulletin.ps1
 #>
 [CmdletBinding()]
 param(
@@ -66,7 +66,7 @@ process {
         $item = Get-Item -LiteralPath $p
         $dir  = if ($item.PSIsContainer) { $item.FullName } else { $item.DirectoryName }
         $slug = Split-Path $dir -Leaf
-        # The merged output is subjects/<slug>/bulletin/<slug>-threat-bulletin.html. Fall
+        # The merged output is samples/<slug>/bulletin/<slug>-threat-bulletin.html. Fall
         # back to the older flat 'bulletin.html' name, then to the subject root, so folders
         # written before the rename - or assembled by hand - still validate.
         $file = $null
@@ -76,7 +76,7 @@ process {
                 $found = @(Get-ChildItem -LiteralPath $bDir -Filter '*-threat-bulletin.html' -File)
                 if ($found.Count -gt 1) {
                     Write-Host ""
-                    Write-Host "=== subjects/$slug ==="
+                    Write-Host "=== samples/$slug ==="
                     Write-Host "  [FAIL] $($found.Count) bulletins in bulletin/ - expected exactly one:"
                     $found | ForEach-Object { Write-Host "         $($_.Name)" }
                     $anyFailed = $true
@@ -90,7 +90,7 @@ process {
         else { $file = $item.FullName }
 
         Write-Host ""
-        Write-Host "=== subjects/$slug ==="
+        Write-Host "=== samples/$slug ==="
 
         if (-not (Test-Path -LiteralPath $file)) {
             Write-Host "  [SKIP] no bulletin present - run Merge-Bulletin.ps1 first"
@@ -262,7 +262,7 @@ process {
         $vis = [regex]::Replace($vis, '(?s)<style.*?</style>', '')
         $vis = $vis -replace '<[^>]*>', ''
         $internalBits = @('mitre-visualizer', 'ti-analysis', 'mitre-mapping', 'TI-Provenance',
-                          'analysis\.json', 'mapping\.json', 'subjects/', 'MODE CHAIN', 'MODE SET',
+                          'analysis\.json', 'mapping\.json', 'samples/', 'MODE CHAIN', 'MODE SET',
                           '[a-z0-9-]+-flow\.html', '[a-z0-9-]+-template\.html', 'analysis\.html')
         $bled = @()
         foreach ($needle in $internalBits) {
@@ -287,7 +287,7 @@ end {
     Write-Host ""
     if ($checked -eq 0) {
         Write-Host "RESULT: NOTHING CHECKED - no input matched."
-        Write-Host "        Point this at a subject folder, e.g. .\subjects\<slug>."
+        Write-Host "        Point this at a subject folder, e.g. .\samples\<slug>."
         exit 1
     }
     if ($anyFailed) { Write-Host "RESULT: failures present."; exit 1 }

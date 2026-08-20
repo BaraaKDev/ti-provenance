@@ -16,7 +16,7 @@
     nobody runs: the documented invocation forms, and deliberately broken input.
 
     SAFETY: fixtures are built under the user TEMP directory and deleted afterwards. Nothing
-    is written to subjects/ or output/. Real subjects are read for the positive cases only.
+    is written to samples/ or output/. Real samples are read for the positive cases only.
 
     Exit 0 = all passed, 1 = at least one failure.
 
@@ -104,7 +104,7 @@ function Write-Text { param([string]$F, [string]$T) [System.IO.File]::WriteAllTe
 # passes. Mutations are then applied on top to make a specific check fail.
 function New-Fixture {
     param([string]$Name, [string]$From = 'akira', [switch]$WithReports, [switch]$WithBulletin)
-    $src = Join-Path $root "subjects\$From"
+    $src = Join-Path $root "samples\$From"
     $dst = Join-Path $fixRoot $Name
     New-Item -ItemType Directory -Path (Join-Path $dst 'handoff') -Force | Out-Null
     foreach ($j in @('analysis.json', 'mapping.json')) {
@@ -135,17 +135,17 @@ Write-Host "fixtures: $fixRoot"
 # ================================================================ 1. invocation forms
 Set-Group '1. Documented invocation forms'
 
-$realSubjects = @(Get-ChildItem (Join-Path $root 'subjects') -Directory)
-$realFlows    = @(Get-ChildItem (Join-Path $root 'subjects\*\reports\*-flow.html'))
+$realSamples = @(Get-ChildItem (Join-Path $root 'samples') -Directory)
+$realFlows    = @(Get-ChildItem (Join-Path $root 'samples\*\reports\*-flow.html'))
 
-$r = Invoke-Target $VM_MAP @{ Path = (Join-Path $root 'subjects\akira') }
+$r = Invoke-Target $VM_MAP @{ Path = (Join-Path $root 'samples\akira') }
 Assert 'Verify-Mapping -Path <subject>' ($r.Code -eq 0) "exit $($r.Code)"
 
 # The $TACTICS regression. begin{} runs once here, so state that leaks between items shows up
 # on the second subject and later - which is why this must pipe, not ForEach-Object.
-$r = Invoke-Target $VM_MAP -UsePipe -PipeIn $realSubjects
+$r = Invoke-Target $VM_MAP -UsePipe -PipeIn $realSamples
 Assert 'Verify-Mapping | pipeline over every subject' ($r.Code -eq 0 -and -not $r.Threw) $(
-    if ($r.Threw) { "threw: $($r.Error)" } else { "exit $($r.Code), $($realSubjects.Count) subjects" })
+    if ($r.Threw) { "threw: $($r.Error)" } else { "exit $($r.Code), $($realSamples.Count) samples" })
 
 $r = Invoke-Target $VFLOW @{ Path = $realFlows[0].FullName }
 Assert 'Verify-Flow -Path <file>' ($r.Code -eq 0) "exit $($r.Code)"
@@ -154,10 +154,10 @@ $r = Invoke-Target $VFLOW -UsePipe -PipeIn $realFlows
 Assert 'Verify-Flow | pipeline over every report' ($r.Code -eq 0 -and -not $r.Threw) $(
     if ($r.Threw) { "threw: $($r.Error)" } else { "$($realFlows.Count) files" })
 
-$r = Invoke-Target $VBULL @{ Path = (Join-Path $root 'subjects\akira') }
+$r = Invoke-Target $VBULL @{ Path = (Join-Path $root 'samples\akira') }
 Assert 'Verify-Bulletin -Path <subject>' ($r.Code -eq 0) "exit $($r.Code)"
 
-$r = Invoke-Target $VBULL -UsePipe -PipeIn $realSubjects
+$r = Invoke-Target $VBULL -UsePipe -PipeIn $realSamples
 Assert 'Verify-Bulletin | pipeline over every subject' ($r.Code -eq 0 -and -not $r.Threw) $(
     if ($r.Threw) { "threw: $($r.Error)" } else { "exit $($r.Code)" })
 
@@ -477,12 +477,12 @@ Assert 'every template accent is one flow-craft.md documents' ($offAccent.Count 
 # the pipeline rather than the subject. Checked against VISIBLE text only - the same words are
 # legitimate in HTML and CSS comments, which is where authoring guidance is supposed to live.
 $FORBIDDEN = 'ti-analysis', 'mitre-visualizer', 'mitre-mapping', 'TI-Provenance',
-             'analysis\.json', 'mapping\.json', 'subjects/', 'MODE CHAIN', 'MODE SET',
+             'analysis\.json', 'mapping\.json', 'samples/', 'MODE CHAIN', 'MODE SET',
              '[a-z0-9-]+-flow\.html', 'analysis\.html', '[a-z0-9-]+-template\.html'
 $leaks = @()
 $scanned = 0
-$reportFiles = @(Get-ChildItem (Join-Path $root 'subjects\*\reports\*.html')) +
-               @(Get-ChildItem (Join-Path $root 'subjects\*\bulletin\*.html')) +
+$reportFiles = @(Get-ChildItem (Join-Path $root 'samples\*\reports\*.html')) +
+               @(Get-ChildItem (Join-Path $root 'samples\*\bulletin\*.html')) +
                $tpl +
                @(Get-ChildItem (Join-Path $root '.claude\skills\ti-analysis\references') -Filter *.html)
 foreach ($h in $reportFiles) {

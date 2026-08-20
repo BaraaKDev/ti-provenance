@@ -76,9 +76,9 @@ the refusal paths, contract drift between the skill copies, and a PDF round trip
 ## Running it
 
 ```powershell
-.\scripts\Merge-Bulletin.ps1  -Path .\subjects\<slug>      # join the two halves
-.\scripts\Verify-Bulletin.ps1 -Path .\subjects\<slug>      # 17 checks; exit 1 on any failure
-.\scripts\Export-Bulletin.ps1 -Path .\subjects\<slug>      # gated PDF into output/
+.\scripts\Merge-Bulletin.ps1  -Path .\samples\<slug>      # join the two halves
+.\scripts\Verify-Bulletin.ps1 -Path .\samples\<slug>      # 17 checks; exit 1 on any failure
+.\scripts\Export-Bulletin.ps1 -Path .\samples\<slug>      # gated PDF into output/
 .\scripts\Test-Pipeline.ps1 -IncludeExport                 # the full regression
 ```
 
@@ -96,7 +96,7 @@ Environment notes, because they shaped the tooling:
 ```
 .claude/skills/     the three skills: analysis, mapping, visualizer
 scripts/            merge, verify, export, and the regression harness
-subjects/<slug>/    handoff/ (JSON)  reports/ (each half)  bulletin/ (merged)
+samples/<slug>/     handoff/ (JSON)  reports/ (each half)  bulletin/ (merged)
 output/             the finished PDFs - the artefact that leaves the project
 CLAUDE.md           how the pieces fit together, and the traps worth remembering
 ```

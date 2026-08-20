@@ -8,7 +8,7 @@ a threat actor, a vulnerability, or a campaign.
 Read it as artefacts rather than arrows — every step writes into the subject folder:
 
 ```
-subjects/<slug>/                        one folder per subject, slug-named
+samples/<slug>/                        one folder per subject, slug-named
   handoff/                              machine handoff - JSON, one writer each
     analysis.json    <-- ti-analysis      framing, risk, sources
     mapping.json     <-- mitre-mapping    tactics and techniques
@@ -23,7 +23,7 @@ output/                                 project root, not per-subject
   <slug>-threat-bulletin.pdf            <-- this file - THE DELIVERABLE
 ```
 
-**`output/` is what the reader gets.** Everything under `subjects/` is working material —
+**`output/` is what the reader gets.** Everything under `samples/` is working material —
 intermediate data, halves, a merged HTML that still needs a browser. The PDF in `output/` is
 the finished artefact, and it sits at the project root rather than per-subject so that
 "what have we published" is one directory listing rather than a walk through six folders.
@@ -81,7 +81,7 @@ your reading was wrong.
 
 ## 2. Pick the slug
 
-Everything writes into `subjects/<slug>/`, so the slug is settled **before** step 1 runs.
+Everything writes into `samples/<slug>/`, so the slug is settled **before** step 1 runs.
 Lowercase, hyphenated, folder-safe, and stable — renaming later orphans every artefact.
 
 | Subject | Slug | Examples |
@@ -102,10 +102,10 @@ another, and none needs to be told how the next one behaves.
 | Step | Invoke | Give it | Then |
 |---|---|---|---|
 | 1 | `ti-analysis` | the subject, and the slug you chose | wait for `analysis.html` + `analysis.json` |
-| 2 | `mitre-mapping` | `subjects/<slug>/` | wait for `mapping.json` |
-| 3 | `mitre-visualizer` | `subjects/<slug>/` | wait for `<name>-flow.html` |
-| 4 | this file | `subjects/<slug>/` | merge into `bulletin/<slug>-threat-bulletin.html` |
-| 5 | this file | `subjects/<slug>/` | export `output/<slug>-threat-bulletin.pdf` |
+| 2 | `mitre-mapping` | `samples/<slug>/` | wait for `mapping.json` |
+| 3 | `mitre-visualizer` | `samples/<slug>/` | wait for `<name>-flow.html` |
+| 4 | this file | `samples/<slug>/` | merge into `bulletin/<slug>-threat-bulletin.html` |
+| 5 | this file | `samples/<slug>/` | export `output/<slug>-threat-bulletin.pdf` |
 
 **Never paste one step's output into the next step's prompt.** Point at the folder. The whole
 purpose of the handoff files is that the evidence is already written down in a form the next
@@ -116,7 +116,7 @@ summary of it.
 **Validate between steps, not at the end.**
 
 ```powershell
-.\.claude\skills\mitre-mapping\scripts\Verify-Mapping.ps1 -Path .\subjects\<slug>
+.\.claude\skills\mitre-mapping\scripts\Verify-Mapping.ps1 -Path .\samples\<slug>
 ```
 
 Run it after step 1 and again after step 2. After step 1 it reports `mapping.json` as absent,
@@ -148,8 +148,8 @@ those two, plus the two things only the combined view can say.
 ## The merge is scripted
 
 ```powershell
-.\scripts\Merge-Bulletin.ps1 -Path .\subjects\<slug>
-.\scripts\Verify-Bulletin.ps1 -Path .\subjects\<slug>
+.\scripts\Merge-Bulletin.ps1 -Path .\samples\<slug>
+.\scripts\Verify-Bulletin.ps1 -Path .\samples\<slug>
 ```
 
 **Do not hand-merge the two files.** Both halves are HTML fragments, so concatenating them
@@ -196,10 +196,10 @@ carries an unattributed second Sources block.
 
 ## The reader never sees the pipeline
 
-Everything in this file — the skills, the handoff JSON, the `subjects/` layout, the templates —
+Everything in this file — the skills, the handoff JSON, the `samples/` layout, the templates —
 is build machinery. **None of it may appear in text a reader sees**, in either half or in the
 merged bulletin. That means no skill names, no `analysis.json` or `mapping.json`, no
-`subjects/...` paths, no companion-report filenames, and no template jargon such as MODE CHAIN
+`samples/...` paths, no companion-report filenames, and no template jargon such as MODE CHAIN
 or MODE SET. Refer to the other half as "the companion attack-flow report", without a filename.
 
 This leaked for a while and was only caught by reading a finished PDF. Three things now hold it:
@@ -218,12 +218,12 @@ instead — visible by default, and it shipped whenever an author did not overwr
 # Step 5: the PDF
 
 ```powershell
-.\scripts\Export-Bulletin.ps1 -Path .\subjects\<slug>
-Get-ChildItem .\subjects -Directory | .\scripts\Export-Bulletin.ps1 -Force
+.\scripts\Export-Bulletin.ps1 -Path .\samples\<slug>
+Get-ChildItem .\samples -Directory | .\scripts\Export-Bulletin.ps1 -Force
 ```
 
 Writes `output/<slug>-threat-bulletin.pdf`. **This is the deliverable** — everything under
-`subjects/` is working material, and this is the file that gets sent.
+`samples/` is working material, and this is the file that gets sent.
 
 **Conversion runs through headless Edge or Chrome**, whichever is installed. There is no
 Python on this machine and no `wkhtmltopdf`; the browser engine is already present and renders
@@ -264,7 +264,7 @@ one that passed every mechanical check.
 One folder per subject, slug-named, holding every artefact for it — the layout is the pipeline
 diagram above.
 
-Six subjects exist, at three levels of completeness:
+Six samples exist, at three levels of completeness:
 
 | Subject | What it carries | Why it is worth reading |
 |---|---|---|
@@ -282,7 +282,7 @@ Two JSON files, `analysis.json` and `mapping.json`, each written by exactly one 
 schema is duplicated into every skill that touches it — see *Skill independence* below — and
 it is the single point where the pipeline can go wrong quietly, so:
 
-- **Validate before rendering.** `Verify-Mapping.ps1 -Path .\subjects\<slug>` checks both
+- **Validate before rendering.** `Verify-Mapping.ps1 -Path .\samples\<slug>` checks both
   files and cross-checks them against each other: malformed technique IDs, tactic names
   invalid for the declared matrix, missing `usage` text, risk levels with no justification,
   a `via_cve` naming a CVE nobody declared, and cross-field errors like a single CVE marked
@@ -320,7 +320,7 @@ Get-FileHash .\.claude\skills\*\scripts\Verify-Mapping.ps1 | Select-Object Hash,
 ```
 
 **Paths.** Inside a skill, paths are skill-relative (`references/`, `guides/`, `scripts/`).
-Everywhere else they are project-relative and start with `subjects/` or `scripts/`. Run
+Everywhere else they are project-relative and start with `samples/` or `scripts/`. Run
 scripts from this directory.
 
 **Project scripts vs skill scripts.** `scripts/` at the project root holds steps 4 and 5 —
@@ -347,7 +347,7 @@ byte-identical, no skill references another, every script is pure ASCII and pars
 carries a BOM, no local shadows a `begin{}` constant by casing, and the schema docs still
 document every field the validator enforces.
 
-Fixtures are built under `%TEMP%` and removed afterwards. Nothing is written to `subjects/` or
+Fixtures are built under `%TEMP%` and removed afterwards. Nothing is written to `samples/` or
 `output/`. The harness has been mutation-tested: reintroducing the `$TACTICS` collision trips
 three separate checks, and removing a zero-input guard trips exactly one.
 

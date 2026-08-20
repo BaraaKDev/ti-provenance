@@ -1,6 +1,6 @@
 # `mapping.json` schema
 
-The structured output of this skill, written to `subjects/<slug>/handoff/mapping.json`.
+The structured output of this skill, written to `samples/<slug>/handoff/mapping.json`.
 
 **This skill owns this file entirely.** Nothing else writes to it, and this skill writes
 nothing else.
@@ -140,5 +140,5 @@ directly. A missing file is never an error; a present but malformed one is.
 
 ## Worked example
 
-`subjects/agrius/handoff/mapping.json` is a complete, validated instance — 12 tactics, 22 techniques,
+`samples/agrius/handoff/mapping.json` is a complete, validated instance — 12 tactics, 22 techniques,
 one `via_cve`, nine arsenal entries. Read it before writing a new one.

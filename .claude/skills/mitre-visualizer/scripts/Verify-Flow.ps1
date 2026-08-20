@@ -8,8 +8,8 @@
     stay human judgment. Exit code 0 = all passed, 1 = at least one failure.
 
 .EXAMPLE
-    .\Verify-Flow.ps1 -Path .\subjects\andariel\reports\andariel-G0138-attack-flow.html
-    Get-ChildItem .\subjects\*\reports\*-flow.html | .\Verify-Flow.ps1
+    .\Verify-Flow.ps1 -Path .\samples\andariel\reports\andariel-G0138-attack-flow.html
+    Get-ChildItem .\samples\*\reports\*-flow.html | .\Verify-Flow.ps1
 #>
 [CmdletBinding()]
 param(
@@ -171,7 +171,7 @@ process {
         # a threat report has no reason to use the word at all, so "the <whatever> skill"
         # trips it whichever skill is named.
         $internals = @('mitre-visualizer', '\bskills?\b', 'TI-Provenance',
-                       'analysis\.json', 'mapping\.json', 'subjects/', 'MODE CHAIN', 'MODE SET',
+                       'analysis\.json', 'mapping\.json', 'samples/', 'MODE CHAIN', 'MODE SET',
                        '[a-z0-9-]+-flow\.html', '[a-z0-9-]+-template\.html', 'analysis\.html')
         $leaked = @()
         foreach ($needle in $internals) {
@@ -195,7 +195,7 @@ end {
     Write-Host ""
     if ($checked -eq 0) {
         Write-Host "RESULT: NOTHING CHECKED - no input matched."
-        Write-Host "        Flow reports live in subjects/<slug>/reports/. A glob that misses"
+        Write-Host "        Flow reports live in samples/<slug>/reports/. A glob that misses"
         Write-Host "        them verifies nothing while looking like a pass."
         exit 1
     }

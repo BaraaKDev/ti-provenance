@@ -106,9 +106,11 @@
   .sevband.low { border-left-color: var(--risk-low); background: var(--risk-low-wash); }
   .sevband.low .v { color: var(--risk-low); }
   .sevband.low .sevmeter i:nth-child(-n+2) { background: var(--risk-low); }
-  .sevband.minimal { border-left-color: var(--risk-minimal); background: var(--risk-minimal-wash); }
-  .sevband.minimal .v { color: var(--risk-minimal); }
-  .sevband.minimal .sevmeter i:nth-child(-n+1) { background: var(--risk-minimal); }
+  /* The floor of the severity scale is "informational"; it borrows the --risk-minimal
+     colour because the two sit at the same end of the same ramp. */
+  .sevband.informational { border-left-color: var(--risk-minimal); background: var(--risk-minimal-wash); }
+  .sevband.informational .v { color: var(--risk-minimal); }
+  .sevband.informational .sevmeter i:nth-child(-n+1) { background: var(--risk-minimal); }
 
   .tlp {
     display: inline-block; align-self: flex-start;

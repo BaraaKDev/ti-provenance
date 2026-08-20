@@ -52,6 +52,10 @@ begin {
     $RELATIONSHIPS = @('none','exploit-chain','remediation-cascade')
     $CONFIDENCE    = @('published','derived')
     $RISK_LEVELS   = @('critical','high','moderate','low','minimal')
+    # Severity differs from the sector scale in one word: its floor is 'informational', because
+    # a whole-subject verdict of 'no indication of interest' does not parse - there is nobody
+    # for the subject to be uninterested in. The other four are shared deliberately.
+    $SEVERITY_LEVELS = @('critical','high','moderate','low','informational')
 
     function Test-Check {
         param([string]$Name, [bool]$Ok, [string]$Detail)
@@ -155,8 +159,7 @@ process {
                 if ($obj -and $OBJECTIVES -notcontains $obj)    { $bad += "objective '$obj'" }
                 if ($cf  -and $CONFIDENCE -notcontains $cf)     { $bad += "confidence '$cf'" }
                 if ($rel -and $RELATIONSHIPS -notcontains $rel) { $bad += "vuln_relationship '$rel'" }
-                # severity shares the sector vocabulary on purpose - one scale per document.
-                if ($sev -and $RISK_LEVELS -notcontains $sev)     { $bad += "severity '$sev'" }
+                if ($sev -and $SEVERITY_LEVELS -notcontains $sev) { $bad += "severity '$sev'" }
                 $results += Test-Check 'analysis.json values in vocabulary' ($bad.Count -eq 0) $(if ($bad.Count) { $bad -join '; ' })
 
                 $xf = @()

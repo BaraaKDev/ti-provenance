@@ -133,7 +133,10 @@ It is **not** the sector table summarised, and it does not reuse the sector defi
 are about targeting, and "is this subject targeted by itself" is not a question. Decide it here,
 in the analysis, because everything it depends on is established here and nowhere else.
 
-It uses the same five words as the sector rows, so one document never carries two scales.
+It shares four words with the sector rows so a document does not carry two scales for the same
+idea. The floor differs: severity bottoms out at `informational`, not `minimal`, because
+"no indication of interest" describes a sector nobody is aiming at and says nothing coherent
+about a subject as a whole.
 
 **Take the highest level whose conditions all hold.**
 
@@ -143,7 +146,7 @@ It uses the same five words as the sector rows, so one document never carries tw
 | `high` | yes | *one* of the other two fails — needs an existing foothold, or hits a subset of estates, or the impact is bounded |
 | `moderate` | no | capability is real and documented, but nothing is currently using it | would be serious if it resumed |
 | `low` | no | historic, fixed, and the population still exposed is small | — |
-| `minimal` | no | no realistic path to the estates this report is written for | — |
+| `informational` | no | no realistic path to the estates this report is written for | — |
 
 Read the two axes per subject type:
 
@@ -245,7 +248,7 @@ The full contract is `references/analysis-schema.md`.
   "attack_id": "{{G-ID, omit if none}}",
   "aliases": ["{{other tracked names}}"],
   "objective": "destruction | extortion | espionage | collection | disruption | unknown",
-  "severity": "critical | high | moderate | low | minimal",
+  "severity": "critical | high | moderate | low | informational",
   "severity_note": "{{one line: which axis kept it off the level above}}",
   "objective_note": "{{one line}}",
   "cves": ["{{CVE IDs, omit if none}}"],

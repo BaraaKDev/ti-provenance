@@ -170,7 +170,7 @@ process {
         # them here would be a reference to them. '\bskills?\b' catches the shape instead -
         # a threat report has no reason to use the word at all, so "the <whatever> skill"
         # trips it whichever skill is named.
-        $internals = @('mitre-visualizer', '\bskills?\b', 'TI-Reporting',
+        $internals = @('mitre-visualizer', '\bskills?\b', 'TI-Provenance',
                        'analysis\.json', 'mapping\.json', 'subjects/', 'MODE CHAIN', 'MODE SET',
                        '[a-z0-9-]+-flow\.html', '[a-z0-9-]+-template\.html', 'analysis\.html')
         $leaked = @()

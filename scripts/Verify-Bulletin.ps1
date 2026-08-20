@@ -261,7 +261,7 @@ process {
         $vis = [regex]::Replace($t, '(?s)<!--.*?-->', '')
         $vis = [regex]::Replace($vis, '(?s)<style.*?</style>', '')
         $vis = $vis -replace '<[^>]*>', ''
-        $internalBits = @('mitre-visualizer', 'ti-analysis', 'mitre-mapping', 'TI-Reporting',
+        $internalBits = @('mitre-visualizer', 'ti-analysis', 'mitre-mapping', 'TI-Provenance',
                           'analysis\.json', 'mapping\.json', 'subjects/', 'MODE CHAIN', 'MODE SET',
                           '[a-z0-9-]+-flow\.html', '[a-z0-9-]+-template\.html', 'analysis\.html')
         $bled = @()

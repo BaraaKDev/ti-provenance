@@ -1,4 +1,4 @@
-# TI-Reporting
+# TI-Provenance
 
 Threat intelligence reporting pipeline. Three skills produce a bulletin about one subject —
 a threat actor, a vulnerability, or a campaign.

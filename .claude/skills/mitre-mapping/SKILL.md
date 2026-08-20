@@ -18,7 +18,7 @@ that it is `T1036` rather than a sub-technique. Each of those is a decision that
 owns that file entirely** — nothing else writes to it, and this skill writes nothing else.
 
 **Path convention.** `references/` and `scripts/` are relative to this skill folder.
-`subjects/` is relative to the TI-Reporting project root.
+`subjects/` is relative to the TI-Provenance project root.
 
 ## Input
 

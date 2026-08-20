@@ -129,7 +129,7 @@ function Edit-Fixture {
 }
 
 Write-Host ""
-Write-Host "TI-Reporting pipeline regression"
+Write-Host "TI-Provenance pipeline regression"
 Write-Host "fixtures: $fixRoot"
 
 # ================================================================ 1. invocation forms
@@ -476,7 +476,7 @@ Assert 'every template accent is one flow-craft.md documents' ($offAccent.Count 
 # mitre-visualizer, analysis.json or MODE CHAIN are, and every one of these strings describes
 # the pipeline rather than the subject. Checked against VISIBLE text only - the same words are
 # legitimate in HTML and CSS comments, which is where authoring guidance is supposed to live.
-$FORBIDDEN = 'ti-analysis', 'mitre-visualizer', 'mitre-mapping', 'TI-Reporting',
+$FORBIDDEN = 'ti-analysis', 'mitre-visualizer', 'mitre-mapping', 'TI-Provenance',
              'analysis\.json', 'mapping\.json', 'subjects/', 'MODE CHAIN', 'MODE SET',
              '[a-z0-9-]+-flow\.html', 'analysis\.html', '[a-z0-9-]+-template\.html'
 $leaks = @()

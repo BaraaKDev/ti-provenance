@@ -23,7 +23,7 @@ what a human reviews, and `bulletin/` holds the merged deliverable a later step 
 the subfolders if they do not exist.
 
 **Path convention.** `references/` and `scripts/` are relative to this skill folder.
-`subjects/` is relative to the TI-Reporting project root.
+`subjects/` is relative to the TI-Provenance project root.
 
 ## When this runs — and when it does not
 
@@ -223,7 +223,7 @@ with it.
 | Destruction / extortion / disruption | signal blue `#1d4ed8` | slate `#55607a` | white (`--ground: #ffffff`) |
 | Espionage / collection | violet `#7c3aed` | slate `#55607a` | white (`--ground: #ffffff`) |
 
-These values are shared across the TI-Reporting project so that separate reports on one
+These values are shared across the TI-Provenance project so that separate reports on one
 subject read as one body of work. `CLAUDE.md` records the convention.
 
 **Risk colours are a separate token family** (`--risk-*`). Sector risk is an analyst

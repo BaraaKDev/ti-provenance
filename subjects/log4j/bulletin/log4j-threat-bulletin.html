@@ -973,8 +973,7 @@
           Horizon.</p>
         <p>
           For <em>how</em> a compromise actually unfolds — the techniques, the tooling and the
-          order they run in — see the companion attack-flow report,
-          <code>log4j-cascade-flow.html</code>.
+          order they run in — see the companion attack-flow report.
         </p>
       </div>
     </div>
@@ -1021,11 +1020,6 @@
       catalog and on Mandiant's long-tail assessment rather than on a fresh incident report. Sector risk
       levels are analyst assessments, not measured values; they deliberately share a colour ramp with CVSS
       severity but are rendered as meters rather than scores so the two are not confused.
-    </p>
-    <p class="note">
-      <strong>Pipeline.</strong> Step 1 of TI-Reporting. The companion ATT&amp;CK flow report
-      is built from the JSON handoff in <code>subjects/log4j/handoff/</code>, of which this analysis
-      produces <code>analysis.json</code>.
     </p>
   </div>
 </footer>
@@ -1513,9 +1507,7 @@
     <p class="note">
       <strong>Read the cascade correctly.</strong> The links are ordered by <em>remediation</em>, not by
       exploitation. An attacker exploits one of these four — whichever matches the version in front of
-      them — and never composes them. If you need a report where the CVEs genuinely compose into a
-      single attack, that is MODE CHAIN's other shape; see
-      <code class="path">proxyshell-chain-flow.html</code>.
+      them — and never composes them.
     </p>
     <p class="note">
       <strong>Derived mapping — read before citing.</strong> MITRE ATT&amp;CK publishes no Log4j mapping,
@@ -1524,13 +1516,6 @@
       <code class="path">T1496.001</code>, now a sub-technique of Resource Hijacking rather than the
       flat technique older references cite — but applying them here is analytical judgment. CVE facts
       are NVD data and are not derived.
-    </p>
-    <p class="note">
-      <strong>Reference artifact</strong> for the <code class="path">mitre-visualizer</code> skill — the
-      worked example of a <strong>remediation cascade</strong> in MODE CHAIN of
-      <code class="path">vulnerability-flow-template.html</code>. It shows the `.state` cards carrying
-      <em>deployed versions</em> rather than attacker capability, and the deliberate choice to draw one
-      flow rather than four when only one attack path was real.
     </p>
   </div>
 </footer>

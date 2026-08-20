@@ -333,7 +333,7 @@
         <p class="eyebrow">Vulnerabilities</p>
         <h2>The highest score is not the first fix</h2>
         <p>
-          MODE SET: these do not compose. Listed in <strong>patch order</strong>, which is not score
+          These do not compose. Listed in <strong>patch order</strong>, which is not score
           order — and the reason is the whole point of this section.
         </p>
       </div>
@@ -669,7 +669,7 @@
       release date. They do not compose: exploiting one gives you nothing you need to exploit another,
       and fixing one neither exposes nor creates another. The RCE-plus-LPE combination noted in the
       triage callout is the generic shape of Windows intrusions, not a documented chain — if evidence
-      of a specific combined exploit emerges, rebuild this as a chain report using MODE CHAIN.
+      of a specific combined exploit emerges, rebuild this as a chain report.
     </p>
     <p class="note">
       <strong>Derived mapping — read before citing.</strong> MITRE ATT&amp;CK publishes no mapping for
@@ -678,14 +678,6 @@
       attack.mitre.org, but applying them here is analytical judgment. The single-phase flows are
       deliberate: each CVE grants one primitive, and padding them into multi-phase narratives would
       invent behaviour nobody has observed.
-    </p>
-    <p class="note">
-      <strong>Reference artifact</strong> for the <code class="path">mitre-visualizer</code> skill — the
-      worked example of <strong>MODE SET</strong> in
-      <code class="path">vulnerability-flow-template.html</code>. It demonstrates the triage table
-      ordered by patch priority rather than score, `.exp` exploitation status outweighing `.sev`
-      severity, `.reach` strips that differentiate three flaws occupying three different tactics, and
-      one `.flow` per vulnerability with node numbering restarting in each.
     </p>
   </div>
 </footer>

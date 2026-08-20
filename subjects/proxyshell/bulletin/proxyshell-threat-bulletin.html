@@ -968,8 +968,7 @@
           missing from an inventory because nobody thinks of them as mail servers any more.</p>
         <p>
           For <em>how</em> a compromise actually unfolds — the techniques, the tooling and the
-          order they run in — see the companion attack-flow report,
-          <code>proxyshell-chain-flow.html</code>.
+          order they run in — see the companion attack-flow report.
         </p>
       </div>
     </div>
@@ -1014,11 +1013,6 @@
       sources is from late 2021. Sector risk levels are analyst assessments, not measured values; they
       deliberately share a colour ramp with CVSS severity but are rendered as meters rather than scores so
       the two are not confused.
-    </p>
-    <p class="note">
-      <strong>Pipeline.</strong> Step 1 of TI-Reporting. The companion ATT&amp;CK flow report
-      is built from the JSON handoff in <code>subjects/proxyshell/handoff/</code>, of which this analysis
-      produces <code>analysis.json</code>.
     </p>
   </div>
 </footer>
@@ -1071,7 +1065,7 @@
         <p class="eyebrow">Vulnerabilities</p>
         <h2>A proxy trick, a forged identity, and a file write</h2>
         <p>
-          MODE CHAIN: these compose. Each CVE contributes one capability the next one needs and
+          These compose. Each CVE contributes one capability the next one needs and
           cannot obtain for itself. Read the <em>Alone</em> line under each — that is what separates
           a chain from three unrelated bugs sharing a nickname.
         </p>
@@ -1518,9 +1512,7 @@
     <p class="note">CVSS scores, CWE assignments, affected builds and KEV status verified against NVD.</p>
     <p class="note">
       <strong>Read the chain correctly.</strong> These CVEs genuinely compose — removing any one
-      breaks the attack. That is MODE CHAIN's <em>exploit chain</em> shape. For the other shape, where
-      the dependency runs through remediation rather than exploitation, see
-      <code class="path">log4j-cascade-flow.html</code>.
+      breaks the attack.
     </p>
     <p class="note">
       <strong>Derived mapping — read before citing.</strong> MITRE ATT&amp;CK publishes no ProxyShell
@@ -1529,16 +1521,6 @@
       against attack.mitre.org, but the decision to apply each one to this chain is an analytical
       judgment and should be reviewed before the page is used as an authority. The CVE facts in the
       chain and remediation sections are vendor and NVD data and are not derived.
-    </p>
-    <p class="note">
-      <strong>Reference artifact</strong> for the <code class="path">mitre-visualizer</code> skill — the
-      worked example of <strong>MODE CHAIN, exploit chain</strong> in
-      <code class="path">vulnerability-flow-template.html</code>. It demonstrates the state/link
-      composition with its <em>Alone</em> lines, the summary table ordered by position in the chain,
-      semantic CVSS severity separated from exploitation status, and
-      <code class="path">.viacve</code> chips wiring techniques to the CVE that enables them. Phases
-      06–08 deliberately carry no CVE tag, because post-compromise behaviour belongs to the operator
-      rather than the vulnerability.
     </p>
   </div>
 </footer>

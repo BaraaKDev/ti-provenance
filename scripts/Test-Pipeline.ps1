@@ -472,6 +472,33 @@ Assert 'every template accent is one flow-craft.md documents' ($offAccent.Count 
     if ($offAccent.Count -eq 0) { 'all documented' }
     else { ($offAccent | ForEach-Object { "$_ uses $($accentOf[$_])" }) -join '; ' })
 
+# Nothing about how a report was built belongs in the report. A reader has no idea what
+# mitre-visualizer, analysis.json or MODE CHAIN are, and every one of these strings describes
+# the pipeline rather than the subject. Checked against VISIBLE text only - the same words are
+# legitimate in HTML and CSS comments, which is where authoring guidance is supposed to live.
+$FORBIDDEN = 'ti-analysis', 'mitre-visualizer', 'mitre-mapping', 'TI-Reporting',
+             'analysis\.json', 'mapping\.json', 'subjects/', 'MODE CHAIN', 'MODE SET',
+             '[a-z0-9-]+-flow\.html', 'analysis\.html', '[a-z0-9-]+-template\.html'
+$leaks = @()
+$scanned = 0
+$reportFiles = @(Get-ChildItem (Join-Path $root 'subjects\*\reports\*.html')) +
+               @(Get-ChildItem (Join-Path $root 'subjects\*\bulletin\*.html')) +
+               $tpl +
+               @(Get-ChildItem (Join-Path $root '.claude\skills\ti-analysis\references') -Filter *.html)
+foreach ($h in $reportFiles) {
+    $scanned++
+    $vis = Read-Text $h.FullName
+    $vis = [regex]::Replace($vis, '(?s)<!--.*?-->', '')      # HTML comments are not rendered
+    $vis = [regex]::Replace($vis, '(?s)/\*.*?\*/', '')        # nor are CSS comments
+    $vis = [regex]::Replace($vis, '(?s)<style.*?</style>', '')
+    $vis = $vis -replace '<[^>]*>', ''
+    foreach ($f in $FORBIDDEN) {
+        if ($vis -match $f) { $leaks += "$($h.Name): $($Matches[0])" }
+    }
+}
+Assert 'no build-pipeline or skill names in visible report text' ($leaks.Count -eq 0 -and $scanned -gt 0) $(
+    if ($leaks.Count) { ($leaks | Select-Object -First 4) -join '; ' } else { "$scanned file(s) clean" })
+
 # ================================================================ 6. export (opt-in)
 if ($IncludeExport) {
     Set-Group '6. PDF export'

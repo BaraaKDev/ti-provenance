@@ -157,6 +157,30 @@ process {
         $hardCoded = [regex]::Matches($t, '<svg[^>]*stroke="(?!currentColor)[^"]+"')
         $results += Test-Check 'icons use stroke="currentColor"' ($hardCoded.Count -eq 0) $(if ($hardCoded.Count) { "$($hardCoded.Count) hard-coded stroke(s)" })
 
+        # --- 12. Nothing about how the report was built -----------------------
+        # A reader has no idea what this skill is called, which template produced the page,
+        # or what a JSON handoff is. Every one of these strings describes the build rather
+        # than the subject, so none of them may appear in text the reader sees. Checked
+        # against VISIBLE text only: the same words are legitimate in HTML and CSS comments,
+        # which is exactly where authoring guidance is supposed to live.
+        $visible = [regex]::Replace($t, '(?s)<!--.*?-->', '')
+        $visible = [regex]::Replace($visible, '(?s)<style.*?</style>', '')
+        $visible = $visible -replace '<[^>]*>', ''
+        # Deliberately does NOT name the other skills: this one must stand alone, and naming
+        # them here would be a reference to them. '\bskills?\b' catches the shape instead -
+        # a threat report has no reason to use the word at all, so "the <whatever> skill"
+        # trips it whichever skill is named.
+        $internals = @('mitre-visualizer', '\bskills?\b', 'TI-Reporting',
+                       'analysis\.json', 'mapping\.json', 'subjects/', 'MODE CHAIN', 'MODE SET',
+                       '[a-z0-9-]+-flow\.html', '[a-z0-9-]+-template\.html', 'analysis\.html')
+        $leaked = @()
+        foreach ($needle in $internals) {
+            $m = [regex]::Match($visible, $needle)
+            if ($m.Success) { $leaked += $m.Value }
+        }
+        $results += Test-Check 'no build or skill references in visible text' ($leaked.Count -eq 0) $(
+            if ($leaked.Count) { "leaked: " + (($leaked | Sort-Object -Unique) -join ', ') })
+
         $failed = @($results | Where-Object { -not $_ }).Count
         if ($failed) {
             $anyFailed = $true

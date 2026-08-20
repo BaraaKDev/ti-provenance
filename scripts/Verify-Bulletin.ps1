@@ -254,6 +254,24 @@ process {
             if ($srcBare -gt 0) { "$srcBare unattributed 'Sources' block(s) - the merge should label them per part" }
             else { 'both labelled' })
 
+        # Nothing about how the bulletin was built belongs in it. The reader does not know what
+        # a skill, a handoff or a template is, and every one of these strings describes the
+        # pipeline rather than the subject. Visible text only - HTML and CSS comments are where
+        # authoring guidance is meant to live, so they are stripped before the scan.
+        $vis = [regex]::Replace($t, '(?s)<!--.*?-->', '')
+        $vis = [regex]::Replace($vis, '(?s)<style.*?</style>', '')
+        $vis = $vis -replace '<[^>]*>', ''
+        $internalBits = @('mitre-visualizer', 'ti-analysis', 'mitre-mapping', 'TI-Reporting',
+                          'analysis\.json', 'mapping\.json', 'subjects/', 'MODE CHAIN', 'MODE SET',
+                          '[a-z0-9-]+-flow\.html', '[a-z0-9-]+-template\.html', 'analysis\.html')
+        $bled = @()
+        foreach ($needle in $internalBits) {
+            $hit = [regex]::Match($vis, $needle)
+            if ($hit.Success) { $bled += $hit.Value }
+        }
+        $results += Test-Check 'no build or skill references in visible text' ($bled.Count -eq 0) $(
+            if ($bled.Count) { "leaked: " + (($bled | Sort-Object -Unique) -join ', ') })
+
         $failed = @($results | Where-Object { -not $_ }).Count
         if ($failed -gt 0) {
             $anyFailed = $true

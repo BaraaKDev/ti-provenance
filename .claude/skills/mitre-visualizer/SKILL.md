@@ -126,10 +126,11 @@ Get-ChildItem .\subjects\*\reports\*-flow.html | & $v   # every report in the pr
 script now refuses that case with `NOTHING CHECKED` and exit 1 rather than reporting a pass,
 but a green line that says `0 file(s) checked` is still not a verification.
 
-Eleven mechanical checks: title present, no leftover placeholders, transitions = phases − 1
+Twelve mechanical checks: title present, no leftover placeholders, transitions = phases − 1
 per flow, sequential node numbering per flow, impact-phase placement, tag balance, every
 `var()` token defined in `:root`, no dark-theme block, technique-ID formatting, every
-`.ticon` containing an `<svg>`, and every icon using `stroke="currentColor"`. Exit 0 clean,
+`.ticon` containing an `<svg>`, every icon using `stroke="currentColor"`, and no build-pipeline
+or skill name in text the reader sees. Exit 0 clean,
 1 on any failure. Fix failures before publishing — do not hand-wave a red check.
 
 An impact phase is **optional**: the checker validates only that if one exists there is

@@ -193,6 +193,28 @@ carries an unattributed second Sources block.
 
 ---
 
+
+## The reader never sees the pipeline
+
+Everything in this file — the skills, the handoff JSON, the `subjects/` layout, the templates —
+is build machinery. **None of it may appear in text a reader sees**, in either half or in the
+merged bulletin. That means no skill names, no `analysis.json` or `mapping.json`, no
+`subjects/...` paths, no companion-report filenames, and no template jargon such as MODE CHAIN
+or MODE SET. Refer to the other half as "the companion attack-flow report", without a filename.
+
+This leaked for a while and was only caught by reading a finished PDF. Three things now hold it:
+
+| Where | What it does |
+|---|---|
+| `Verify-Flow.ps1` | fails a flow report that names any of it — runs inside the skill, so a standalone run is covered too |
+| `Verify-Bulletin.ps1` | fails the merged bulletin, which gates export, so no PDF can carry it |
+| `Test-Pipeline.ps1` | sweeps every report, bulletin and template in one pass |
+
+All three scan **visible text only**, stripping HTML comments, CSS comments and `<style>` blocks
+first. That is deliberate: authoring guidance is supposed to live in comments, and a comment can
+never render. The failure mode that caused this was guidance sitting in a `<p class="note">`
+instead — visible by default, and it shipped whenever an author did not overwrite it.
+
 # Step 5: the PDF
 
 ```powershell

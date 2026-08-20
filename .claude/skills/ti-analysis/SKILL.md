@@ -108,6 +108,23 @@ Close instead with the bottom-line `.callout`, which points the reader across to
 report. Division of labour for the bulletin: **this report says who is at risk and why; the
 flow report says how they get hit.**
 
+
+## Never write the pipeline into the report
+
+The reader is a defender reading about a threat, not someone who knows this project exists.
+**Nothing about how the report was produced may appear in text they can see** — not the name
+of this skill or any other, not `analysis.json` or any handoff file, not a `subjects/...` path,
+not the filename of the companion report, and not template jargon such as MODE CHAIN or
+MODE SET. Refer to the companion report as "the companion attack-flow report", with no filename.
+
+Authoring guidance belongs in an HTML or CSS comment, which never renders. The rule is that a
+comment is invisible and a `<p class="note">` is not, so anything left in a note ships to the
+reader in the PDF.
+
+There is no script in this skill that checks the rendered report, so here the rule is yours to
+hold. Read the finished page once with the question "would a stranger understand every word of
+this?" - anything that only makes sense to someone who built the pipeline does not belong.
+
 ## Sourcing
 
 **`references/sources.yaml` is the allowlist.** Research only from the sources it names. A

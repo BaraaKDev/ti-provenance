@@ -234,6 +234,22 @@ There is no red row. On a vulnerability report `--sev-crit` is `#a4161a`, and an
 anywhere near it puts severity red on things that are not a severity — which is the one thing
 the severity ramp cannot survive. Keep the accent and the severity ramp in different families.
 
+
+## Never write the pipeline into the report
+
+The reader knows nothing about this project. **No text they can see may name this skill or any
+other, a template file, a `subjects/...` path, a JSON handoff, or the mode labels MODE CHAIN and
+MODE SET.** Those labels are how this guide talks to you about which shape to build; they are not
+words a defender reading about three Exchange flaws can interpret. Say "these compose" rather
+than "MODE CHAIN: these compose".
+
+Do not cross-reference another subject's report by filename either. A worked example is useful to
+you while writing and meaningless to the person reading the finished page.
+
+Authoring guidance goes in an HTML or CSS comment, never in a `<p class="note">` — a comment
+cannot render, a note always does. `Verify-Flow.ps1` checks this on visible text, with comments
+and `<style>` blocks stripped first.
+
 ## Coverage gaps
 
 Sparse mappings are common. When tactics are missing, add a short caveat in the footer

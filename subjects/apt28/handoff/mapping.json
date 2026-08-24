@@ -1,0 +1,136 @@
+{
+  "schema": "mapping/1.0",
+  "subject": "APT28",
+  "slug": "apt28",
+  "matrix": "enterprise",
+  "tactics": [
+    {
+      "tactic": "Resource Development",
+      "techniques": [
+        {
+          "id": "T1583.003",
+          "name": "Acquire Infrastructure: Virtual Private Server",
+          "usage": "Configures rented virtual private servers to act as malicious DNS resolvers. Two clusters are identifiable by their banners - SSH on TCP 56777 or 35681, with dnsmasq 2.85 answering on UDP 53 - and they receive high volumes of DNS traffic redirected from compromised routers.",
+          "tooling": ["dnsmasq"]
+        },
+        {
+          "id": "T1584.008",
+          "name": "Compromise Infrastructure: Network Devices",
+          "usage": "Compromises SOHO routers, principally TP-Link models including the WR841N, Archer C5 and C7, MR6400 and WDR series, and rewrites their DHCP-supplied DNS settings to point at actor-controlled resolvers. A subset of MikroTik routers, often in Ukraine, is handled interactively rather than at scale."
+        }
+      ]
+    },
+    {
+      "tactic": "Initial Access",
+      "techniques": [
+        {
+          "id": "T1190",
+          "name": "Exploit Public-Facing Application",
+          "usage": "Exploits the router's own web interface, likely through CVE-2023-50224 on the TP-Link WR841N, sending one crafted HTTP GET request to retrieve stored credentials and a second to overwrite the DHCP DNS settings. The primary resolver is set to actor infrastructure while the original is demoted to secondary, which keeps name resolution working and the change unremarkable."
+        },
+        {
+          "id": "T1566",
+          "name": "Phishing",
+          "usage": "Sends spearphishing mail as the delivery mechanism for two distinct operations: cross-site scripting payloads that execute inside the victim's webmail session, and crafted messages that trigger the Outlook authentication leak. Mail is sent from co-opted public mail services rather than actor-registered domains."
+        }
+      ]
+    },
+    {
+      "tactic": "Execution",
+      "techniques": [
+        {
+          "id": "T1059.003",
+          "name": "Command and Scripting Interpreter: Windows Command Shell",
+          "usage": "GooseEgg spawns elevated processes and drives them from batch scripts named execute.bat and doit.bat, which carry out the follow-on work rather than the launcher doing it directly.",
+          "tooling": ["GooseEgg", "execute.bat", "doit.bat"]
+        }
+      ]
+    },
+    {
+      "tactic": "Privilege Escalation",
+      "techniques": [
+        {
+          "id": "T1068",
+          "name": "Exploitation for Privilege Escalation",
+          "usage": "Uses the custom GooseEgg launcher to exploit CVE-2022-38028 in the Windows Print Spooler, modifying a JavaScript constraints file and executing it with SYSTEM permissions. In use since at least June 2020 and possibly April 2019, which is well before the flaw was publicly fixed.",
+          "tooling": ["GooseEgg"]
+        }
+      ]
+    },
+    {
+      "tactic": "Persistence",
+      "techniques": [
+        {
+          "id": "T1053.005",
+          "name": "Scheduled Task/Job: Scheduled Task",
+          "usage": "Installs a scheduled task through the GooseEgg batch scripts so the launcher survives reboot, rather than relying on the initial foothold remaining available.",
+          "tooling": ["GooseEgg"]
+        },
+        {
+          "id": "T1098.002",
+          "name": "Account Manipulation: Additional Email Delegate Permissions",
+          "usage": "Alters Microsoft Exchange mailbox permissions so that mailboxes of interest can be read without re-authenticating as their owner. Named as an initial-access and access-maintenance technique in the ten-nation advisory on the logistics campaign."
+        }
+      ]
+    },
+    {
+      "tactic": "Credential Access",
+      "techniques": [
+        {
+          "id": "T1110.003",
+          "name": "Brute Force: Password Spraying",
+          "usage": "Guesses credentials across many accounts as a primary route into logistics and technology organisations, in preference to exploiting software. The joint advisory leads its mitigations with phishing-resistant multi-factor authentication for this reason."
+        },
+        {
+          "id": "T1187",
+          "name": "Forced Authentication",
+          "usage": "Exploits CVE-2023-23397 by sending a crafted message that causes Outlook to authenticate to an attacker-controlled server with no user interaction. The NTLMv2 hash is captured and relayed to impersonate the victim. Used as a zero-day from 18 March 2022 and in two further waves after the patch, against at least 30 organisations in 14 nations.",
+          "tooling": ["Compromised Ubiquiti devices"]
+        },
+        {
+          "id": "T1557",
+          "name": "Adversary-in-the-Middle",
+          "usage": "Once a router resolves selected domains to actor infrastructure, inserts itself into the connection to email and login services. Harvests passwords and OAuth or equivalent tokens from both browser sessions and desktop applications; lookups that do not match the targeting criteria are resolved normally so the hijack stays invisible."
+        },
+        {
+          "id": "T1111",
+          "name": "Multi-Factor Authentication Interception",
+          "usage": "The SpyPress.MDAEMON payload steals two-factor authentication secrets from the webmail session and creates application passwords, which are honoured without a second factor and therefore outlive the victim's MFA.",
+          "tooling": ["SpyPress.MDAEMON"]
+        },
+        {
+          "id": "T1003.002",
+          "name": "OS Credential Dumping: Security Account Manager",
+          "usage": "Extracts registry hives containing credential material after GooseEgg has obtained SYSTEM, using the same batch scripts that establish persistence.",
+          "tooling": ["GooseEgg"]
+        }
+      ]
+    },
+    {
+      "tactic": "Collection",
+      "techniques": [
+        {
+          "id": "T1114",
+          "name": "Email Collection",
+          "usage": "Steals webmail credentials and exfiltrates mail and contacts through JavaScript injected into the victim's own webmail page. Delivered against Roundcube first and later Horde, MDaemon and Zimbra, against Ukrainian government bodies and Eastern European defence companies.",
+          "tooling": ["SpyPress.ROUNDCUBE", "SpyPress.MDAEMON"]
+        },
+        {
+          "id": "T1114.003",
+          "name": "Email Collection: Email Forwarding Rule",
+          "usage": "Installs Sieve rules through SpyPress.ROUNDCUBE that forward incoming mail to attacker-controlled addresses. This is the part of the access that survives a password reset, because the rule belongs to the mailbox rather than to the session.",
+          "tooling": ["SpyPress.ROUNDCUBE"]
+        }
+      ]
+    }
+  ],
+  "arsenal": [
+    { "name": "GooseEgg", "role": "Launcher that exploits the Print Spooler to run payloads as SYSTEM", "kind": "Cred access" },
+    { "name": "SpyPress.ROUNDCUBE", "role": "Webmail implant: steals credentials, exfiltrates mail, plants forwarding rules", "kind": "Backdoor" },
+    { "name": "SpyPress.MDAEMON", "role": "Webmail implant that additionally takes 2FA secrets and creates application passwords", "kind": "Cred access" },
+    { "name": "Zebrocy", "role": "Long-running downloader and backdoor family in Delphi and AutoIt", "kind": "Backdoor" },
+    { "name": "Drovorub", "role": "Linux implant associated with the group", "kind": "Backdoor" },
+    { "name": "X-Agent", "role": "Core modular backdoor of the older toolset", "kind": "Backdoor" },
+    { "name": "Mimikatz", "role": "Credential theft on Windows hosts", "kind": "Cred access" }
+  ]
+}

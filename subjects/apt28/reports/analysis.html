@@ -1,0 +1,716 @@
+<title>APT28 &middot; Threat Actor Analysis</title>
+
+<style>
+  /* ---- Tokens: shared across TI-Provenance - see CLAUDE.md ---- */
+  :root {
+    color-scheme: light;
+
+    /* Neutrals carry a faint cool bias to sit with the violet accent. */
+    --ground: #ffffff;
+    --surface: #ffffff;
+    --surface-2: #f3f6fc;
+    --ink: #14181f;
+    --muted: #5b6474;
+    --hair: #e3e8f2;
+    --hair-strong: #c6cede;
+
+    /* ACCENT - espionage objective: violet, NOT the signal blue used for
+       destruction and extortion. The colour is an assertion about intent. */
+    --ember: #7c3aed;
+    --ember-ink: #6d28d9;
+    --ember-wash: rgba(124, 58, 237, 0.09);
+    --steel: #55607a;
+    --steel-wash: rgba(85, 96, 122, 0.10);
+    --spine: #c2cadb;
+
+    /* SECTOR RISK - shares the CVSS ramp, separate tokens, different form. */
+    --risk-critical: #a4161a;  --risk-critical-wash: rgba(164, 22, 26, 0.10);
+    --risk-high:     #b3541e;  --risk-high-wash:     rgba(179, 84, 30, 0.10);
+    --risk-moderate: #8a6a00;  --risk-moderate-wash: rgba(138, 106, 0, 0.10);
+    --risk-low:      #4a6b2a;  --risk-low-wash:      rgba(74, 107, 42, 0.10);
+    --risk-minimal:  #5c6470;  --risk-minimal-wash:  rgba(92, 100, 112, 0.10);
+
+    --shadow: 0 1px 2px rgba(20,22,26,.06), 0 8px 24px rgba(20,22,26,.05);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.55; -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 940px; margin: 0 auto; padding: 0 24px; }
+
+  /* ================= 1. COVER ================= */
+  .cover {
+    position: relative; overflow: hidden;
+    border-bottom: 1px solid var(--hair);
+    background:
+      radial-gradient(120% 90% at 88% -5%, var(--ember-wash), transparent 62%),
+      var(--surface);
+  }
+  .cover .wrap { position: relative; z-index: 2; padding-top: 84px; padding-bottom: 76px; }
+
+  .covermotif {
+    position: absolute; top: 40px; right: -130px; width: 700px; height: 700px;
+    color: var(--ember); pointer-events: none; z-index: 1;
+  }
+  .covermotif .arcs   { opacity: .16; }
+  .covermotif .rail   { opacity: .30; }
+  .covermotif .dots   { opacity: .22; }
+
+  /* The cover is a full page by design. Without a height it stopped at its text, which left
+     more than half the sheet bare and sliced the motif off mid-arc - the emptiness read as a
+     mistake rather than as a title page. The title block sits at the top, .coverfoot is pushed
+     to the bottom by margin-top:auto, and the gap between them is deliberate. */
+  .cover { min-height: 100vh; display: flex; flex-direction: column; }
+  .cover .wrap { flex: 1; display: flex; flex-direction: column; }
+  .coverfoot { margin-top: auto; }
+
+  /* Assessed severity, colour-coded. Deliberately uses the --risk-* family and NOT --sev-*:
+     this is an analyst judgment about the subject on the same five-level scale the sector rows
+     use. Borrowing the CVSS ramp here would put severity colour on something that is not a
+     CVSS score, which is what makes the two stop meaning different things. */
+  .sevband {
+    display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+    padding: 16px 20px; margin-bottom: 20px;
+    border: 1px solid var(--hair-strong); border-radius: 12px;
+    border-left-width: 6px; border-left-style: solid;
+  }
+  .sevband .k {
+    font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--muted); margin: 0; flex: 1 0 auto;
+  }
+  .sevband .v { font-size: 20px; font-weight: 800; margin: 0; letter-spacing: -.01em; }
+  .sevmeter { display: flex; gap: 4px; }
+  .sevmeter i { width: 26px; height: 9px; border-radius: 2px; background: var(--hair-strong); }
+
+  .sevband.critical { border-left-color: var(--risk-critical); background: var(--risk-critical-wash); }
+  .sevband.critical .v { color: var(--risk-critical); }
+  .sevband.critical .sevmeter i:nth-child(-n+5) { background: var(--risk-critical); }
+  .sevband.high { border-left-color: var(--risk-high); background: var(--risk-high-wash); }
+  .sevband.high .v { color: var(--risk-high); }
+  .sevband.high .sevmeter i:nth-child(-n+4) { background: var(--risk-high); }
+  .sevband.moderate { border-left-color: var(--risk-moderate); background: var(--risk-moderate-wash); }
+  .sevband.moderate .v { color: var(--risk-moderate); }
+  .sevband.moderate .sevmeter i:nth-child(-n+3) { background: var(--risk-moderate); }
+  .sevband.low { border-left-color: var(--risk-low); background: var(--risk-low-wash); }
+  .sevband.low .v { color: var(--risk-low); }
+  .sevband.low .sevmeter i:nth-child(-n+2) { background: var(--risk-low); }
+  /* The floor of the severity scale is "informational"; it borrows the --risk-minimal
+     colour because the two sit at the same end of the same ramp. */
+  .sevband.informational { border-left-color: var(--risk-minimal); background: var(--risk-minimal-wash); }
+  .sevband.informational .v { color: var(--risk-minimal); }
+  .sevband.informational .sevmeter i:nth-child(-n+1) { background: var(--risk-minimal); }
+
+  .tlp {
+    display: inline-block; align-self: flex-start;
+    font-family: ui-monospace, Consolas, monospace;
+    font-size: 10.5px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
+    padding: 4px 10px; border-radius: 4px; margin-bottom: 26px;
+    background: var(--surface-2); border: 1px solid var(--hair-strong); color: var(--muted);
+  }
+  .tlp.clear { color: var(--muted); }
+  .tlp.green { color: var(--risk-low);      border-color: color-mix(in srgb, var(--risk-low) 40%, transparent);      background: var(--risk-low-wash); }
+  .tlp.amber { color: var(--risk-high);     border-color: color-mix(in srgb, var(--risk-high) 40%, transparent);     background: var(--risk-high-wash); }
+  .tlp.red   { color: var(--risk-critical); border-color: color-mix(in srgb, var(--risk-critical) 40%, transparent); background: var(--risk-critical-wash); }
+
+  .eyebrow {
+    font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+    font-size: 11.5px; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--muted); margin: 0 0 18px; display: flex; align-items: center; gap: 12px;
+  }
+  .eyebrow::after { content: ""; flex: 1; height: 1px; background: var(--hair-strong); }
+  .idtag { color: var(--ember-ink); font-weight: 600; }
+
+  .cover h1 {
+    font-size: clamp(34px, 5.6vw, 54px); line-height: .96; letter-spacing: -.025em;
+    font-weight: 800; margin: 0 0 10px; text-wrap: balance; max-width: 16ch;
+  }
+  .cover h1 .accent { color: var(--ember); }
+  /* The cover is deliberately left at the original scale - it is the one page that is not
+     dense reading, and the body-copy reduction is not wanted here. The explicit line-height
+     restores what it inherited before body dropped to 1.55. */
+  .cover .standfirst {
+    font-size: clamp(15px, 2vw, 17.5px); line-height: 1.6; color: var(--muted);
+    max-width: 60ch; margin: 20px 0 0;
+  }
+  /* Six cells. auto-fit leaves the last row short at print width, and the gap lets the
+     container's hairline background show through as an empty grey block - so the columns
+     are pinned instead. Three divides six exactly, and so does two on a narrow screen.
+     CHANGE THE NUMBER OF CELLS AND YOU MUST CHANGE THIS RULE. */
+  .covermeta {
+    margin-top: 42px; display: grid; gap: 1px;
+    grid-template-columns: repeat(3, 1fr);
+    background: var(--hair); border: 1px solid var(--hair); border-radius: 12px; overflow: hidden;
+  }
+  @media (max-width: 640px) { .covermeta { grid-template-columns: repeat(2, 1fr); } }
+  .covermeta div { background: var(--surface); padding: 15px 18px; }
+  .covermeta .k { font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0 0 5px; }
+  .covermeta .v { font-size: 13.5px; font-weight: 600; margin: 0; }
+
+  /* ================= Sections ================= */
+  section { padding: 46px 0; }
+  section.alt { background: var(--surface); border-top: 1px solid var(--hair); border-bottom: 1px solid var(--hair); }
+  .section-head { margin-bottom: 28px; }
+  /* Section labels carry heading weight, not kicker weight - the executive summary and
+     defensive priorities have no h2 under them, so this line IS their heading. The cover
+     and hero eyebrows are deliberately excluded: they sit under display type already. */
+  .section-head .eyebrow { font-size: 18.5px; letter-spacing: .18em; margin-bottom: 10px; }
+  .section-head h2 {
+    font-size: 28px; letter-spacing: -.015em;
+    font-weight: 800; margin: 0; text-wrap: balance;
+  }
+  .section-head p { color: var(--muted); max-width: 68ch; margin: 10px 0 0; font-size: 13px; }
+
+  .prose { max-width: 68ch; }
+  .prose p { margin: 0 0 15px; font-size: 13.5px; }
+  .prose p:last-child { margin-bottom: 0; }
+  .prose strong { font-weight: 700; }
+  .prose h3 {
+    font-size: 24px; font-weight: 700; letter-spacing: -.01em;
+    margin: 34px 0 12px; text-wrap: balance;
+  }
+
+  .src {
+    font-family: ui-monospace, Consolas, monospace; font-size: 10.5px; font-weight: 700;
+    color: var(--steel); background: var(--steel-wash);
+    border: 1px solid color-mix(in srgb, var(--steel) 24%, transparent);
+    padding: 0 5px; border-radius: 4px; vertical-align: 1px; margin-left: 3px;
+    text-decoration: none; white-space: nowrap;
+  }
+
+  /* ================= 2. CHRONOLOGY ================= */
+  .chrono { position: relative; padding-left: 116px; }
+  .chrono::before {
+    content: ""; position: absolute; left: 92px; top: 10px; bottom: 10px;
+    width: 3px; border-radius: 3px;
+    background: linear-gradient(to bottom, var(--spine) 0%, var(--spine) 45%, var(--ember) 100%);
+  }
+  .entry { position: relative; margin-bottom: 30px; }
+  .entry:last-child { margin-bottom: 0; }
+  .entry .when {
+    position: absolute; left: -116px; top: 1px; width: 76px; text-align: right;
+    font-family: ui-monospace, Consolas, monospace; font-size: 12px; font-weight: 700;
+    color: var(--ember-ink); letter-spacing: .02em;
+  }
+  .entry::after {
+    content: ""; position: absolute; left: -27px; top: 7px;
+    width: 11px; height: 11px; border-radius: 50%;
+    background: var(--surface); border: 3px solid var(--spine); z-index: 2;
+  }
+  .entry.key::after { border-color: var(--ember); background: var(--ember); }
+  .entry h3 { margin: 0 0 6px; font-size: 24px; font-weight: 700; letter-spacing: -.01em; }
+  .entry p { margin: 0 0 10px; font-size: 13px; max-width: 66ch; }
+  .entry p:last-child { margin-bottom: 0; }
+
+  /* ================= 4. CONCLUSION ================= */
+  .callout {
+    margin-top: 28px; padding: 20px 22px;
+    background: var(--surface); border: 1px solid var(--ember);
+    border-left: 4px solid var(--ember); border-radius: 12px; font-size: 13.5px;
+  }
+  section.alt .callout { background: var(--ground); }
+  .callout strong { color: var(--ember-ink); }
+  .callout p { margin: 0 0 14px; }
+  .callout p:last-child { margin: 0; }
+
+  .takeaways { display: grid; gap: 12px; margin-top: 26px; }
+  .takeaway {
+    display: grid; grid-template-columns: 30px 1fr; gap: 0 14px; align-items: start;
+    background: var(--surface); border: 1px solid var(--hair);
+    border-radius: 12px; padding: 16px 18px; box-shadow: var(--shadow);
+  }
+  section.alt .takeaway { background: var(--ground); }
+  .takeaway .n {
+    display: flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--ember-wash); color: var(--ember-ink);
+    border: 1px solid color-mix(in srgb, var(--ember) 28%, transparent);
+    font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; font-weight: 700;
+  }
+  .takeaway p { margin: 0; font-size: 13px; }
+
+  /* ================= 5. RISK & IMPACT ================= */
+  .sectors {
+    border: 1px solid var(--hair); border-radius: 14px; overflow: hidden;
+    background: var(--surface); box-shadow: var(--shadow);
+  }
+  section.alt .sectors { background: var(--ground); }
+  .sector {
+    display: grid; grid-template-columns: minmax(150px, 1.1fr) 104px 92px 2fr;
+    gap: 16px; align-items: center;
+    padding: 15px 20px; border-bottom: 1px solid var(--hair);
+  }
+  .sector:last-child { border-bottom: none; }
+  .sector .name { font-weight: 700; font-size: 13px; }
+  .sector .why { font-size: 12.5px; color: var(--muted); }
+
+  .meter { display: flex; gap: 3px; }
+  .meter i {
+    display: block; height: 9px; flex: 1; border-radius: 2px;
+    background: var(--hair-strong); opacity: .5;
+  }
+  .level {
+    font-family: ui-monospace, Consolas, monospace; font-size: 10px; font-weight: 700;
+    letter-spacing: .1em; text-transform: uppercase; text-align: center;
+    padding: 3px 8px; border-radius: 100px; white-space: nowrap;
+  }
+
+  .sector.critical .meter i:nth-child(-n+5) { background: var(--risk-critical); opacity: 1; }
+  .sector.high     .meter i:nth-child(-n+4) { background: var(--risk-high);     opacity: 1; }
+  .sector.moderate .meter i:nth-child(-n+3) { background: var(--risk-moderate); opacity: 1; }
+  .sector.low      .meter i:nth-child(-n+2) { background: var(--risk-low);      opacity: 1; }
+  .sector.minimal  .meter i:nth-child(-n+1) { background: var(--risk-minimal);  opacity: 1; }
+
+  .sector.critical .level { color: #fff; background: var(--risk-critical); }
+  .sector.high     .level { color: var(--risk-high);     background: var(--risk-high-wash);     border: 1px solid color-mix(in srgb, var(--risk-high) 32%, transparent); }
+  .sector.moderate .level { color: var(--risk-moderate); background: var(--risk-moderate-wash); border: 1px solid color-mix(in srgb, var(--risk-moderate) 32%, transparent); }
+  .sector.low      .level { color: var(--risk-low);      background: var(--risk-low-wash);      border: 1px solid color-mix(in srgb, var(--risk-low) 32%, transparent); }
+  .sector.minimal  .level { color: var(--risk-minimal);  background: var(--risk-minimal-wash);  border: 1px solid var(--hair-strong); }
+
+  .risklegend {
+    display: flex; flex-wrap: wrap; gap: 18px; margin-top: 20px;
+    padding: 14px 18px; background: var(--surface-2);
+    border: 1px solid var(--hair); border-radius: 12px;
+    font-size: 12.5px; color: var(--muted);
+  }
+  .risklegend .item { display: flex; align-items: center; gap: 8px; }
+  .risklegend .sw { width: 22px; height: 8px; border-radius: 2px; }
+
+  /* ================= Footer ================= */
+  footer { border-top: 1px solid var(--hair); padding: 32px 0 44px; color: var(--muted); font-size: 12px; }
+  footer h3 { font-size: 11.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin: 0 0 14px; }
+  footer a { color: var(--ember-ink); }
+  .sources { counter-reset: s; display: grid; gap: 8px; margin: 0 0 26px; padding: 0; list-style: none; }
+  /* Counter absolutely positioned, not a grid column: a list item holding a text node AND
+     an anchor produces three grid items, so the anchor wrapped into the 30px counter column
+     and the URL rendered about four characters wide. */
+  .sources li {
+    counter-increment: s; position: relative; padding-left: 40px;
+    font-size: 12.5px; overflow-wrap: anywhere;
+  }
+  .sources li::before {
+    content: counter(s); position: absolute; left: 0; top: 2px;
+    font-family: ui-monospace, Consolas, monospace; font-size: 10.5px;
+    font-weight: 700; color: var(--steel); background: var(--steel-wash);
+    border: 1px solid color-mix(in srgb, var(--steel) 24%, transparent);
+    border-radius: 4px; text-align: center; width: 30px; height: 20px; line-height: 18px;
+  }
+  .note {
+    margin-top: 12px; padding: 14px 16px; background: var(--surface-2);
+    border: 1px dashed var(--hair-strong); border-radius: 10px; color: var(--muted);
+    font-size: 12.5px;
+  }
+  code { font-family: ui-monospace, Consolas, monospace; font-size: .9em; background: var(--surface-2); padding: 1px 5px; border-radius: 3px; }
+</style>
+
+<!-- ===================== 1. COVER ===================== -->
+<header class="cover">
+  <svg class="covermotif" viewBox="0 0 400 400" fill="none" aria-hidden="true">
+    <g class="arcs" stroke="currentColor" stroke-width="1.1">
+      <circle cx="286" cy="132" r="46"/>
+      <circle cx="286" cy="132" r="86"/>
+      <circle cx="286" cy="132" r="126"/>
+      <circle cx="286" cy="132" r="166"/>
+    </g>
+    <g class="rail" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+      <path d="M286 46 V318"/>
+    </g>
+    <g class="dots" fill="currentColor">
+      <circle cx="286" cy="86"  r="7"/>
+      <circle cx="286" cy="150" r="7"/>
+      <circle cx="286" cy="214" r="7"/>
+      <circle cx="286" cy="278" r="7"/>
+      <circle cx="196" cy="188" r="4"/>
+      <circle cx="352" cy="242" r="4"/>
+      <circle cx="230" cy="300" r="4"/>
+    </g>
+  </svg>
+
+  <div class="wrap">
+    <span class="tlp clear">TLP:CLEAR</span>
+
+    <p class="eyebrow">Threat Actor Analysis <span class="idtag">G0007</span></p>
+    <h1>APT28<span class="accent">.</span></h1>
+    <p class="standfirst">A military intelligence unit with twenty years of continuous operation, which
+      no longer needs to reach your perimeter to reach you.</p>
+
+    <div class="coverfoot">
+      <div class="sevband high">
+        <p class="k">Assessed severity</p>
+        <span class="sevmeter"><i></i><i></i><i></i><i></i><i></i></span>
+        <p class="v">High</p>
+      </div>
+
+      <div class="covermeta">
+        <div><p class="k">Subject type</p><p class="v">Threat actor &middot; state</p></div>
+        <div><p class="k">Attribution</p><p class="v">Russia &middot; GRU Unit 26165</p></div>
+        <div><p class="k">First observed</p><p class="v">2004</p></div>
+        <div><p class="k">Report date</p><p class="v">21 August 2026</p></div>
+        <div><p class="k">Is active?</p><p class="v">Yes</p></div>
+        <div><p class="k">Also tracked as</p><p class="v">Fancy Bear &middot; Forest Blizzard &middot; Sednit</p></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ===================== 2. OVERVIEW ===================== -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Overview</p>
+        <h2>Twenty years, one unit, eight names</h2>
+      </div>
+
+      <div class="prose">
+        <p>APT28 is the cyber arm of a military intelligence unit rather than a criminal enterprise,
+          and almost everything about its behaviour follows from that. The UK NCSC assesses it is
+          almost certainly the Russian General Staff Main Intelligence Directorate's 85th Main
+          Special Service Centre, <strong>military unit 26165</strong>; the United States and United
+          Kingdom governments have both linked the group publicly to that
+          unit.<a class="src" href="#s6">6</a><a class="src" href="#s2">2</a> MITRE tracks it as
+          G0007 and records activity since at least 2004, which makes it one of the longest-running
+          tracked intrusion sets in the catalogue.<a class="src" href="#s1">1</a> The name sprawl is
+          unusual even by threat-intelligence standards &mdash; Fancy Bear, Forest Blizzard, Sednit,
+          Sofacy, STRONTIUM, Pawn Storm, IRON TWILIGHT and Fighting Ursa all refer to the same unit,
+          so reporting that looks like four separate campaigns is frequently
+          one.<a class="src" href="#s1">1</a></p>
+
+        <p>The tradecraft is <strong>broad rather than deep in any single technique</strong>, which is
+          what separates this group from a ransomware crew with one reliable way in. Initial access
+          comes from credential guessing and password spraying, spearphishing, abuse of Microsoft
+          Exchange mailbox permissions, cross-site scripting against webmail, and &mdash; when it
+          suits &mdash; a zero-day.<a class="src" href="#s4">4</a> Post-compromise, the group runs
+          custom tooling with a long lineage: Zebrocy downloaders and backdoors, X-Agent, Drovorub,
+          and the GooseEgg launcher.<a class="src" href="#s1">1</a> It has also shown a persistent
+          appetite for network edge devices, compromising Ubiquiti kit to collect authentication
+          material and, more recently, SOHO routers to manipulate DNS.<a class="src" href="#s3">3</a></p>
+
+        <p>Two things about targeting are worth holding onto. First, the aperture is
+          <strong>intelligence value, not sector prestige</strong>: the group has hit a national
+          parliament, a chemical-weapons watchdog, election committees, ministries of defence and
+          foreign affairs, and &mdash; since 2022 &mdash; the logistics and technology companies
+          moving aid into Ukraine. Second, <strong>it does not need to reach you directly</strong>.
+          The 2026 DNS hijacking operations compromise consumer routers opportunistically and then
+          filter downstream for users of interest, which means an organisation can be touched through
+          an employee's home network rather than its own perimeter.<a class="src" href="#s6">6</a></p>
+      </div>
+
+      <h3 style="font-size:24px;font-weight:700;margin:30px 0 18px;">Activity, oldest first</h3>
+
+      <div class="chrono">
+        <div class="entry key">
+          <div class="when">2015</div>
+          <h3>German parliament compromised</h3>
+          <p>The NCSC attributes cyber attacks against the German Bundestag to the group, including
+            data theft and the disruption of email accounts belonging to German Members of Parliament
+            and the Vice Chancellor. The operation establishes the pattern that recurs for the next
+            decade: mailbox access at a legislature, taken for collection rather than
+            disruption.<a class="src" href="#s6">6</a></p>
+        </div>
+
+        <div class="entry key">
+          <div class="when">2016</div>
+          <h3>US election committees and campaign staff targeted</h3>
+          <p>MITRE records the compromise of the Democratic National Committee, the Democratic
+            Congressional Campaign Committee and the Hillary Clinton presidential campaign. The
+            activity combines credential theft against email accounts with the subsequent staged
+            release of stolen material, pairing collection with influence rather than treating them as
+            separate operations.<a class="src" href="#s1">1</a></p>
+        </div>
+
+        <div class="entry">
+          <div class="when">2018-04</div>
+          <h3>Attempted intrusion at the OPCW</h3>
+          <p>The NCSC attributes an attempted attack against the Organisation for the Prohibition of
+            Chemical Weapons in April 2018, intended to disrupt independent analysis of chemicals
+            weaponised by the GRU in the United Kingdom. The target is an international body rather
+            than a state, and the objective is interference with an investigation into the sponsor's
+            own activity.<a class="src" href="#s6">6</a></p>
+        </div>
+
+        <div class="entry">
+          <div class="when">2020-06</div>
+          <h3>GooseEgg in use for privilege escalation</h3>
+          <p>Microsoft assesses the custom <strong>GooseEgg</strong> launcher has been in use since at
+            least June 2020 and possibly as early as April 2019. It exploits CVE-2022-38028 in the
+            Windows Print Spooler by modifying a JavaScript constraints file and executing it with
+            SYSTEM permissions, then runs batch scripts such as <code>execute.bat</code> and
+            <code>doit.bat</code> to install a scheduled task for persistence and extract registry
+            hives containing credentials.<a class="src" href="#s2">2</a></p>
+        </div>
+
+        <div class="entry key">
+          <div class="when">2022</div>
+          <h3>Targeting expands to the aid supply chain</h3>
+          <p>As Russian forces fail to meet their objectives in Ukraine and Western states supply aid,
+            unit 26165 broadens its targeting to Western logistics entities and technology companies
+            involved in coordinating, transporting and delivering that assistance. Defence, IT
+            services, maritime, airports, ports and air traffic management organisations across NATO
+            members are all drawn in, alongside internet-connected cameras at Ukrainian border
+            crossings and near military
+            installations.<a class="src" href="#s4">4</a><a class="src" href="#s5">5</a></p>
+        </div>
+
+        <div class="entry key">
+          <div class="when">2022-03</div>
+          <h3>Outlook flaw exploited as a zero-day for twenty months</h3>
+          <p>Unit 42 records exploitation of CVE-2023-23397 beginning 18 March 2022, a year before
+            public disclosure. A crafted email causes Outlook to send an NTLM authentication message
+            to an attacker-controlled server <em>with no user interaction</em>; the group captures the
+            NTLMv2 hash and relays it to impersonate the victim. Exploitation continues in two further
+            waves after the patch, reaching at least <strong>30 organisations across 14 nations over
+            twenty months</strong>. Compromised Ubiquiti devices collect the NTLM messages, and the
+            mail is sent from co-opted public mail services.<a class="src" href="#s3">3</a></p>
+        </div>
+
+        <div class="entry key">
+          <div class="when">2023-09</div>
+          <h3>Operation RoundPress turns webmail against its users</h3>
+          <p>ESET, with <em>medium confidence</em>, attributes a campaign against high-value webmail
+            servers to the group, running from at least September 2023 into December 2024.
+            Spearphishing mail carries cross-site scripting payloads that inject JavaScript into the
+            victim's webmail page, initially against Roundcube and later Horde, MDaemon and Zimbra.
+            The SpyPress payloads steal webmail credentials and exfiltrate mail and contacts; the
+            MDaemon variant additionally takes two-factor secrets and creates application passwords to
+            bypass 2FA, while the Roundcube variant installs Sieve rules that forward incoming mail to
+            attacker addresses.<a class="src" href="#s7">7</a></p>
+        </div>
+
+        <div class="entry key">
+          <div class="when">2024</div>
+          <h3>Routers repurposed into a DNS hijacking network</h3>
+          <p>From 2024 into 2026 the group configures virtual private servers as malicious DNS
+            resolvers and points compromised routers at them. TP-Link WR841N devices are exploited,
+            likely through CVE-2023-50224, using a crafted HTTP GET request to retrieve credentials
+            and a second to rewrite the router's DHCP DNS settings &mdash; typically setting the
+            primary resolver to attacker infrastructure while leaving the original as secondary.
+            Downstream laptops and phones inherit the setting, lookups for email and login domains
+            resolve to actor-controlled addresses, and adversary-in-the-middle attacks harvest
+            passwords and OAuth tokens. MikroTik routers in Ukraine are handled interactively rather
+            than opportunistically.<a class="src" href="#s6">6</a></p>
+        </div>
+
+        <div class="entry key">
+          <div class="when">2025-05</div>
+          <h3>Ten-nation advisory on the logistics campaign</h3>
+          <p>The NCSC publishes a joint advisory on 21 May 2025 with the United States, Germany, the
+            Czech Republic, Poland, Australia, Canada, Denmark, Estonia, France and the Netherlands,
+            setting out the campaign against Western logistics and technology organisations. Initial
+            access is attributed to credential guessing, spearphishing and exploitation of Microsoft
+            Exchange mailbox permissions, and the recommended mitigation leads with phishing-resistant
+            multi-factor authentication.<a class="src" href="#s4">4</a><a class="src" href="#s5">5</a></p>
+        </div>
+
+        <div class="entry">
+          <div class="when">2026-04</div>
+          <h3>Router operations detailed publicly</h3>
+          <p>The NCSC publishes a technical advisory on 7 April 2026 describing the DNS hijacking
+            infrastructure, including two clusters of virtual private servers identifiable by SSH
+            banners on non-standard ports alongside <code>dnsmasq</code> on UDP 53, and a list of
+            TP-Link models observed being targeted. The advisory assesses the operations as
+            opportunistic, with the actor gaining visibility of a large pool of candidate users and
+            filtering at each stage for those of intelligence value.<a class="src" href="#s6">6</a></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 4. CONCLUSION =====================
+       History is deliberately omitted. MITRE dates the group to at least 2004, but the
+       cited sources carry no documented detail before 2015, and a History section built
+       on a single date claim would say "we did not look" about a decade nobody described. -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Conclusion</p>
+        <h2>Patience, breadth, and somebody else's router</h2>
+      </div>
+
+      <div class="prose">
+        <p>Most write-ups of this group reach for the 2016 election material, which is the least
+          useful part of the record for a defender. What the last four years show is an intelligence
+          unit that widened its aperture rather than sharpening one technique: from parliaments and
+          treaty bodies to the freight forwarders and air traffic managers moving aid, and from
+          spearphishing into whatever the target's mail estate happens to run. The Outlook flaw is the
+          exception that proves the pattern &mdash; a genuine zero-day, held for a year, then used for
+          another eight months after the patch because enough estates had not applied it. Everything
+          else in the record is credentials, mailboxes and edge devices, which are cheaper to
+          maintain and far harder to eradicate.</p>
+      </div>
+
+      <div class="takeaways">
+        <div class="takeaway"><span class="n">1</span><p><strong>Your mail estate is the target, not
+          the route to it.</strong> Mailbox permissions, webmail XSS, Sieve forwarding rules, stolen
+          2FA secrets and application passwords all appear in the record. Several of these survive a
+          password reset, so incident response that stops at credentials leaves the access
+          intact.</p></div>
+        <div class="takeaway"><span class="n">2</span><p><strong>Eight names, one unit.</strong> Fancy
+          Bear, Forest Blizzard, Sednit, Sofacy, STRONTIUM, Pawn Storm, IRON TWILIGHT and Fighting
+          Ursa are the same actor. Threat feeds that treat them separately will show four small
+          problems where there is one persistent one.</p></div>
+        <div class="takeaway"><span class="n">3</span><p><strong>Selection is by role, not by
+          industry.</strong> A logistics firm became a priority target because of what it moves, not
+          what it is. Any organisation that acquires a policy, defence or aid-delivery function
+          acquires this actor's attention with it, and the sector table below will be the wrong guide
+          the day that changes.</p></div>
+        <div class="takeaway"><span class="n">4</span><p><strong>The perimeter is not the
+          boundary.</strong> Hijacked home routers put an adversary-in-the-middle between staff and
+          their login pages, on equipment no corporate control touches. Phishing-resistant MFA is what
+          survives that; an OTP does not.</p></div>
+        <div class="takeaway"><span class="n">5</span><p><strong>Assume the dwell time is
+          long.</strong> This unit has run continuously for two decades and held a zero-day for a
+          year before using it at scale. Detection tuned to a smash-and-grab tempo is tuned for the
+          wrong opponent.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 5. RISK &amp; IMPACT ===================== -->
+  <section class="alt">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Risk &amp; Impact</p>
+        <h2>Selected on what you do, not what you are</h2>
+        <p>The levels below track where victims have actually been reported, and this group's
+          victimology follows function rather than sector: what matters is whether an organisation
+          touches policy, defence, or the movement of aid.</p>
+      </div>
+
+      <div class="sectors">
+        <div class="sector critical">
+          <div class="name">Government and public administration</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Critical</div>
+          <div class="why">The most consistently documented target across two decades &mdash; a
+            national parliament in 2015, election committees in 2016, and ministries of defence,
+            foreign affairs and internal affairs named in the exploitation of the Outlook flaw.</div>
+        </div>
+        <div class="sector critical">
+          <div class="name">Defence and defence industry</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Critical</div>
+          <div class="why">Defence ministries appear in Unit 42's victimology for the Outlook
+            campaign, and Eastern European defence companies are named among the webmail targets in
+            2024.</div>
+        </div>
+        <div class="sector critical">
+          <div class="name">Logistics, transport and aviation</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Critical</div>
+          <div class="why">The explicit subject of a ten-nation advisory: maritime operators,
+            airports, ports and air traffic management, selected for their role in moving aid to
+            Ukraine rather than for anything about the sector itself.</div>
+        </div>
+        <div class="sector high">
+          <div class="name">Technology and IT services</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">High</div>
+          <div class="why">Named alongside logistics in the same advisory, and attractive as a route
+            into the organisations these firms serve rather than as an end in itself.</div>
+        </div>
+        <div class="sector high">
+          <div class="name">Energy and utilities</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">High</div>
+          <div class="why">Energy production and distribution is listed among the priority sectors in
+            Unit 42's account of the Outlook exploitation, though it appears less often than
+            government and defence.</div>
+        </div>
+        <div class="sector high">
+          <div class="name">International organisations and NGOs</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">High</div>
+          <div class="why">The OPCW intrusion attempt is the clearest case, and Microsoft names
+            non-governmental organisations among those hit with GooseEgg. Bodies investigating or
+            constraining Russian state activity are a recurring target.</div>
+        </div>
+        <div class="sector moderate">
+          <div class="name">Education and research</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Moderate</div>
+          <div class="why">Microsoft lists the education sector among GooseEgg victims, but it appears
+            once rather than repeatedly, and no specific institution is named in the cited
+            reporting.</div>
+        </div>
+        <div class="sector low">
+          <div class="name">Retail and hospitality</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Low</div>
+          <div class="why">Absent from every source reviewed. The level reflects that absence rather
+            than any protection &mdash; a retail firm handling aid logistics would sit in the critical
+            row above on the strength of that role alone.</div>
+        </div>
+        <div class="sector minimal">
+          <div class="name">Organisations with no policy, defence or aid-delivery role</div>
+          <div class="meter"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="level">Minimal</div>
+          <div class="why">This group selects on intelligence value, so an organisation outside those
+            themes is unlikely to be a deliberate target. The 2026 router operations are the caveat:
+            opportunistic DNS hijacking can still sweep up an employee's home network before filtering
+            discards it.</div>
+        </div>
+      </div>
+
+      <div class="risklegend">
+        <div class="item"><span class="sw" style="background:var(--risk-critical)"></span> Critical — actively targeted</div>
+        <div class="item"><span class="sw" style="background:var(--risk-high)"></span> High — fits the victim profile</div>
+        <div class="item"><span class="sw" style="background:var(--risk-moderate)"></span> Moderate — plausible, not observed</div>
+        <div class="item"><span class="sw" style="background:var(--risk-low)"></span> Low — outside the pattern</div>
+        <div class="item"><span class="sw" style="background:var(--risk-minimal)"></span> Minimal — no indication</div>
+      </div>
+
+      <div class="callout">
+        <p><strong>Ask what your organisation touches, not which row it sits in.</strong> Every
+          critical row above is there because of a function &mdash; making policy, supplying defence,
+          moving aid &mdash; rather than an industry code. A firm that picks up one of those
+          functions moves up this table the week it does so, and nothing about its sector will have
+          changed.</p>
+        <p>
+          For <em>how</em> a compromise actually unfolds — the techniques, the tooling and the
+          order they run in — see the companion attack-flow report.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 6. SOURCES ===================== -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Sources</p>
+        <h2>What this analysis is built on</h2>
+      </div>
+      <ol class="sources">
+        <li id="s1">MITRE ATT&amp;CK &mdash; Groups: APT28 (G0007) &mdash; <a href="https://attack.mitre.org/groups/G0007/">https://attack.mitre.org/groups/G0007/</a></li>
+        <li id="s2">Microsoft Threat Intelligence &mdash; Analyzing Forest Blizzard's custom post-compromise tool for exploiting CVE-2022-38028 &mdash; <a href="https://www.microsoft.com/en-us/security/blog/2024/04/22/analyzing-forest-blizzards-custom-post-compromise-tool-for-exploiting-cve-2022-38028-to-obtain-credentials/">https://www.microsoft.com/en-us/security/blog/2024/04/22/analyzing-forest-blizzards-custom-post-compromise-tool-for-exploiting-cve-2022-38028-to-obtain-credentials/</a></li>
+        <li id="s3">Palo Alto Unit 42 &mdash; Fighting Ursa aka APT28: illuminating a covert campaign (CVE-2023-23397) &mdash; <a href="https://unit42.paloaltonetworks.com/russian-apt-fighting-ursa-exploits-cve-2023-233397/">https://unit42.paloaltonetworks.com/russian-apt-fighting-ursa-exploits-cve-2023-233397/</a></li>
+        <li id="s4">NCSC UK and partners &mdash; UK and allies expose Russian intelligence campaign targeting western logistics and technology organisations, 21 May 2025 &mdash; <a href="https://www.ncsc.gov.uk/news/uk-partners-expose-russian-intelligence-campaign">https://www.ncsc.gov.uk/news/uk-partners-expose-russian-intelligence-campaign</a></li>
+        <li id="s5">CISA &mdash; AA25-141A, Russian GRU targeting Western logistics entities and technology companies &mdash; <a href="https://www.cisa.gov/news-events/cybersecurity-advisories/aa25-141a">https://www.cisa.gov/news-events/cybersecurity-advisories/aa25-141a</a></li>
+        <li id="s6">NCSC UK &mdash; APT28 exploit routers to enable DNS hijacking operations, 7 April 2026 &mdash; <a href="https://www.ncsc.gov.uk/sites/default/files/2026-04/NCSC_APT28-exploit-routers-to-enable-DNS-hijacking-operations.pdf">https://www.ncsc.gov.uk/sites/default/files/2026-04/NCSC_APT28-exploit-routers-to-enable-DNS-hijacking-operations.pdf</a></li>
+        <li id="s7">ESET Research &mdash; Operation RoundPress: targeting high-value webmail servers &mdash; <a href="https://www.welivesecurity.com/en/eset-research/operation-roundpress/">https://www.welivesecurity.com/en/eset-research/operation-roundpress/</a></li>
+      </ol>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+
+    <p class="note">
+      <strong>Confidence and sourcing.</strong> The attribution to GRU unit 26165 is a published
+      government assessment, carried by the UK NCSC at "almost certainly" and stated jointly by the
+      US and UK governments; it is reported here at that strength and not upgraded. The Operation
+      RoundPress activity is attributed by ESET at <em>medium</em> confidence and is described as
+      such in the text. The alias list is MITRE's. One sourcing limitation is worth stating plainly:
+      the CISA advisory page blocks automated retrieval, so the logistics campaign detail rests on
+      the NCSC publication of the same joint advisory, with the CISA record cited alongside it rather
+      than read directly. Sector risk levels are analyst assessments, not measured values; they
+      deliberately share a colour ramp with CVSS severity but are rendered as meters rather than
+      scores so the two are not confused.
+    </p>
+  </div>
+</footer>

@@ -1,0 +1,150 @@
+{
+  "schema": "analysis/1.0",
+  "subject": "APT28",
+  "slug": "apt28",
+  "subject_type": "actor",
+  "matrix": "enterprise",
+  "attack_id": "G0007",
+  "aliases": ["Fancy Bear", "Forest Blizzard", "Sednit", "Sofacy", "STRONTIUM", "Pawn Storm", "IRON TWILIGHT", "Fighting Ursa"],
+  "objective": "espionage",
+  "severity": "high",
+  "severity_note": "Active with full-compromise impact, but the operation filters for intelligence value at every stage - a typical estate is collateral in the funnel rather than the target.",
+  "objective_note": "Collection against government, defence and the logistics chain supplying Ukraine, with influence operations layered on top.",
+  "confidence": "published",
+  "facts": {
+    "attribution": "Russia - GRU 85th GTsSS, Unit 26165",
+    "active_since": "At least 2004",
+    "targets": "Government, defence, logistics and aid delivery across NATO members and Ukraine"
+  },
+  "background": [
+    "APT28 is the cyber arm of a military intelligence unit rather than a criminal enterprise, and almost everything about its behaviour follows from that. The UK NCSC assesses it is almost certainly the Russian General Staff Main Intelligence Directorate's 85th Main Special Service Centre, military unit 26165; the United States and United Kingdom governments have both linked the group publicly to that unit. MITRE tracks it as G0007 and records activity since at least 2004, which makes it one of the longest-running tracked intrusion sets in the catalogue. The name sprawl is unusual even by threat-intelligence standards - Fancy Bear, Forest Blizzard, Sednit, Sofacy, STRONTIUM, Pawn Storm, IRON TWILIGHT and Fighting Ursa all refer to the same unit, so reporting that looks like four separate campaigns is frequently one.",
+    "The tradecraft is broad rather than deep in any single technique, which is what separates this group from a ransomware crew with one reliable way in. Initial access comes from credential guessing and password spraying, spearphishing, abuse of Microsoft Exchange mailbox permissions, cross-site scripting against webmail, and - when it suits - a zero-day. Post-compromise, the group runs custom tooling with a long lineage: Zebrocy downloaders and backdoors in Delphi and AutoIt, X-Agent, Drovorub, and the GooseEgg launcher. It has also shown a persistent appetite for network edge devices, compromising Ubiquiti kit to collect authentication material and, more recently, SOHO routers to manipulate DNS.",
+    "Two things about targeting are worth holding onto. First, the aperture is intelligence value, not sector prestige: the group has hit a national parliament, a chemical-weapons watchdog, election committees, ministries of defence and foreign affairs, and - since 2022 - the logistics and technology companies moving aid into Ukraine. Second, it does not need to reach you directly. The 2026 DNS hijacking operations compromise consumer routers opportunistically and then filter downstream for users of interest, which means an organisation can be touched through an employee's home network rather than its own perimeter."
+  ],
+  "chronology": [
+    {
+      "date": "2015",
+      "event": "German parliament compromised",
+      "detail": "The NCSC attributes cyber attacks against the German Bundestag to the group, including data theft and the disruption of email accounts belonging to German Members of Parliament and the Vice Chancellor. The operation establishes the pattern that recurs for the next decade: mailbox access at a legislature, taken for collection rather than disruption.",
+      "key": true,
+      "sources": [5]
+    },
+    {
+      "date": "2016",
+      "event": "US election committees and campaign staff targeted",
+      "detail": "MITRE records the compromise of the Democratic National Committee, the Democratic Congressional Campaign Committee and the Hillary Clinton presidential campaign. The activity combines credential theft against email accounts with the subsequent staged release of stolen material, pairing collection with influence rather than treating them as separate operations.",
+      "key": true,
+      "sources": [0]
+    },
+    {
+      "date": "2018-04",
+      "event": "Attempted intrusion at the OPCW",
+      "detail": "The NCSC attributes an attempted attack against the Organisation for the Prohibition of Chemical Weapons in April 2018, intended to disrupt independent analysis of chemicals weaponised by the GRU in the United Kingdom. The target is an international body rather than a state, and the objective is interference with an investigation into the sponsor's own activity.",
+      "sources": [5]
+    },
+    {
+      "date": "2020-06",
+      "event": "GooseEgg in use for privilege escalation",
+      "detail": "Microsoft assesses the custom GooseEgg launcher has been in use since at least June 2020 and possibly as early as April 2019. It exploits CVE-2022-38028 in the Windows Print Spooler by modifying a JavaScript constraints file and executing it with SYSTEM permissions, then runs batch scripts such as execute.bat and doit.bat to install a scheduled task for persistence and extract registry hives containing credentials.",
+      "sources": [1]
+    },
+    {
+      "date": "2022",
+      "event": "Targeting expands to the aid supply chain",
+      "detail": "As Russian forces fail to meet their objectives in Ukraine and Western states supply aid, unit 26165 broadens its targeting to Western logistics entities and technology companies involved in coordinating, transporting and delivering that assistance. Defence, IT services, maritime, airports, ports and air traffic management organisations across NATO members are all drawn in, alongside internet-connected cameras at Ukrainian border crossings and near military installations.",
+      "key": true,
+      "sources": [3, 4]
+    },
+    {
+      "date": "2022-03",
+      "event": "Outlook flaw exploited as a zero-day for twenty months",
+      "detail": "Unit 42 records exploitation of CVE-2023-23397 beginning 18 March 2022, a year before public disclosure. A crafted email causes Outlook to send an NTLM authentication message to an attacker-controlled server with no user interaction; the group captures the NTLMv2 hash and relays it to impersonate the victim. Exploitation continues in two further waves after the patch, reaching at least 30 organisations across 14 nations over twenty months. Compromised Ubiquiti devices are used to collect the NTLM messages, and the mail is sent from co-opted public mail services.",
+      "key": true,
+      "sources": [2]
+    },
+    {
+      "date": "2023-09",
+      "event": "Operation RoundPress turns webmail against its users",
+      "detail": "ESET, with medium confidence, attributes a campaign against high-value webmail servers to the group, running from at least September 2023 into December 2024. Spearphishing mail carries cross-site scripting payloads that inject JavaScript into the victim's webmail page, initially against Roundcube and later Horde, MDaemon and Zimbra. The SpyPress payloads steal webmail credentials and exfiltrate mail and contacts; the MDaemon variant additionally takes two-factor secrets and creates application passwords to bypass 2FA, while the Roundcube variant installs Sieve rules that forward incoming mail to attacker addresses.",
+      "key": true,
+      "sources": [6]
+    },
+    {
+      "date": "2024",
+      "event": "Routers repurposed into a DNS hijacking network",
+      "detail": "From 2024 into 2026 the group configures virtual private servers as malicious DNS resolvers and points compromised routers at them. TP-Link WR841N devices are exploited, likely through CVE-2023-50224, using a crafted HTTP GET request to retrieve credentials and a second to rewrite the router's DHCP DNS settings - typically setting the primary resolver to attacker infrastructure while leaving the original as secondary. Downstream laptops and phones inherit the setting, lookups for email and login domains resolve to actor-controlled addresses, and adversary-in-the-middle attacks harvest passwords and OAuth tokens. MikroTik routers in Ukraine are handled interactively rather than opportunistically.",
+      "key": true,
+      "sources": [5]
+    },
+    {
+      "date": "2025-05",
+      "event": "Ten-nation advisory on the logistics campaign",
+      "detail": "The NCSC publishes a joint advisory on 21 May 2025 with the United States, Germany, the Czech Republic, Poland, Australia, Canada, Denmark, Estonia, France and the Netherlands, setting out the campaign against Western logistics and technology organisations. Initial access is attributed to credential guessing, spearphishing and exploitation of Microsoft Exchange mailbox permissions, and the recommended mitigation leads with phishing-resistant multi-factor authentication.",
+      "key": true,
+      "sources": [3, 4]
+    },
+    {
+      "date": "2026-04",
+      "event": "Router operations detailed publicly",
+      "detail": "The NCSC publishes a technical advisory on 7 April 2026 describing the DNS hijacking infrastructure, including two clusters of virtual private servers identifiable by SSH banners on non-standard ports alongside dnsmasq on UDP 53, and a list of TP-Link models observed being targeted. The advisory assesses the operations as opportunistic, with the actor gaining visibility of a large pool of candidate users and filtering at each stage for those of intelligence value.",
+      "sources": [5]
+    }
+  ],
+  "risk": [
+    {
+      "sector": "Government and public administration",
+      "level": "critical",
+      "why": "The most consistently documented target across two decades - a national parliament in 2015, election committees in 2016, and ministries of defence, foreign affairs and internal affairs named in the exploitation of the Outlook flaw."
+    },
+    {
+      "sector": "Defence and defence industry",
+      "level": "critical",
+      "why": "Defence ministries appear in Unit 42's victimology for the Outlook campaign, and Eastern European defence companies are named among the webmail targets in 2024."
+    },
+    {
+      "sector": "Logistics, transport and aviation",
+      "level": "critical",
+      "why": "The explicit subject of a ten-nation advisory: maritime operators, airports, ports and air traffic management, selected for their role in moving aid to Ukraine rather than for anything about the sector itself."
+    },
+    {
+      "sector": "Technology and IT services",
+      "level": "high",
+      "why": "Named alongside logistics in the same advisory, and attractive as a route into the organisations these firms serve rather than as an end in itself."
+    },
+    {
+      "sector": "Energy and utilities",
+      "level": "high",
+      "why": "Energy production and distribution is listed among the priority sectors in Unit 42's account of the Outlook exploitation, though it appears less often than government and defence."
+    },
+    {
+      "sector": "International organisations and NGOs",
+      "level": "high",
+      "why": "The OPCW intrusion attempt is the clearest case, and Microsoft names non-governmental organisations among those hit with GooseEgg. Bodies investigating or constraining Russian state activity are a recurring target."
+    },
+    {
+      "sector": "Education and research",
+      "level": "moderate",
+      "why": "Microsoft lists the education sector among GooseEgg victims, but it appears once rather than repeatedly, and no specific institution is named in the cited reporting."
+    },
+    {
+      "sector": "Retail and hospitality",
+      "level": "low",
+      "why": "Absent from every source reviewed. The level reflects that absence rather than any protection - a retail firm handling aid logistics would sit in the critical row above on the strength of that role alone."
+    },
+    {
+      "sector": "Organisations with no policy, defence or aid-delivery role",
+      "level": "minimal",
+      "why": "This group selects on intelligence value, so an organisation outside those themes is unlikely to be a deliberate target. The 2026 router operations are the caveat: opportunistic DNS hijacking can still sweep up an employee's home network before filtering discards it."
+    }
+  ],
+  "sources": [
+    "https://attack.mitre.org/groups/G0007/",
+    "https://www.microsoft.com/en-us/security/blog/2024/04/22/analyzing-forest-blizzards-custom-post-compromise-tool-for-exploiting-cve-2022-38028-to-obtain-credentials/",
+    "https://unit42.paloaltonetworks.com/russian-apt-fighting-ursa-exploits-cve-2023-233397/",
+    "https://www.ncsc.gov.uk/news/uk-partners-expose-russian-intelligence-campaign",
+    "https://www.cisa.gov/news-events/cybersecurity-advisories/aa25-141a",
+    "https://www.ncsc.gov.uk/sites/default/files/2026-04/NCSC_APT28-exploit-routers-to-enable-DNS-hijacking-operations.pdf",
+    "https://www.welivesecurity.com/en/eset-research/operation-roundpress/"
+  ],
+  "report": "analysis.html"
+}

@@ -8,3 +8,7 @@ desktop.ini
 # It is derived and regenerable, but it is also the artefact that leaves the project and
 # lands in somebody's inbox. For an intelligence product the question "what exactly did we
 # publish, and when" has to be answerable, so the published PDF is tracked on purpose.
+
+# Local-only Claude Code settings. This file is per-machine by convention, and shipping it
+# would push our attribution overrides onto whoever clones the repo.
+.claude/settings.local.json

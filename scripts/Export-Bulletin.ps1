@@ -177,9 +177,10 @@ process {
         $item = Get-Item -LiteralPath $p
         $dir  = if ($item.PSIsContainer) { $item.FullName } else { $item.DirectoryName }
         $slug = Split-Path $dir -Leaf
+        $area = Split-Path (Split-Path $dir -Parent) -Leaf
 
         Write-Host ""
-        Write-Host "=== samples/$slug ==="
+        Write-Host "=== $area/$slug ==="
 
         $bDir = Join-Path $dir 'bulletin'
         $src = $null

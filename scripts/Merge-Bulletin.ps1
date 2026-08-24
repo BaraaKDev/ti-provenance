@@ -142,6 +142,7 @@ function Get-Region {
 if (-not (Test-Path -LiteralPath $Path)) { throw "Not found: $Path" }
 $dir  = (Get-Item -LiteralPath $Path).FullName
 $slug = Split-Path $dir -Leaf
+$area = Split-Path (Split-Path $dir -Parent) -Leaf   # samples | subjects | whatever was given
 
 # A subject folder holds its artefacts in subfolders - handoff/ for the JSON, reports/ for
 # the rendered halves, bulletin/ for the merged output. Each falls back to the subject root
@@ -159,17 +160,17 @@ $bulletinDir = Join-Path $dir 'bulletin'
 
 $aPath = Join-Path $reportsDir 'analysis.html'
 if (-not (Test-Path -LiteralPath $aPath)) {
-    Write-Host "REFUSED: no reports/analysis.html in samples/$slug - run the analysis step first."
+    Write-Host "REFUSED: no reports/analysis.html in $area/$slug - run the analysis step first."
     exit 1
 }
 
 $flows = @(Get-ChildItem -LiteralPath $reportsDir -Filter '*-flow.html' -File)
 if ($flows.Count -eq 0) {
-    Write-Host "REFUSED: no reports/*-flow.html in samples/$slug - run the visualization step first."
+    Write-Host "REFUSED: no reports/*-flow.html in $area/$slug - run the visualization step first."
     exit 1
 }
 if ($flows.Count -gt 1) {
-    Write-Host "REFUSED: $($flows.Count) flow reports in samples/$slug/reports - expected exactly one:"
+    Write-Host "REFUSED: $($flows.Count) flow reports in $area/$slug/reports - expected exactly one:"
     $flows | ForEach-Object { Write-Host "         $($_.Name)" }
     exit 1
 }
@@ -191,7 +192,7 @@ elseif (Test-Path -LiteralPath $legacyPath)  { $priorPath = $legacyPath }
 $existing = $null
 if ($null -ne $priorPath) {
     if (-not $Force) {
-        Write-Host "REFUSED: samples/$slug/bulletin/$(Split-Path $priorPath -Leaf) exists. Re-run with -Force."
+        Write-Host "REFUSED: $area/$slug/bulletin/$(Split-Path $priorPath -Leaf) exists. Re-run with -Force."
         Write-Host "         Editorial regions are preserved across a forced re-merge."
         exit 1
     }
@@ -353,6 +354,15 @@ $aCover
 
 <!-- BULLETIN:SUMMARY -->$summary<!-- /BULLETIN:SUMMARY -->
 
+<section class="partrule">
+  <div class="wrap">
+    <span class="pnum">Part 1</span>
+    <h2>Written analysis</h2>
+    <p>Who the subject is, what it has done in order, and which sectors sit in its path.
+       Part 2 is how a compromise actually unfolds.</p>
+  </div>
+</section>
+
 $aRest
 
 <section class="partrule">
@@ -376,7 +386,7 @@ Write-Text $outPath $doc
 # ---------------------------------------------------------------- report
 
 Write-Host ""
-Write-Host "=== samples/$slug ==="
+Write-Host "=== $area/$slug ==="
 Write-Host "  part 1   reports/analysis.html  $($A.Body.Length) chars"
 Write-Host "  part 2   reports/$($flows[0].Name)  $($F.Body.Length) chars"
 Write-Host "  scoped   $($F.Css.Length) chars of CSS rewritten under $SCOPE"
@@ -385,9 +395,9 @@ if ($carried.Count -gt 0) {
 } else {
     Write-Host "  editorial regions are placeholders - fill BULLETIN:SUMMARY and BULLETIN:DEFENCE"
 }
-Write-Host "  WROTE    samples/$slug/bulletin/$outName  ($($doc.Length) chars)"
+Write-Host "  WROTE    $area/$slug/bulletin/$outName  ($($doc.Length) chars)"
 if ($priorPath -eq $legacyPath -and $legacyPath -ne $outPath) {
-    [void]$warnings.Add("carried the editorial regions over from the old name; delete samples/$slug/bulletin/bulletin.html")
+    [void]$warnings.Add("carried the editorial regions over from the old name; delete $area/$slug/bulletin/bulletin.html")
 }
 
 if ($warnings.Count -gt 0) {
@@ -397,5 +407,5 @@ if ($warnings.Count -gt 0) {
 }
 
 Write-Host ""
-Write-Host "Now run: .\scripts\Verify-Bulletin.ps1 -Path .\samples\$slug"
+Write-Host "Now run: .\scripts\Verify-Bulletin.ps1 -Path .\$area\$slug"
 exit 0

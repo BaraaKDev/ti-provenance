@@ -1,6 +1,6 @@
 # Handoff schema
 
-Two JSON files, one per producing step, both written into `samples/<slug>/handoff/`:
+Two JSON files, one per producing step, both written into `subjects/<slug>/handoff/`:
 
 | File | Written by | Carries |
 |---|---|---|
@@ -11,7 +11,7 @@ Two JSON files, one per producing step, both written into `samples/<slug>/handof
 collide in the same file. A consumer reads whichever files are present.
 
 > This file is carried by every skill that touches the handoff, deliberately duplicated so
-> each skill stays self-contained. `CLAUDE.md` is where the copies are reconciled.
+> each skill stays self-contained. The orchestration layer is where the copies are reconciled.
 
 ## When the files exist
 

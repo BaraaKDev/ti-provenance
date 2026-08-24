@@ -1,14 +1,26 @@
 # TI-Provenance
 
-Threat intelligence reporting pipeline. Three skills produce a bulletin about one subject —
+Threat intelligence reporting pipeline. Four skills produce a bulletin about one subject —
 a threat actor, a vulnerability, or a campaign.
+
+**This file is for changing the machine. The `threat-report` skill is for using it.**
+
+If the task is *produce a bulletin*, none of this is needed — invoke the orchestrator and it
+handles classification, slugs, the three worker skills, the merge and the export. This file is
+what you need when the task is *change how bulletins get made*: the artefact layout, the handoff
+contract, the design decisions behind the machinery, the conventions that keep the skills
+independent, and the environment traps that have already cost this project real bugs.
+
+The split matters because a procedure written twice drifts. Anything describing how to run the
+pipeline belongs in the skill and nowhere else; anything describing why it is shaped this way
+belongs here.
 
 ## The pipeline
 
 Read it as artefacts rather than arrows — every step writes into the subject folder:
 
 ```
-samples/<slug>/                        one folder per subject, slug-named
+subjects/<slug>/                       one folder per subject, slug-named
   handoff/                              machine handoff - JSON, one writer each
     analysis.json    <-- ti-analysis      framing, risk, sources
     mapping.json     <-- mitre-mapping    tactics and techniques
@@ -17,13 +29,13 @@ samples/<slug>/                        one folder per subject, slug-named
     <name>-flow.html <-- mitre-visualizer built from the two JSON files
   bulletin/                             the merged HTML, still a working file
     <slug>-threat-bulletin.html
-                     <-- this file        the two reports, merged
+                     <-- threat-report    the two reports, merged
 
 output/                                 project root, not per-subject
-  <slug>-threat-bulletin.pdf            <-- this file - THE DELIVERABLE
+  <slug>-threat-bulletin.pdf            <-- threat-report - THE DELIVERABLE
 ```
 
-**`output/` is what the reader gets.** Everything under `samples/` is working material —
+**`output/` is what the reader gets.** Everything under a subject folder is working material —
 intermediate data, halves, a merged HTML that still needs a browser. The PDF in `output/` is
 the finished artefact, and it sits at the project root rather than per-subject so that
 "what have we published" is one directory listing rather than a walk through six folders.
@@ -42,8 +54,8 @@ filename convention.
 | 1 | `ti-analysis` | `reports/analysis.html` + `handoff/analysis.json` | built |
 | 2 | `mitre-mapping` | `handoff/mapping.json` | built |
 | 3 | `mitre-visualizer` | `reports/<name>-flow.html` | built |
-| 4 | this file | `bulletin/<slug>-threat-bulletin.html` | built |
-| 5 | this file | `output/<slug>-threat-bulletin.pdf` | built |
+| 4 | `threat-report` | `bulletin/<slug>-threat-bulletin.html` | built |
+| 5 | `threat-report` | `output/<slug>-threat-bulletin.pdf` | built |
 
 **Every file has exactly one writer.** No artefact is co-written, so two steps can never
 collide or contradict each other inside one file. A consumer reads whichever files exist.
@@ -56,150 +68,65 @@ handoff can optimise for unambiguous parsing.
 
 # Running the pipeline
 
-## 1. Classify the request
+**The `threat-report` skill drives it.** Give it an actor, a vulnerability, or a link to
+reporting about one, and it classifies the subject, picks the slug, runs the three worker
+skills in order, merges, verifies and exports.
 
-Three kinds of input, one pipeline. The difference only changes what step 1 researches and
-which template step 3 picks — the sequence is identical.
+That procedure used to live here. It moved because a skill is discoverable — it shows up under
+`/skills`, carries its own description, and can be invoked directly — whereas a section of this
+file is only found by something already reading this file.
 
-| The user gives you | `subject_type` | Examples |
-|---|---|---|
-| A tracked actor or group name | `actor` | *Andariel* · *Volt Typhoon* |
-| One or more CVEs, or a named flaw | `vulnerability` | *CVE-2021-44228* · *the ProxyShell chain* · *August 2026 Patch Tuesday* |
-| An actor named together with what they exploited, or a named operation | `campaign` | *Agrius exploiting FortiOS* · *Akira* · *Operation X* |
+What stays here is what the skill assumes rather than what it does: the artefact layout, the
+handoff contract, the conventions, and the traps this environment keeps setting.
 
-**Akira is in the campaign row on purpose.** It reads as a pure ransomware crew, and was
-nearly written up as an actor — but every documented way in is a named, patchable CVE, and a
-report that omitted them would have dropped the only thing a defender can act on today.
-
-**The boundary that matters is actor vs campaign.** If the request names both an actor *and*
-the CVEs they used, it is a campaign — not an actor with a CVE mentioned in passing. A
-campaign report wires the two together; an actor report cannot.
-
-**Step 1 decides authoritatively.** Your reading routes the request; `subject_type` in
-`analysis.json` is the answer everything downstream uses. If they disagree, the file wins and
-your reading was wrong.
-
-## 2. Pick the slug
-
-Everything writes into `samples/<slug>/`, so the slug is settled **before** step 1 runs.
-Lowercase, hyphenated, folder-safe, and stable — renaming later orphans every artefact.
-
-| Subject | Slug | Examples |
-|---|---|---|
-| Actor | the primary tracked name | `agrius` · `akira` · `andariel` |
-| Vulnerability with a common name | that name | `log4j` · `proxyshell` |
-| Vulnerability without one | the CVE, lowercased | `cve-2026-68820` |
-| A patch set or advisory batch | vendor plus period | `windows-2026-08` |
-| Campaign | the actor's slug | `agrius` |
-
-Create the folder, then run the steps in order.
-
-## 3. Run the five steps
-
-**Invoke each skill by name and let it work.** They are self-contained: none references
-another, and none needs to be told how the next one behaves.
-
-| Step | Invoke | Give it | Then |
-|---|---|---|---|
-| 1 | `ti-analysis` | the subject, and the slug you chose | wait for `analysis.html` + `analysis.json` |
-| 2 | `mitre-mapping` | `samples/<slug>/` | wait for `mapping.json` |
-| 3 | `mitre-visualizer` | `samples/<slug>/` | wait for `<name>-flow.html` |
-| 4 | this file | `samples/<slug>/` | merge into `bulletin/<slug>-threat-bulletin.html` |
-| 5 | this file | `samples/<slug>/` | export `output/<slug>-threat-bulletin.pdf` |
-
-**Never paste one step's output into the next step's prompt.** Point at the folder. The whole
-purpose of the handoff files is that the evidence is already written down in a form the next
-step can read — re-narrating it in a prompt creates a second version that will drift from the
-file, and step 2 in particular is designed to read `chronology[].detail` rather than your
-summary of it.
-
-**Validate between steps, not at the end.**
-
-```powershell
-.\.claude\skills\mitre-mapping\scripts\Verify-Mapping.ps1 -Path .\samples\<slug>
-```
-
-Run it after step 1 and again after step 2. After step 1 it reports `mapping.json` as absent,
-which is expected. A structural error caught here costs one step to fix; caught after step 4
-it costs three. (Any skill's copy of the script will do — they are byte-identical.)
-
-## 4. When a step refuses
-
-**Steps 1 and 2 are allowed to stop, and a refusal is a result.** Step 1 stops when the
-subject has no coverage in its allowlisted sources. Step 2 stops when the evidence describes
-outcomes but no behaviour it can map.
-
-When that happens: **keep whatever was produced, stop the pipeline, and tell the user which
-step stopped and why.** Do not paper over it. Specifically, do not supply the missing research
-yourself, do not relax a skill's sourcing rules, and do not hand step 3 a mapping you wrote to
-keep things moving. A bulletin assembled around a gap reads exactly like one built on
-evidence, which is the whole problem.
-
-A thin subject legitimately produces a short bulletin. That is a different thing from a padded
-one, and the difference is not visible in the output — only in whether it happened.
+**Real runs write to `subjects/<slug>/`. `samples/<slug>/` is the shipped reference set** that
+the schema docs, the report guides and the harness all read, so nothing should write there.
 
 ---
+# Why it is built this way
 
-# Step 4: the bulletin
+Not how to run it — that is the orchestrator's job, and repeating it here would create a second
+copy to drift. These are the decisions behind the machinery, kept because each one cost something
+to learn and none is obvious from the code.
 
-Part 1 says **who is at risk and why**. Part 2 says **how they get hit**. The bulletin is
-those two, plus the two things only the combined view can say.
-
-## The merge is scripted
-
-```powershell
-.\scripts\Merge-Bulletin.ps1 -Path .\samples\<slug>
-.\scripts\Verify-Bulletin.ps1 -Path .\samples\<slug>
-```
-
-**Do not hand-merge the two files.** Both halves are HTML fragments, so concatenating them
-looks like it works — but they share class names, and `high` and `low` mean *risk level* in
-part 1 and *severity* in part 2. A naive merge silently restyles the risk meters, and nothing
-about the output announces it. The script rewrites part 2's CSS to sit under a `.flowpart`
+**The merge is scripted because the two halves collide.** Both are HTML fragments, so
+concatenating them looks like it works. But they share class names, and `high` and `low` mean
+*risk level* in part 1 and *severity* in part 2. A naive merge silently restyles the risk meters
+and nothing about the output says so. The script rewrites part 2's CSS under a `.flowpart`
 wrapper, including its `:root` custom properties, which land on the wrapper and cascade down.
 
-Re-running with `-Force` **preserves the editorial regions**, so regenerating either half does
-not cost you the written sections. Everything outside those two regions is derived and will be
-overwritten — edit the source report, not the bulletin.
+**Two regions are hand-written because only the combined view can say certain things.** *This
+actor is in your sector, and the way in is a flaw you have* is not available to either half
+alone, which is why the executive summary exists rather than being cut from part 1. Re-merging
+with `-Force` preserves both regions; everything outside them is derived and overwritten.
 
-## Two regions you write by hand
+**An actor bulletin has a structural remediation gap.** An actor flow has no CVEs to remediate,
+so it has no Remediation part, and the bulletin arrives with no defensive guidance unless the
+orchestrator writes it. That gap is a property of the design, not an oversight — worth knowing
+before someone "fixes" it by having the flow report invent mitigations.
 
-The script leaves both marked and stubbed.
+**The exporter gates on the verifier.** A PDF is a faithful render of whatever it is handed,
+including a bulletin with a surviving placeholder or no remediation at all — and the PDF is the
+artefact that leaves the project. `-SkipVerify` exists for when you know why you are overriding.
 
-**`BULLETIN:SUMMARY`** — sits after the cover. One paragraph plus three to five bottom lines,
-**written last**, for a reader who will not read further. It is the only section allowed to
-draw on both halves at once: *this actor is in your sector, and the way in is a flaw you have.*
-Neither half can say that alone, which is why the section exists rather than being cut from
-part 1.
+**PDF conversion is Chromium-only on purpose.** There is no Python here and no `wkhtmltopdf`; the
+browser engine is already present and renders the same CSS the bulletin was designed against, so
+it is the only route that guarantees the PDF matches the page that was reviewed. Page numbering
+rides on `@page` margin boxes for the same reason — `string-set` is unimplemented in every
+browser, Chromium honours margin boxes, and the harness reads the numbers back out of the
+finished PDF rather than trusting the CSS took.
 
-**`BULLETIN:DEFENCE`** — sits at the end, and **whether you write it depends on the subject
-type**:
-
-| Subject | Where remediation comes from |
-|---|---|
-| `vulnerability` | the flow report's own **Remediation** part. **Empty this region** |
-| `campaign` | usually the flow report. Check, then empty the region |
-| `actor` | **nothing produces it.** Write it here |
-
-That gap is real and worth knowing about: an actor flow has no CVEs to remediate, so it has no
-Remediation part, and an actor bulletin arrives with no defensive guidance unless step 4
-supplies it. Derive it from `mapping.json` — ordered by the tactics actually mapped, each item
-naming the technique it denies, verified against the ATT&CK mitigations for that technique. Do
-not fall back to generic hardening advice; a list that would be identical for any actor tells
-the reader nothing about this one.
-
-The verifier fails on a surviving placeholder in either region, and fails when a bulletin
-carries an unattributed second Sources block.
-
----
-
-
+**Mechanical checks cannot see the page.** They confirm the HTML is sound and the PDF is
+well-formed. They cannot see a clipped column or a colour that did not survive printing. This
+project has shipped one layout defect that passed every check, so the finished PDF gets looked at
+once by a human.
 ## The reader never sees the pipeline
 
 Everything in this file — the skills, the handoff JSON, the `samples/` layout, the templates —
 is build machinery. **None of it may appear in text a reader sees**, in either half or in the
 merged bulletin. That means no skill names, no `analysis.json` or `mapping.json`, no
-`samples/...` paths, no companion-report filenames, and no template jargon such as MODE CHAIN
+`subjects/...` or `samples/...` paths, no companion-report filenames, 
+
 or MODE SET. Refer to the other half as "the companion attack-flow report", without a filename.
 
 This leaked for a while and was only caught by reading a finished PDF. Three things now hold it:
@@ -215,54 +142,16 @@ first. That is deliberate: authoring guidance is supposed to live in comments, a
 never render. The failure mode that caused this was guidance sitting in a `<p class="note">`
 instead — visible by default, and it shipped whenever an author did not overwrite it.
 
-# Step 5: the PDF
-
-```powershell
-.\scripts\Export-Bulletin.ps1 -Path .\samples\<slug>
-Get-ChildItem .\samples -Directory | .\scripts\Export-Bulletin.ps1 -Force
-```
-
-Writes `output/<slug>-threat-bulletin.pdf`. **This is the deliverable** — everything under
-`samples/` is working material, and this is the file that gets sent.
-
-**Conversion runs through headless Edge or Chrome**, whichever is installed. There is no
-Python on this machine and no `wkhtmltopdf`; the browser engine is already present and renders
-the same CSS the bulletin was designed against, so it is the only route that guarantees the
-PDF matches the page you reviewed. The script finds the engine itself and refuses if neither
-is there.
-
-Three things the exporter adds or fixes before printing:
-
-- **The bulletin is an HTML fragment** — no doctype, `html`, `head` or `body`. Printed as-is a
-  browser renders it in quirks mode, so it is wrapped in a real document first.
-- **Print defaults would strip the colour.** Backgrounds are off by default in print, and this
-  design encodes meaning in colour: sector risk meters, CVSS severity chips, phase heat, the
-  accent that asserts the actor's objective. Losing it does not merely look worse, it removes
-  information. The wrapper forces `print-color-adjust: exact`, widens the 940px reading column
-  to the printable width so nothing is clipped, and stops cards breaking across pages.
-- **Nothing numbers the pages.** Every page but the cover carries its number bottom-left, set
-  in an `@page` margin box. That is the only mechanism available: `string-set` is unimplemented
-  in every browser, but Chromium honours margin boxes, and this exporter is Chromium-only by
-  design. `@page :first` blanks it on the cover. Because the numbering depends on an engine
-  feature rather than on anything here, `Test-Pipeline.ps1 -IncludeExport` reads the numbers
-  back out of the finished PDF rather than trusting that the CSS took.
-
-**The exporter runs `Verify-Bulletin.ps1` itself and refuses on failure.** That gate is not
-politeness — the PDF is a faithful render of whatever it is handed, including a bulletin with
-a surviving placeholder or no remediation guidance at all, and the PDF is the artefact that
-leaves the project. `-SkipVerify` overrides it when you know why you are overriding.
-
-**Check the PDF by eye once.** The verifier can confirm the HTML is structurally sound and the
-exporter can confirm the PDF is well-formed, but neither can see a clipped column or a colour
-that did not survive. Layout defects only surface by looking — this project has already shipped
-one that passed every mechanical check.
-
----
-
 # Subject folders
 
 One folder per subject, slug-named, holding every artefact for it — the layout is the pipeline
-diagram above.
+diagram above. Two directories use it, and the difference is what they mean rather than what
+they contain:
+
+| | |
+|---|---|
+| `samples/` | The shipped reference set. The schema docs and report guides point at it, and the harness reads it for its positive cases, so changing one of these changes the documentation. |
+| `subjects/` | Real output. Nothing references it, so it can be added to, rewritten and deleted freely. This is where the orchestrator writes. |
 
 Six samples exist, at three levels of completeness:
 
@@ -282,7 +171,7 @@ Two JSON files, `analysis.json` and `mapping.json`, each written by exactly one 
 schema is duplicated into every skill that touches it — see *Skill independence* below — and
 it is the single point where the pipeline can go wrong quietly, so:
 
-- **Validate before rendering.** `Verify-Mapping.ps1 -Path .\samples\<slug>` checks both
+- **Validate before rendering.** `Verify-Mapping.ps1 -Path .\subjects\<slug>` checks both
   files and cross-checks them against each other: malformed technique IDs, tactic names
   invalid for the declared matrix, missing `usage` text, risk levels with no justification,
   a `via_cve` naming a CVE nobody declared, and cross-field errors like a single CVE marked
@@ -294,9 +183,15 @@ it is the single point where the pipeline can go wrong quietly, so:
 
 # Conventions
 
-**Skill independence.** Every skill is self-contained and **references nothing inside another
-skill**. Invoke any one of them on its own and it works. The only thing that knows all three
-exist is this file.
+**Two kinds of skill.** `ti-analysis`, `mitre-mapping` and `mitre-visualizer` are **workers**:
+each does one job, references nothing inside another skill, and names no project-level script.
+Invoke any one on its own and it works, which is the property that makes them reusable.
+
+`threat-report` is the **orchestrator**. Naming the other three is its entire function, so it
+is exempt from that rule — it inherits the exemption this file used to hold. The exemption runs
+one way only: a worker still may not name the orchestrator, and the harness checks both
+directions, plus that the orchestrator actually drives all three workers rather than quietly
+dropping a step.
 
 The cost is duplication: each skill carries its own schema reference and its own copy of
 `Verify-Mapping.ps1`. The script is meant to stay byte-identical across skills; the schema
@@ -320,18 +215,18 @@ Get-FileHash .\.claude\skills\*\scripts\Verify-Mapping.ps1 | Select-Object Hash,
 ```
 
 **Paths.** Inside a skill, paths are skill-relative (`references/`, `guides/`, `scripts/`).
-Everywhere else they are project-relative and start with `samples/` or `scripts/`. Run
+Everywhere else they are project-relative and start with `subjects/`, `samples/` or `scripts/`. Run
 scripts from this directory.
 
 **Project scripts vs skill scripts.** `scripts/` at the project root holds steps 4 and 5 —
 `Merge-Bulletin.ps1`, `Verify-Bulletin.ps1` and `Export-Bulletin.ps1` — plus the test harness.
 They are not part of any skill, because these are the steps that must see both halves at once.
-Nothing in a skill may reference them.
+No **worker** skill may reference them; the orchestrator invokes them by design.
 
 **Run the harness before committing a script change.**
 
 ```powershell
-.\scripts\Test-Pipeline.ps1                  # ~40 checks, a few seconds
+.\scripts\Test-Pipeline.ps1                  # 52 checks, a few seconds
 .\scripts\Test-Pipeline.ps1 -IncludeExport   # adds the PDF round trip, ~15s more
 ```
 
@@ -343,7 +238,8 @@ mode — malformed JSON, a pre-rename tactic name, an undeclared `via_cve`, a lo
 a chain, a blank `usage`, reversed chronology, two flow reports, two bulletins.
 
 It also asserts the things this file *claims*: the three `Verify-Mapping.ps1` copies are
-byte-identical, no skill references another, every script is pure ASCII and parses, nothing
+byte-identical, no worker references another skill or a project script, the orchestrator drives
+all three workers and targets `subjects/`, every script is pure ASCII and parses, nothing
 carries a BOM, no local shadows a `begin{}` constant by casing, and the schema docs still
 document every field the validator enforces.
 

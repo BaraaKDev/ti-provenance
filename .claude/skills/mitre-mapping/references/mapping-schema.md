@@ -1,6 +1,6 @@
 # `mapping.json` schema
 
-The structured output of this skill, written to `samples/<slug>/handoff/mapping.json`.
+The structured output of this skill, written to `subjects/<slug>/handoff/mapping.json`.
 
 **This skill owns this file entirely.** Nothing else writes to it, and this skill writes
 nothing else.

@@ -1,6 +1,6 @@
 ---
 name: ti-analysis
-description: Produces a detailed written threat-intelligence analysis of a NAMED threat actor, a vulnerability or vulnerability chain, or a campaign — covering overview, history, conclusion, and a risk-and-impact assessment with per-sector risk levels. Writes samples/<slug>/reports/analysis.html plus samples/<slug>/handoff/analysis.json, leaving the ATT&CK technique mapping to a separate step. Use when asked to research, analyse, profile or write up a threat actor, CVE or campaign. Do NOT use it to build an ATT&CK mapping.
+description: Produces a detailed written threat-intelligence analysis of a NAMED threat actor, a vulnerability or vulnerability chain, or a campaign — covering overview, history, conclusion, and a risk-and-impact assessment with per-sector risk levels. Writes subjects/<slug>/reports/analysis.html plus subjects/<slug>/handoff/analysis.json, leaving the ATT&CK technique mapping to a separate step. Use when asked to research, analyse, profile or write up a threat actor, CVE or campaign. Do NOT use it to build an ATT&CK mapping.
 ---
 
 # TI Analysis
@@ -11,11 +11,11 @@ means, and who is at risk.
 
 ## Where this sits in the pipeline
 
-**Step 1 of the pipeline.** Two outputs, into two different subfolders of `samples/<slug>/`:
+**Step 1 of the pipeline.** Two outputs, into two different subfolders of `subjects/<slug>/`:
 
 | Output | Consumed by |
 |---|---|
-| `reports/analysis.html` | `CLAUDE.md`, merged with the flow report into the bulletin |
+| `reports/analysis.html` | the merge step, which joins it with the flow report |
 | `handoff/analysis.json` | the structured handoff; a separate step writes `handoff/mapping.json` |
 
 The subject folder separates artefacts by kind: `handoff/` is machine-read JSON, `reports/` is
@@ -23,7 +23,11 @@ what a human reviews, and `bulletin/` holds the merged deliverable a later step 
 the subfolders if they do not exist.
 
 **Path convention.** `references/` and `scripts/` are relative to this skill folder.
-`samples/` is relative to the TI-Provenance project root.
+`subjects/` and `samples/` are relative to the TI-Provenance project root.
+
+**Write into `subjects/<slug>/`.** `samples/` is the shipped reference set the schema docs and
+report guides point at, so a run that writes there rewrites the project's own documentation.
+Read it for worked examples; never write to it.
 
 ## When this runs — and when it does not
 
@@ -113,7 +117,7 @@ flow report says how they get hit.**
 
 The reader is a defender reading about a threat, not someone who knows this project exists.
 **Nothing about how the report was produced may appear in text they can see** — not the name
-of this skill or any other, not `analysis.json` or any handoff file, not a `samples/...` path,
+of this skill or any other, not `analysis.json` or any handoff file, not a `subjects/...` or `samples/...` path,
 not the filename of the companion report, and not template jargon such as MODE CHAIN or
 MODE SET. Refer to the companion report as "the companion attack-flow report", with no filename.
 
@@ -224,7 +228,7 @@ with it.
 | Espionage / collection | violet `#7c3aed` | slate `#55607a` | white (`--ground: #ffffff`) |
 
 These values are shared across the TI-Provenance project so that separate reports on one
-subject read as one body of work. `CLAUDE.md` records the convention.
+subject read as one body of work. It is a project-wide convention.
 
 **Risk colours are a separate token family** (`--risk-*`). Sector risk is an analyst
 judgment, not a measured score, so it renders as a **segmented meter** rather than a numeric
@@ -232,7 +236,7 @@ badge. Do not swap the form.
 
 ## Also write `analysis.json`
 
-Alongside the report, write `samples/<slug>/handoff/analysis.json`. **This skill owns that file
+Alongside the report, write `subjects/<slug>/handoff/analysis.json`. **This skill owns that file
 entirely** — nothing else writes to it, and the ATT&CK mapping lives in a separate file
 written by a separate step. Every field is a judgment this analysis has already made.
 
@@ -306,7 +310,7 @@ with no impact phase, which is honest.
 Validate before finishing:
 
 ```powershell
-.\.claude\skills\ti-analysis\scripts\Verify-Mapping.ps1 -Path .\samples\<slug>
+.\.claude\skills\ti-analysis\scripts\Verify-Mapping.ps1 -Path .\subjects\<slug>
 ```
 
 It reports `mapping.json` as absent, which is expected at this stage — the `analysis.json`
@@ -331,8 +335,8 @@ checks are the ones that must pass.
 > contract. A skill that also *reads* the handoff documents more than this.
 >
 > Each skill in this project is self-contained and references nothing inside another skill, so
-> a shared contract is copied rather than linked. `CLAUDE.md` is the only place that knows the
-> other skills exist, and is where the copies get reconciled if the contract changes.
+> a shared contract is copied rather than linked. The orchestration layer above these skills is
+> the only place that knows the other skills exist, and is where the copies get reconciled.
 
 > The script is deliberately **pure ASCII**, and every `Get-Content` that reads a report or
 > mapping passes **`-Encoding UTF8`**. Windows PowerShell 5.1 reads `.ps1` as ANSI without a

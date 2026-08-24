@@ -360,20 +360,66 @@ $copies = @($VM_VIS, $VM_MAP, $VM_ANA)
 $hashes = @($copies | ForEach-Object { (Get-FileHash $_).Hash } | Select-Object -Unique)
 Assert 'Verify-Mapping.ps1 byte-identical in all three skills' ($hashes.Count -eq 1) $(if ($hashes.Count -eq 1) { $hashes[0].Substring(0, 12) } else { "$($hashes.Count) distinct" })
 
-$skills = @('ti-analysis', 'mitre-mapping', 'mitre-visualizer')
+# Two kinds of skill, and only one of them is required to be ignorant of the others.
+#
+# WORKERS do one job and must stay runnable on their own: none may name another skill or a
+# project-level script, because either would make it depend on machinery that might not be there.
+# That is the property these checks protect.
+#
+# The ORCHESTRATOR exists precisely to know the others - naming them is its whole function. It is
+# the role CLAUDE.md used to play, so it inherits the exemption CLAUDE.md always had.
+$WORKERS      = @('ti-analysis', 'mitre-mapping', 'mitre-visualizer')
+$ORCHESTRATOR = 'threat-report'
+$allSkills    = $WORKERS + $ORCHESTRATOR
+
 $xref = @()
-foreach ($s in $skills) {
+foreach ($s in $WORKERS) {
     foreach ($file in (Get-ChildItem (Join-Path $root ".claude\skills\$s") -Recurse -File)) {
-        foreach ($o in ($skills | Where-Object { $_ -ne $s })) {
+        foreach ($o in ($allSkills | Where-Object { $_ -ne $s })) {
             if (Select-String -Path $file.FullName -SimpleMatch $o -Quiet) { $xref += "$s/$($file.Name) -> $o" }
         }
     }
 }
-Assert 'no skill references another skill' ($xref.Count -eq 0) $(if ($xref.Count) { $xref[0] } else { '0 references' })
+Assert 'no worker skill references another skill' ($xref.Count -eq 0) $(if ($xref.Count) { $xref[0] } else { "$($WORKERS.Count) workers clean" })
 
-$leak = @(Get-ChildItem (Join-Path $root '.claude\skills') -Recurse -File |
-    ForEach-Object { Select-String -Path $_.FullName -Pattern 'Merge-Bulletin|Verify-Bulletin|Export-Bulletin|Test-Pipeline' })
-Assert 'no skill references a project-level script' ($leak.Count -eq 0) $(if ($leak.Count) { "$($leak.Count) hit(s)" } else { '0 references' })
+$leak = @()
+foreach ($s in $WORKERS) {
+    $leak += @(Get-ChildItem (Join-Path $root ".claude\skills\$s") -Recurse -File |
+        ForEach-Object { Select-String -Path $_.FullName -Pattern 'Merge-Bulletin|Verify-Bulletin|Export-Bulletin|Test-Pipeline' })
+}
+Assert 'no worker skill references a project-level script' ($leak.Count -eq 0) $(if ($leak.Count) { "$($leak.Count) hit(s)" } else { '0 references' })
+
+# The exemption is only worth granting if the orchestrator actually orchestrates. If it stops
+# naming a worker, a step has silently dropped out of the pipeline and nothing else would notice.
+$orchPath = Join-Path $root ".claude\skills\$ORCHESTRATOR\SKILL.md"
+$orchestrates = @()
+if (Test-Path $orchPath) {
+    $orchText = Read-Text $orchPath
+    $orchestrates = @($WORKERS | Where-Object { $orchText -match [regex]::Escape($_) })
+}
+Assert 'the orchestrator drives every worker skill' ($orchestrates.Count -eq $WORKERS.Count) $(
+    if ($orchestrates.Count -eq $WORKERS.Count) { "all $($WORKERS.Count) invoked" }
+    else { 'missing: ' + (($WORKERS | Where-Object { $orchestrates -notcontains $_ }) -join ', ') })
+
+# Real runs write to subjects/; samples/ is the shipped reference set the guides and this harness
+# read. An orchestrator that pointed at samples/ would overwrite the documentation.
+$writesRight = (Test-Path $orchPath) -and ((Read-Text $orchPath) -match 'subjects/<slug>/')
+Assert 'the orchestrator writes to subjects/, not samples/' $writesRight $(
+    if ($writesRight) { 'targets subjects/' } else { 'does not name subjects/<slug>/' })
+
+# The workers are the ones a stranger will invoke directly, and the first thing they do is write.
+# A worker that names samples/<slug>/ as its own target sends that write into the shipped
+# reference set - the folder the schema docs, the report guides and this harness all read. A
+# CONCRETE sample path (samples/agrius/...) is a worked example being read and is fine; the
+# PLACEHOLDER form means "the subject you are working on", which is always subjects/.
+$badTarget = @()
+foreach ($s in $WORKERS) {
+    $badTarget += @(Get-ChildItem (Join-Path $root ".claude\skills\$s") -Recurse -File |
+        ForEach-Object { Select-String -Path $_.FullName -Pattern 'samples/<slug>' -Encoding UTF8 })
+}
+Assert 'no worker skill points its own writes at samples/' ($badTarget.Count -eq 0) $(
+    if ($badTarget.Count) { "$($badTarget.Count) hit(s), first: $($badTarget[0].Filename):$($badTarget[0].LineNumber)" }
+    else { "$($WORKERS.Count) workers target subjects/" })
 
 $allScripts = @(Get-ChildItem (Join-Path $root 'scripts') -Filter *.ps1) +
               @(Get-ChildItem (Join-Path $root '.claude\skills') -Recurse -Filter *.ps1)
@@ -481,8 +527,12 @@ $FORBIDDEN = 'ti-analysis', 'mitre-visualizer', 'mitre-mapping', 'TI-Provenance'
              '[a-z0-9-]+-flow\.html', 'analysis\.html', '[a-z0-9-]+-template\.html'
 $leaks = @()
 $scanned = 0
+# Both areas, not just the shipped one - a real run writes to subjects/, and a sweep that
+# only reads samples/ would report "all clean" while never opening the new report at all.
 $reportFiles = @(Get-ChildItem (Join-Path $root 'samples\*\reports\*.html')) +
                @(Get-ChildItem (Join-Path $root 'samples\*\bulletin\*.html')) +
+               @(Get-ChildItem (Join-Path $root 'subjects\*\reports\*.html') -ErrorAction SilentlyContinue) +
+               @(Get-ChildItem (Join-Path $root 'subjects\*\bulletin\*.html') -ErrorAction SilentlyContinue) +
                $tpl +
                @(Get-ChildItem (Join-Path $root '.claude\skills\ti-analysis\references') -Filter *.html)
 foreach ($h in $reportFiles) {

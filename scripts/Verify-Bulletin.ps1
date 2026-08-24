@@ -66,6 +66,7 @@ process {
         $item = Get-Item -LiteralPath $p
         $dir  = if ($item.PSIsContainer) { $item.FullName } else { $item.DirectoryName }
         $slug = Split-Path $dir -Leaf
+        $area = Split-Path (Split-Path $dir -Parent) -Leaf
         # The merged output is samples/<slug>/bulletin/<slug>-threat-bulletin.html. Fall
         # back to the older flat 'bulletin.html' name, then to the subject root, so folders
         # written before the rename - or assembled by hand - still validate.
@@ -76,7 +77,7 @@ process {
                 $found = @(Get-ChildItem -LiteralPath $bDir -Filter '*-threat-bulletin.html' -File)
                 if ($found.Count -gt 1) {
                     Write-Host ""
-                    Write-Host "=== samples/$slug ==="
+                    Write-Host "=== $area/$slug ==="
                     Write-Host "  [FAIL] $($found.Count) bulletins in bulletin/ - expected exactly one:"
                     $found | ForEach-Object { Write-Host "         $($_.Name)" }
                     $anyFailed = $true
@@ -90,7 +91,7 @@ process {
         else { $file = $item.FullName }
 
         Write-Host ""
-        Write-Host "=== samples/$slug ==="
+        Write-Host "=== $area/$slug ==="
 
         if (-not (Test-Path -LiteralPath $file)) {
             Write-Host "  [SKIP] no bulletin present - run Merge-Bulletin.ps1 first"
@@ -122,6 +123,17 @@ process {
             if (-not $hasFlow)  { $miss += 'flow wrapper' }
             if (-not $hasRule)  { $miss += 'part divider' }
             if ($miss.Count) { "missing: " + ($miss -join ', ') } else { 'cover, divider, flow' })
+
+        # A document that says "Part 2" and never says "Part 1" reads as though the reader
+        # missed something. This shipped for weeks because every check tested the halves in
+        # isolation and nothing asserted the structure the reader actually sees.
+        $partLabels = @([regex]::Matches($t, 'class="pnum">\s*(Part \d)\s*<') |
+                        ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique)
+        $bothParts = ($partLabels -contains 'Part 1') -and ($partLabels -contains 'Part 2')
+        $results += Test-Check 'both parts are labelled for the reader' $bothParts $(
+            if ($bothParts) { 'Part 1 and Part 2 present' }
+            elseif ($partLabels.Count) { 'only ' + ($partLabels -join ', ') }
+            else { 'no part dividers at all' })
 
         # ---- 3. CSS scoping. The whole reason this script exists.
         $css = ''

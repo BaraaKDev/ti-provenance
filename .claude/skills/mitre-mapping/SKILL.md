@@ -1,12 +1,12 @@
 ---
 name: mitre-mapping
-description: Derives a MITRE ATT&CK mapping — which tactics and techniques a named threat actor, vulnerability or campaign actually used, and the attack path they form — from documented evidence, then writes samples/<slug>/handoff/mapping.json. Reads the subject's analysis.json when one exists, otherwise works from a supplied report, advisory or narrative. Use when asked to map a subject to ATT&CK, identify its techniques or tactics, or work out the attack path an intrusion takes. Do NOT use it to research a subject from scratch, and do NOT use it to render a mapping as a diagram or report.
+description: Derives a MITRE ATT&CK mapping — which tactics and techniques a named threat actor, vulnerability or campaign actually used, and the attack path they form — from documented evidence, then writes subjects/<slug>/handoff/mapping.json. Reads the subject's analysis.json when one exists, otherwise works from a supplied report, advisory or narrative. Use when asked to map a subject to ATT&CK, identify its techniques or tactics, or work out the attack path an intrusion takes. Do NOT use it to research a subject from scratch, and do NOT use it to render a mapping as a diagram or report.
 ---
 
 # MITRE ATT&CK Mapping
 
 Turns an evidenced account of what a subject did into the tactics and techniques that account
-represents, and writes it as `samples/<slug>/handoff/mapping.json`.
+represents, and writes it as `subjects/<slug>/handoff/mapping.json`.
 
 The job is **judgment, not lookup.** The evidence says *"renamed Plink to systems.exe"*; you
 decide that is `T1036` under Stealth, that it is Stealth rather than Defense Impairment, and
@@ -14,15 +14,19 @@ that it is `T1036` rather than a sub-technique. Each of those is a decision that
 
 ## Where this sits
 
-**Step 2 of the pipeline.** One output: `samples/<slug>/handoff/mapping.json`. **This skill
+**Step 2 of the pipeline.** One output: `subjects/<slug>/handoff/mapping.json`. **This skill
 owns that file entirely** — nothing else writes to it, and this skill writes nothing else.
 
 **Path convention.** `references/` and `scripts/` are relative to this skill folder.
-`samples/` is relative to the TI-Provenance project root.
+`subjects/` and `samples/` are relative to the TI-Provenance project root.
+
+**Write into `subjects/<slug>/`.** `samples/` is the shipped reference set the schema docs and
+report guides point at, so a run that writes there rewrites the project's own documentation.
+Read it for worked examples; never write to it.
 
 ## Input
 
-**Preferred: `samples/<slug>/handoff/analysis.json`.** A structured account of the subject written by
+**Preferred: `subjects/<slug>/handoff/analysis.json`.** A structured account of the subject written by
 an earlier step. The fields that matter:
 
 | Field | What you do with it |
@@ -131,7 +135,7 @@ and eventually acted on.
 
 ## Output
 
-Write `samples/<slug>/handoff/mapping.json`. Full contract in `references/mapping-schema.md`.
+Write `subjects/<slug>/handoff/mapping.json`. Full contract in `references/mapping-schema.md`.
 
 ```json
 {
@@ -176,7 +180,7 @@ Four things about the output specifically:
 Validate before finishing:
 
 ```powershell
-.\.claude\skills\mitre-mapping\scripts\Verify-Mapping.ps1 -Path .\samples\<slug>
+.\.claude\skills\mitre-mapping\scripts\Verify-Mapping.ps1 -Path .\subjects\<slug>
 ```
 
 It checks tactic names against the declared matrix, technique ID format, that every technique
@@ -205,8 +209,8 @@ tactic, or whether the mapping is any good** — that is what the path check is 
 > subset.
 >
 > Each skill in this project is self-contained and references nothing inside another skill, so
-> a shared contract is copied rather than linked. `CLAUDE.md` is the only place that knows the
-> other skills exist, and is where the copies get reconciled if the contract changes.
+> a shared contract is copied rather than linked. The orchestration layer above these skills is
+> the only place that knows the other skills exist, and is where the copies get reconciled.
 
 > **Never invent or "correct" an ATT&CK ID.** Method step 3 above is the instruction;
 > `references/mapping-craft.md` §*Verifying IDs* carries the three-point check, the tactic-name

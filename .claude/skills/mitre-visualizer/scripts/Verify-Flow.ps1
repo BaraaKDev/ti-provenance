@@ -195,7 +195,7 @@ end {
     Write-Host ""
     if ($checked -eq 0) {
         Write-Host "RESULT: NOTHING CHECKED - no input matched."
-        Write-Host "        Flow reports live in samples/<slug>/reports/. A glob that misses"
+        Write-Host "        Flow reports live in subjects/<slug>/reports/. A glob that misses"
         Write-Host "        them verifies nothing while looking like a pass."
         exit 1
     }

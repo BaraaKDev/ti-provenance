@@ -116,6 +116,7 @@ process {
         $item = Get-Item -LiteralPath $p
         $dir  = if ($item.PSIsContainer) { $item.FullName } else { $item.DirectoryName }
         $slug = Split-Path $dir -Leaf
+        $area = Split-Path (Split-Path $dir -Parent) -Leaf
 
         $aPath = Resolve-Artefact $dir 'handoff' 'analysis.json'
         $mPath = Resolve-Artefact $dir 'handoff' 'mapping.json'
@@ -123,7 +124,7 @@ process {
         $mExists = Test-Path -LiteralPath $mPath
 
         Write-Host ""
-        Write-Host "=== samples/$slug ==="
+        Write-Host "=== $area/$slug ==="
 
         if (-not $aExists -and -not $mExists) {
             Write-Host "  [SKIP] no handoff files present - nothing to validate"

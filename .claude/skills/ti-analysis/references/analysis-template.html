@@ -2,11 +2,11 @@
   ============================================================================
   TI ANALYSIS TEMPLATE - copy this file, replace every {{PLACEHOLDER}}.
 
-  Step 1 of the TI-Provenance pipeline. Produces samples/<slug>/reports/analysis.html,
-  which CLAUDE.md later merges with the companion ATT&CK flow report into a
+  Step 1 of the TI-Provenance pipeline. Produces subjects/<slug>/reports/analysis.html,
+  which a later step merges with the companion attack-flow report into a
   bulletin. Tokens, type scale and accent logic match that report on purpose -
   the two documents sit side by side and must not look like two products.
-  The shared palette is recorded in CLAUDE.md.
+  The palette is a project-wide convention, shared by both halves.
 
   ---------------------------------------------------------------------------
   SIX SECTIONS, ALWAYS IN THIS ORDER:
@@ -35,7 +35,7 @@
 <title>{{SUBJECT}} — Threat Analysis</title>
 
 <style>
-  /* ---- Tokens: shared across TI-Provenance - see CLAUDE.md ---- */
+  /* ---- Tokens: shared project-wide, so both halves of a bulletin match ---- */
   :root {
     color-scheme: light;
 
